@@ -1,0 +1,12 @@
+1.1
+    * Reduced size of library
+    * Added support for Will messages
+    * Clarified licensing - see LICENSE.txt
+
+
+1.0
+    * Only Quality of Service (QOS) 0 messaging is supported
+    * The maximum message size, including header, is 128 bytes
+    * The keepalive interval is set to 30 seconds
+    * No support for Will messages
+
