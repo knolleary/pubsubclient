@@ -88,7 +88,7 @@ int PubSubClient::loop() {
       long t = millis();
       if (t - lastActivity > KEEPALIVE) {
          _client.write(192);
-         _client.write(0);
+         _client.write((uint8_t)0);
          lastActivity = t;
       }
       if (_client.available()) {
@@ -109,7 +109,7 @@ int PubSubClient::loop() {
                }
             } else if (type == 12) { // PINGREG
                _client.write(208);
-               _client.write(0);
+               _client.write((uint8_t)0);
                lastActivity = t;
             }
          }
@@ -163,7 +163,7 @@ void PubSubClient::subscribe(char* topic) {
 
 void PubSubClient::disconnect() {
    _client.write(224);
-   _client.write(0);
+   _client.write((uint8_t)0);
    _client.stop();
    lastActivity = millis();
 }

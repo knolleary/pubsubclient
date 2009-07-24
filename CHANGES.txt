@@ -1,3 +1,7 @@
+1.2
+    * Fixed compile error when used with arduino-0016 or later
+
+
 1.1
     * Reduced size of library
     * Added support for Will messages
