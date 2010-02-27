@@ -13,7 +13,6 @@
 #define MQTTPUBLISH 3<<4
 #define MQTTSUBSCRIBE 8<<4
 
-
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,int)) : _client(ip,port) {
    this->callback = callback;
 }
@@ -37,7 +36,7 @@ int PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t wi
             buffer[length++] = 0x02;
          }
          buffer[length++] = 0;
-         buffer[length++] = (KEEPALIVE/500);
+         buffer[length++] = (KEEPALIVE/1000);
          length = writeString(id,buffer,length);
          if (willTopic) {
             length = writeString(willTopic,buffer,length);
@@ -46,6 +45,7 @@ int PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t wi
          write(MQTTCONNECT,buffer,length);
          while (!_client.available()) {}
          uint8_t len = readPacket();
+         
          if (len == 4 && buffer[3] == 0) {
             lastActivity = millis();
             return 1;
@@ -59,12 +59,13 @@ int PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t wi
 
 uint8_t PubSubClient::readPacket() {
    uint8_t len = 0;
+   while (!_client.available()) {}
    buffer[len++] = _client.read();
-   
    uint8_t multiplier = 1;
    uint8_t length = 0;
    uint8_t digit = 0;
    do {
+      while (!_client.available()) {}
       digit = _client.read();
       buffer[len++] = digit;
       length += (digit & 127) * multiplier;
@@ -74,12 +75,15 @@ uint8_t PubSubClient::readPacket() {
    for (int i = 0;i<length;i++)
    {
       if (len < MAX_PACKET_SIZE) {
+         while (!_client.available()) {}
          buffer[len++] = _client.read();
       } else {
+         while (!_client.available()) {}
          _client.read();
          len = 0; // This will cause the packet to be ignored.
       }
    }
+
    return len;
 }
 
