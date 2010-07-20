@@ -21,6 +21,7 @@ private:
    long lastActivity;
    void (*callback)(char*,uint8_t*,int);
    uint8_t readPacket();
+   uint8_t readByte();
    int write(uint8_t header, uint8_t* buf, uint8_t length);
    uint8_t writeString(char* string, uint8_t* buf, uint8_t pos);
 public:

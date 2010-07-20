@@ -21,7 +21,7 @@ int PubSubClient::connect(char *id) {
 }
 
 int PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t willRetain, char* willMessage) {
-   if (!_client.connected()) {
+   if (!connected()) {
       if (_client.connect()) {
          nextMsgId = 1;
          uint8_t d[9] = {0x00,0x06,0x4d,0x51,0x49,0x73,0x64,0x70,0x03};
@@ -50,23 +50,25 @@ int PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t wi
             lastActivity = millis();
             return 1;
          }
-         
-         _client.stop();
       }
+      _client.stop();
    }
    return 0;
 }
 
+uint8_t PubSubClient::readByte() {
+   while(!_client.available()) {}
+   return _client.read();
+}
+
 uint8_t PubSubClient::readPacket() {
    uint8_t len = 0;
-   while (!_client.available()) {}
-   buffer[len++] = _client.read();
+   buffer[len++] = readByte();
    uint8_t multiplier = 1;
    uint8_t length = 0;
    uint8_t digit = 0;
    do {
-      while (!_client.available()) {}
-      digit = _client.read();
+      digit = readByte();
       buffer[len++] = digit;
       length += (digit & 127) * multiplier;
       multiplier *= 128;
@@ -75,11 +77,9 @@ uint8_t PubSubClient::readPacket() {
    for (int i = 0;i<length;i++)
    {
       if (len < MAX_PACKET_SIZE) {
-         while (!_client.available()) {}
-         buffer[len++] = _client.read();
+         buffer[len++] = readByte();
       } else {
-         while (!_client.available()) {}
-         _client.read();
+         readByte();
          len = 0; // This will cause the packet to be ignored.
       }
    }
@@ -88,7 +88,7 @@ uint8_t PubSubClient::readPacket() {
 }
 
 int PubSubClient::loop() {
-   if (_client.connected()) {
+   if (connected()) {
       long t = millis();
       if (t - lastActivity > KEEPALIVE) {
          _client.write(192);
@@ -129,7 +129,7 @@ int PubSubClient::publish(char* topic, char* payload) {
 
 
 int PubSubClient::publish(char* topic, uint8_t* payload, uint8_t plength) {
-   if (_client.connected()) {
+   if (connected()) {
       uint8_t length = writeString(topic,buffer,0);
       int i;
       for (i=0;i<plength;i++) {
@@ -154,7 +154,7 @@ int PubSubClient::write(uint8_t header, uint8_t* buf, uint8_t length) {
 
 
 void PubSubClient::subscribe(char* topic) {
-   if (_client.connected()) {
+   if (connected()) {
       uint8_t length = 2;
       nextMsgId++;
       buffer[0] = nextMsgId >> 8;
@@ -187,7 +187,9 @@ uint8_t PubSubClient::writeString(char* string, uint8_t* buf, uint8_t pos) {
 
 
 int PubSubClient::connected() {
-   return (int)_client.connected();
+   int rc = (int)_client.connected();
+   if (!rc) _client.stop();
+   return rc;
 }
 
 
