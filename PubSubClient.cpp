@@ -13,6 +13,9 @@
 #define MQTTPUBLISH 3<<4
 #define MQTTSUBSCRIBE 8<<4
 
+PubSubClient::PubSubClient() : _client(0) {
+}
+
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,int)) : _client(ip,port) {
    this->callback = callback;
 }
