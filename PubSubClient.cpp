@@ -4,7 +4,6 @@
   http://knolleary.net
 */
 
-#include "WConstants.h"
 #include "PubSubClient.h"
 #include "Client.h"
 #include "string.h"

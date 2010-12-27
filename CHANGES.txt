@@ -1,3 +1,7 @@
+1.5
+    * Added default constructor
+    * Fixed compile error when used with arduino-0021 or later
+
 1.4
     * Fixed connection lost handling
 
