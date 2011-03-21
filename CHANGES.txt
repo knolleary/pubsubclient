@@ -1,3 +1,6 @@
+1.6
+    * Added the ability to publish a retained message
+
 1.5
     * Added default constructor
     * Fixed compile error when used with arduino-0021 or later

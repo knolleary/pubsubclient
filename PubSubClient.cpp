@@ -129,16 +129,22 @@ int PubSubClient::publish(char* topic, char* payload) {
    return publish(topic,(uint8_t*)payload,strlen(payload));
 }
 
-
 int PubSubClient::publish(char* topic, uint8_t* payload, uint8_t plength) {
+   return publish(topic, payload, plength, 0);
+}
+
+int PubSubClient::publish(char* topic, uint8_t* payload, uint8_t plength, uint8_t retained) {
    if (connected()) {
       uint8_t length = writeString(topic,buffer,0);
       int i;
       for (i=0;i<plength;i++) {
          buffer[length++] = payload[i];
       }
-      //header |= 1; retain
-      write(MQTTPUBLISH,buffer,length);
+      uint8_t header = MQTTPUBLISH;
+      if (retained != 0) {
+         header |= 1;
+      }
+      write(header,buffer,length);
       return 1;
    }
    return 0;

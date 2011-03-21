@@ -32,6 +32,7 @@ public:
    void disconnect();
    int publish(char *, char *);
    int publish(char *, uint8_t *, uint8_t);
+   int publish(char *, uint8_t *, uint8_t, uint8_t);
    void subscribe(char *);
    int loop();
    int connected();
