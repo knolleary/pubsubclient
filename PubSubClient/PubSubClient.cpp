@@ -8,10 +8,6 @@
 #include "Client.h"
 #include "string.h"
 
-#define MQTTCONNECT 1<<4
-#define MQTTPUBLISH 3<<4
-#define MQTTSUBSCRIBE 8<<4
-
 PubSubClient::PubSubClient() : _client(0) {
 }
 
@@ -26,7 +22,7 @@ int PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t wi
    if (!connected()) {
       if (_client.connect()) {
          nextMsgId = 1;
-         uint8_t d[9] = {0x00,0x06,0x4d,0x51,0x49,0x73,0x64,0x70,0x03};
+         uint8_t d[9] = {0x00,0x06,'M','Q','I','s','d','p',MQTTPROTOCOLVERSION};
          uint8_t length = 0;
          int j;
          for (j = 0;j<9;j++) {
@@ -93,15 +89,15 @@ int PubSubClient::loop() {
    if (connected()) {
       long t = millis();
       if (t - lastActivity > KEEPALIVE) {
-         _client.write(192);
+         _client.write(MQTTPINGREQ);
          _client.write((uint8_t)0);
          lastActivity = t;
       }
       if (_client.available()) {
          uint8_t len = readPacket();
          if (len > 0) {
-            uint8_t type = buffer[0]>>4;
-            if (type == 3) { // PUBLISH
+            uint8_t type = buffer[0]&0xF0;
+            if (type == MQTTPUBLISH) {
                if (callback) {
                   uint8_t tl = (buffer[2]<<3)+buffer[3];
                   char topic[tl+1];
@@ -113,8 +109,8 @@ int PubSubClient::loop() {
                   uint8_t *payload = buffer+4+tl;
                   callback(topic,payload,len-4-tl);
                }
-            } else if (type == 12) { // PINGREG
-               _client.write(208);
+            } else if (type == MQTTPINGREQ) {
+               _client.write(MQTTPINGRESP);
                _client.write((uint8_t)0);
                lastActivity = t;
             }
@@ -154,9 +150,7 @@ int PubSubClient::publish(char* topic, uint8_t* payload, uint8_t plength, uint8_
 int PubSubClient::write(uint8_t header, uint8_t* buf, uint8_t length) {
    _client.write(header);
    _client.write(length);
-   for (int i=0;i<length;i++) {
-      _client.write(buf[i]);
-   }
+   _client.write(buf,length);
    return 0;
 }
 
@@ -174,7 +168,7 @@ void PubSubClient::subscribe(char* topic) {
 }
 
 void PubSubClient::disconnect() {
-   _client.write(224);
+   _client.write(MQTTDISCONNECT);
    _client.write((uint8_t)0);
    _client.stop();
    lastActivity = millis();
