@@ -35,7 +35,9 @@ private:
    Client _client;
    uint8_t buffer[MAX_PACKET_SIZE];
    uint8_t nextMsgId;
-   long lastActivity;
+   long lastOutActivity;
+   long lastInActivity;
+   bool pingOutstanding;
    void (*callback)(char*,uint8_t*,int);
    uint8_t readPacket();
    uint8_t readByte();

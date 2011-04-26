@@ -1,3 +1,6 @@
+1.7
+    * Improved keepalive handling
+
 1.6
     * Added the ability to publish a retained message
 
