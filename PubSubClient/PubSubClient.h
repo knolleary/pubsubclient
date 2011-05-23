@@ -11,8 +11,6 @@
 
 #define MAX_PACKET_SIZE 128
 #define KEEPALIVE 15000 // max value = 255000
-// Old behaviour of a temporary buffer for all output packets
-//#define CONFIG_USE_BUFFER_COPY
 
 // from mqtt-v3r1 
 #define MQTTPROTOCOLVERSION 3
@@ -44,11 +42,7 @@ private:
    uint16_t readPacket();
    uint8_t readByte();
    int write(uint8_t header, uint8_t* buf, uint16_t length);
-#if defined (CONFIG_USE_BUFFER_COPY)
-   uint16_t writeString(char* string, uint8_t* buf, uint16_t pos);
-#else
    int writeString(char *string, uint16_t str_len);
-#endif
    int writeRemainingLength(uint16_t length);
 public:
    PubSubClient();

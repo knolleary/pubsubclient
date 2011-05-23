@@ -23,26 +23,6 @@ int PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t wi
       if (_client.connect()) {
          nextMsgId = 1;
          uint8_t d[9] = {0x00,0x06,'M','Q','I','s','d','p',MQTTPROTOCOLVERSION};
-#if defined (CONFIG_USE_BUFFER_COPY)
-         uint16_t length = 0;
-         int j;
-         for (j = 0;j<9;j++) {
-            buffer[length++] = d[j];
-         }
-         if (willTopic) {
-            buffer[length++] = 0x06|(willQos<<3)|(willRetain<<5);
-         } else {
-            buffer[length++] = 0x02;
-         }
-         buffer[length++] = 0;
-         buffer[length++] = (KEEPALIVE/1000);
-         length = writeString(id,buffer,length);
-         if (willTopic) {
-            length = writeString(willTopic,buffer,length);
-            length = writeString(willMessage,buffer,length);
-         }
-         write(MQTTCONNECT,buffer,length);
-#else
          uint16_t packet_len = 12 + strlen(id) + 2;
          if (willTopic) {
              packet_len += strlen(willTopic) + 2 + strlen(willMessage) + 2;
@@ -65,9 +45,8 @@ int PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t wi
              writeString(willTopic, strlen(willTopic));
              writeString(willMessage, strlen(willMessage));
          }
-#endif
-	 lastOutActivity = millis();
-	 lastInActivity = millis();
+         lastOutActivity = millis();
+         lastInActivity = millis();
          while (!_client.available()) {
             long t= millis();
             if (t-lastInActivity > KEEPALIVE) {
@@ -174,19 +153,6 @@ int PubSubClient::publish(char* topic, uint8_t* payload, uint16_t plength) {
 
 int PubSubClient::publish(char* topic, uint8_t* payload, uint16_t plength, uint8_t retained) {
    if (connected()) {
-#if defined (CONFIG_USE_BUFFER_COPY)
-      uint16_t length = writeString(topic,buffer,0);
-      uint16_t i;
-      for (i=0;i<plength;i++) {
-         buffer[length++] = payload[i];
-      }
-      uint8_t header = MQTTPUBLISH;
-      if (retained != 0) {
-         header |= 1;
-      }
-      write(header,buffer,length);
-      return 1;
-#else
       uint8_t header = MQTTPUBLISH;
       if (retained != 0) {
          header |= 1;
@@ -198,8 +164,6 @@ int PubSubClient::publish(char* topic, uint8_t* payload, uint16_t plength, uint8
       writeString(topic, topic_len);
       // now finally, payload, using original payload pointer!
       _client.write(payload, plength);
-      
-#endif
    }
    return 0;
 }
@@ -218,14 +182,6 @@ int PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
 void PubSubClient::subscribe(char* topic) {
    if (connected()) {
       nextMsgId++;
-#if defined (CONFIG_USE_BUFFER_COPY)
-      uint16_t length = 2;
-      buffer[0] = nextMsgId >> 8;
-      buffer[1] = nextMsgId - (buffer[0]<<8);
-      length = writeString(topic, buffer,length);
-      buffer[length++] = 0; // Only do QoS 0 subs
-      write(MQTTSUBSCRIBE,buffer,length);
-#else
       _client.write(MQTTSUBSCRIBE);
       // 2 for msgid, 2 for utf8 encoding, 1 for qos flags
       writeRemainingLength(2 + strlen(topic) + 2 + 1);
@@ -233,7 +189,6 @@ void PubSubClient::subscribe(char* topic) {
       _client.write(nextMsgId & 0x00ff);
       writeString(topic, strlen(topic));
       _client.write((uint8_t)0);  // only do QoS 0 subs
-#endif
    }
 }
 
@@ -245,20 +200,6 @@ void PubSubClient::disconnect() {
    lastOutActivity = millis();
 }
 
-#if defined (CONFIG_USE_BUFFER_COPY)
-uint16_t PubSubClient::writeString(char* string, uint8_t* buf, uint16_t pos) {
-   char* idp = string;
-   uint16_t i = 0;
-   pos += 2;
-   while (*idp) {
-      buf[pos++] = *idp++;
-      i++;
-   }
-   buf[pos-i-2] = 0;
-   buf[pos-i-1] = i;
-   return pos;
-}
-#else
 int PubSubClient::writeString(char *string, uint16_t strlen) {
       // big endian string length first...
       _client.write(strlen >> 8);
@@ -266,7 +207,6 @@ int PubSubClient::writeString(char *string, uint16_t strlen) {
       _client.write((uint8_t *)string, strlen);
       return 0;
 }
-#endif
 
 /**
  * For a given "length" write to the client the variable width field "remainging length"
