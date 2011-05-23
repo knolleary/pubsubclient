@@ -168,17 +168,6 @@ int PubSubClient::publish(char* topic, uint8_t* payload, uint16_t plength, uint8
    return 0;
 }
 
-
-int PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
-   _client.write(header);
-   // Need to properly write the variable length header.
-   writeRemainingLength(length);
-   _client.write(buf, length);
-   lastOutActivity = millis();
-   return 0;
-}
-
-
 void PubSubClient::subscribe(char* topic) {
    if (connected()) {
       nextMsgId++;

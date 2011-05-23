@@ -41,7 +41,6 @@ private:
    void (*callback)(char*,uint8_t*,int);
    uint16_t readPacket();
    uint8_t readByte();
-   int write(uint8_t header, uint8_t* buf, uint16_t length);
    int writeString(char *string, uint16_t str_len);
    int writeRemainingLength(uint16_t length);
 public:
