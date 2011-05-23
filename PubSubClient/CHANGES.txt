@@ -1,5 +1,8 @@
 1.7
     * Improved keepalive handling
+    * Published messages and topics can be any length.
+      Received messages must be less than MAX_PACKET_SIZE (128 bytes)
+      (messages are no longer copied into temporary buffers first)
 
 1.6
     * Added the ability to publish a retained message
