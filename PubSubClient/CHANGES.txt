@@ -3,6 +3,9 @@
     * Published messages and topics can be any length.
       Received messages must be less than MAX_PACKET_SIZE (128 bytes)
       (messages are no longer copied into temporary buffers first)
+    * All methods now return 0 for succes, non-zero for failure.
+      Previously there was a mix of return codes.
+    * Unique failure modes now have their own return codes.
 
 1.6
     * Added the ability to publish a retained message
