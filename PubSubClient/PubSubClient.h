@@ -12,6 +12,10 @@
 #define MAX_PACKET_SIZE 128
 #define KEEPALIVE 15000 // max value = 255000
 
+#define ERR_OK                  0
+#define ERR_NOT_CONNECTED       1
+#define ERR_TIMEOUT_EXCEEDED    2
+
 // from mqtt-v3r1 
 #define MQTTPROTOCOLVERSION 3
 #define MQTTCONNECT     1 << 4  // Client request to connect to Server
@@ -52,7 +56,7 @@ public:
    int publish(char *topic, char * payload);
    int publish(char *topic, uint8_t *payload, uint16_t payload_length);
    int publish(char *topic, uint8_t *payload, uint16_t payload_length, uint8_t retain);
-   void subscribe(char *topic);
+   int subscribe(char *topic);
    int loop();
    int connected();
 };

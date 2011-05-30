@@ -51,7 +51,7 @@ int PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t wi
             long t= millis();
             if (t-lastInActivity > KEEPALIVE) {
                _client.stop();
-               return 0;
+               return ERR_TIMEOUT_EXCEEDED;
             }
          }
          uint16_t len = readPacket();
@@ -59,12 +59,12 @@ int PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t wi
          if (len == 4 && buffer[3] == 0) {
             lastInActivity = millis();
             pingOutstanding = false;
-            return 1;
+            return ERR_OK;
          }
       }
       _client.stop();
    }
-   return 0;
+   return ERR_NOT_CONNECTED;
 }
 
 uint8_t PubSubClient::readByte() {
@@ -104,7 +104,7 @@ int PubSubClient::loop() {
       if ((t - lastInActivity > KEEPALIVE) || (t - lastOutActivity > KEEPALIVE)) {
          if (pingOutstanding) {
             _client.stop();
-            return 0;
+            return ERR_TIMEOUT_EXCEEDED;
          } else {
             _client.write(MQTTPINGREQ);
             _client.write((uint8_t)0);
@@ -138,9 +138,9 @@ int PubSubClient::loop() {
             }
          }
       }
-      return 1;
+      return ERR_OK;
    }
-   return 0;
+   return ERR_NOT_CONNECTED;
 }
 
 int PubSubClient::publish(char* topic, char* payload) {
@@ -164,11 +164,12 @@ int PubSubClient::publish(char* topic, uint8_t* payload, uint16_t plength, uint8
       writeString(topic, topic_len);
       // now finally, payload, using original payload pointer!
       _client.write(payload, plength);
+      return ERR_OK;
    }
-   return 0;
+   return ERR_NOT_CONNECTED;
 }
 
-void PubSubClient::subscribe(char* topic) {
+int PubSubClient::subscribe(char* topic) {
    if (connected()) {
       nextMsgId++;
       _client.write(MQTTSUBSCRIBE);
@@ -178,7 +179,9 @@ void PubSubClient::subscribe(char* topic) {
       _client.write(nextMsgId & 0x00ff);
       writeString(topic, strlen(topic));
       _client.write((uint8_t)0);  // only do QoS 0 subs
+      return ERR_OK;
    }
+   return ERR_NOT_CONNECTED;
 }
 
 void PubSubClient::disconnect() {
