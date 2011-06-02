@@ -12,6 +12,10 @@
 #define MAX_PACKET_SIZE 128
 #define KEEPALIVE 15000 // max value = 255000
 
+#define ERR_OK                  0
+#define ERR_NOT_CONNECTED       1
+#define ERR_TIMEOUT_EXCEEDED    2
+
 // from mqtt-v3r1 
 #define MQTTPROTOCOLVERSION 3
 #define MQTTCONNECT     1 << 4  // Client request to connect to Server
@@ -34,25 +38,25 @@ class PubSubClient {
 private:
    Client _client;
    uint8_t buffer[MAX_PACKET_SIZE];
-   uint8_t nextMsgId;
+   uint16_t nextMsgId;
    long lastOutActivity;
    long lastInActivity;
    bool pingOutstanding;
    void (*callback)(char*,uint8_t*,int);
-   uint8_t readPacket();
+   uint16_t readPacket();
    uint8_t readByte();
-   int write(uint8_t header, uint8_t* buf, uint8_t length);
-   uint8_t writeString(char* string, uint8_t* buf, uint8_t pos);
+   int writeString(char *string, uint16_t str_len);
+   int writeRemainingLength(uint16_t length);
 public:
    PubSubClient();
    PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,int));
-   int connect(char *);
-   int connect(char*, char*, uint8_t, uint8_t, char*);
+   int connect(char *clientId);
+   int connect(char *clientId, char *willTopic, uint8_t willQos, uint8_t willRetain, char *willMessage);
    void disconnect();
-   int publish(char *, char *);
-   int publish(char *, uint8_t *, uint8_t);
-   int publish(char *, uint8_t *, uint8_t, uint8_t);
-   void subscribe(char *);
+   int publish(char *topic, char * payload);
+   int publish(char *topic, uint8_t *payload, uint16_t payload_length);
+   int publish(char *topic, uint8_t *payload, uint16_t payload_length, uint8_t retain);
+   int subscribe(char *topic);
    int loop();
    int connected();
 };
