@@ -1,6 +1,6 @@
 1.7
     * Improved keepalive handling
-
+    * Updated to the Arduino-1.0 API
 1.6
     * Added the ability to publish a retained message
 

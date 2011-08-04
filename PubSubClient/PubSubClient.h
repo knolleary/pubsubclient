@@ -7,6 +7,7 @@
 #ifndef PubSubClient_h
 #define PubSubClient_h
 
+#include "Ethernet.h"
 #include "Client.h"
 
 #define MAX_PACKET_SIZE 128
@@ -43,6 +44,8 @@ private:
    uint8_t readByte();
    int write(uint8_t header, uint8_t* buf, uint8_t length);
    uint8_t writeString(char* string, uint8_t* buf, uint8_t pos);
+   uint8_t *ip;
+   uint16_t port;
 public:
    PubSubClient();
    PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,int));

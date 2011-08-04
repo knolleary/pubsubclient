@@ -8,11 +8,13 @@
 #include "Client.h"
 #include "string.h"
 
-PubSubClient::PubSubClient() : _client(0) {
+PubSubClient::PubSubClient() : _client() {
 }
 
-PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,int)) : _client(ip,port) {
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,int)) : _client() {
    this->callback = callback;
+   this->ip = ip;
+   this->port = port;
 }
 int PubSubClient::connect(char *id) {
    return connect(id,0,0,0,0);
@@ -20,7 +22,7 @@ int PubSubClient::connect(char *id) {
 
 int PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t willRetain, char* willMessage) {
    if (!connected()) {
-      if (_client.connect()) {
+      if (_client.connect(this->ip, this->port)) {
          nextMsgId = 1;
          uint8_t d[9] = {0x00,0x06,'M','Q','I','s','d','p',MQTTPROTOCOLVERSION};
          uint8_t length = 0;
