@@ -5,7 +5,7 @@
 */
 
 #include "PubSubClient.h"
-#include "Client.h"
+#include "EthernetClient.h"
 #include "string.h"
 
 PubSubClient::PubSubClient() : _client() {

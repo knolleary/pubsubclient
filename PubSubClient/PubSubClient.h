@@ -8,7 +8,7 @@
 #define PubSubClient_h
 
 #include "Ethernet.h"
-#include "Client.h"
+#include "EthernetClient.h"
 
 #define MAX_PACKET_SIZE 128
 #define KEEPALIVE 15000 // max value = 255000
@@ -33,7 +33,7 @@
 
 class PubSubClient {
 private:
-   Client _client;
+   EthernetClient _client;
    uint8_t buffer[MAX_PACKET_SIZE];
    uint8_t nextMsgId;
    long lastOutActivity;
