@@ -5,8 +5,8 @@
 */
 
 #include "PubSubClient.h"
-#include "EthernetClient.h"
-#include "string.h"
+#include <EthernetClient.h>
+#include <string.h>
 
 PubSubClient::PubSubClient() : _client() {
 }
@@ -16,13 +16,30 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,ui
    this->ip = ip;
    this->port = port;
 }
+
+PubSubClient::PubSubClient(String domain, uint16_t port, void (*callback)(char*,uint8_t*,int)) : _client() {
+   this->callback = callback;
+   this->domain = domain;
+   this->port = port;
+}
+
 int PubSubClient::connect(char *id) {
    return connect(id,0,0,0,0);
 }
 
 int PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t willRetain, char* willMessage) {
    if (!connected()) {
-      if (_client.connect(this->ip, this->port)) {
+      int result = 0;
+      
+      if (domain != NULL) {
+        char c[40];
+        this->domain.toCharArray(c, 40);
+        result = _client.connect(c, this->port);
+      } else {
+        result = _client.connect(this->ip, this->port);
+      }
+      
+      if (result) {
          nextMsgId = 1;
          uint8_t d[9] = {0x00,0x06,'M','Q','I','s','d','p',MQTTPROTOCOLVERSION};
          uint8_t length = 0;
