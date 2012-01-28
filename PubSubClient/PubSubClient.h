@@ -45,10 +45,12 @@ private:
    int write(uint8_t header, uint8_t* buf, uint8_t length);
    uint8_t writeString(char* string, uint8_t* buf, uint8_t pos);
    uint8_t *ip;
+   String domain;
    uint16_t port;
 public:
    PubSubClient();
    PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,int));
+   PubSubClient(String, uint16_t, void(*)(char*,uint8_t*,int));
    int connect(char *);
    int connect(char*, char*, uint8_t, uint8_t, char*);
    void disconnect();
