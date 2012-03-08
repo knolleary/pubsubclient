@@ -11,22 +11,22 @@
 PubSubClient::PubSubClient() : _client() {
 }
 
-PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,int)) : _client() {
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int)) : _client() {
    this->callback = callback;
    this->ip = ip;
    this->port = port;
 }
-int PubSubClient::connect(char *id) {
+boolean PubSubClient::connect(char *id) {
    return connect(id,0,0,0,0);
 }
 
-int PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t willRetain, char* willMessage) {
+boolean PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t willRetain, char* willMessage) {
    if (!connected()) {
       if (_client.connect(this->ip, this->port)) {
          nextMsgId = 1;
          uint8_t d[9] = {0x00,0x06,'M','Q','I','s','d','p',MQTTPROTOCOLVERSION};
          uint8_t length = 0;
-         int j;
+         unsigned int j;
          for (j = 0;j<9;j++) {
             buffer[length++] = d[j];
          }
@@ -35,8 +35,8 @@ int PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t wi
          } else {
             buffer[length++] = 0x02;
          }
-         buffer[length++] = 0;
-         buffer[length++] = (KEEPALIVE/1000);
+         buffer[length++] = ((MQTT_KEEPALIVE) >> 8);
+         buffer[length++] = ((MQTT_KEEPALIVE) & 0xff);
          length = writeString(id,buffer,length);
          if (willTopic) {
             length = writeString(willTopic,buffer,length);
@@ -46,23 +46,23 @@ int PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t wi
          lastOutActivity = millis();
          lastInActivity = millis();
          while (!_client.available()) {
-            long t= millis();
-            if (t-lastInActivity > KEEPALIVE) {
+            unsigned long t= millis();
+            if (t-lastInActivity > MQTT_KEEPALIVE*1000) {
                _client.stop();
-               return 0;
+               return false;
             }
          }
-         uint8_t len = readPacket();
+         uint16_t len = readPacket();
          
          if (len == 4 && buffer[3] == 0) {
             lastInActivity = millis();
             pingOutstanding = false;
-            return 1;
+            return true;
          }
       }
       _client.stop();
    }
-   return 0;
+   return false;
 }
 
 uint8_t PubSubClient::readByte() {
@@ -70,11 +70,11 @@ uint8_t PubSubClient::readByte() {
    return _client.read();
 }
 
-uint8_t PubSubClient::readPacket() {
-   uint8_t len = 0;
+uint16_t PubSubClient::readPacket() {
+   uint16_t len = 0;
    buffer[len++] = readByte();
    uint8_t multiplier = 1;
-   uint8_t length = 0;
+   uint16_t length = 0;
    uint8_t digit = 0;
    do {
       digit = readByte();
@@ -83,9 +83,9 @@ uint8_t PubSubClient::readPacket() {
       multiplier *= 128;
    } while ((digit & 128) != 0);
    
-   for (int i = 0;i<length;i++)
+   for (uint16_t i = 0;i<length;i++)
    {
-      if (len < MAX_PACKET_SIZE) {
+      if (len < MQTT_MAX_PACKET_SIZE) {
          buffer[len++] = readByte();
       } else {
          readByte();
@@ -96,13 +96,13 @@ uint8_t PubSubClient::readPacket() {
    return len;
 }
 
-int PubSubClient::loop() {
+boolean PubSubClient::loop() {
    if (connected()) {
-      long t = millis();
-      if ((t - lastInActivity > KEEPALIVE) || (t - lastOutActivity > KEEPALIVE)) {
+      unsigned long t = millis();
+      if ((t - lastInActivity > MQTT_KEEPALIVE*1000) || (t - lastOutActivity > MQTT_KEEPALIVE*1000)) {
          if (pingOutstanding) {
             _client.stop();
-            return 0;
+            return false;
          } else {
             _client.write(MQTTPINGREQ);
             _client.write((uint8_t)0);
@@ -112,15 +112,15 @@ int PubSubClient::loop() {
          }
       }
       if (_client.available()) {
-         uint8_t len = readPacket();
+         uint16_t len = readPacket();
          if (len > 0) {
             lastInActivity = t;
             uint8_t type = buffer[0]&0xF0;
             if (type == MQTTPUBLISH) {
                if (callback) {
-                  uint8_t tl = (buffer[2]<<3)+buffer[3];
+                  uint16_t tl = (buffer[2]<<8)+buffer[3];
                   char topic[tl+1];
-                  for (int i=0;i<tl;i++) {
+                  for (uint16_t i=0;i<tl;i++) {
                      topic[i] = buffer[4+i];
                   }
                   topic[tl] = 0;
@@ -136,56 +136,75 @@ int PubSubClient::loop() {
             }
          }
       }
-      return 1;
+      return true;
    }
-   return 0;
+   return false;
 }
 
-int PubSubClient::publish(char* topic, char* payload) {
-   return publish(topic,(uint8_t*)payload,strlen(payload));
+boolean PubSubClient::publish(char* topic, char* payload) {
+   return publish(topic,(uint8_t*)payload,strlen(payload),false);
 }
 
-int PubSubClient::publish(char* topic, uint8_t* payload, uint8_t plength) {
-   return publish(topic, payload, plength, 0);
+boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plength) {
+   return publish(topic, payload, plength, false);
 }
 
-int PubSubClient::publish(char* topic, uint8_t* payload, uint8_t plength, uint8_t retained) {
+boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plength, boolean retained) {
    if (connected()) {
-      uint8_t length = writeString(topic,buffer,0);
-      int i;
+      uint16_t length = writeString(topic,buffer,false);
+      uint16_t i;
       for (i=0;i<plength;i++) {
          buffer[length++] = payload[i];
       }
       uint8_t header = MQTTPUBLISH;
-      if (retained != 0) {
+      if (retained) {
          header |= 1;
       }
-      write(header,buffer,length);
-      return 1;
+      return write(header,buffer,length);
    }
-   return 0;
+   return false;
 }
 
 
-int PubSubClient::write(uint8_t header, uint8_t* buf, uint8_t length) {
-   _client.write(header);
-   _client.write(length);
-   _client.write(buf,length);
+boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
+   uint8_t lenBuf[4];
+   uint8_t llen = 0;
+   uint8_t digit;
+   uint8_t pos = 0;
+   uint8_t rc;
+   uint8_t len = length;
+   do {
+      digit = len % 128;
+      len = len / 128;
+      if (len > 0) {
+         digit |= 0x80;
+      }
+      lenBuf[pos++] = digit;
+      llen++;
+   } while(len>0);
+
+   rc = _client.write(header);
+   rc += _client.write(lenBuf,llen);
+   rc += _client.write(buf,length);
    lastOutActivity = millis();
-   return 0;
+   return (rc == 1+llen+length);
 }
 
 
-void PubSubClient::subscribe(char* topic) {
+boolean PubSubClient::subscribe(char* topic) {
    if (connected()) {
-      uint8_t length = 2;
+      uint16_t length = 2;
       nextMsgId++;
+      if (nextMsgId == 0) {
+         nextMsgId = 1;
+      }
       buffer[0] = nextMsgId >> 8;
       buffer[1] = nextMsgId - (buffer[0]<<8);
       length = writeString(topic, buffer,length);
       buffer[length++] = 0; // Only do QoS 0 subs
-      write(MQTTSUBSCRIBE,buffer,length);
+      return write(MQTTSUBSCRIBE|MQTTQOS1,buffer,length);
    }
+   return false;
 }
 
 void PubSubClient::disconnect() {
@@ -196,9 +215,9 @@ void PubSubClient::disconnect() {
    lastOutActivity = millis();
 }
 
-uint8_t PubSubClient::writeString(char* string, uint8_t* buf, uint8_t pos) {
+uint16_t PubSubClient::writeString(char* string, uint8_t* buf, uint16_t pos) {
    char* idp = string;
-   uint8_t i = 0;
+   uint16_t i = 0;
    pos += 2;
    while (*idp) {
       buf[pos++] = *idp++;
@@ -210,7 +229,7 @@ uint8_t PubSubClient::writeString(char* string, uint8_t* buf, uint8_t pos) {
 }
 
 
-int PubSubClient::connected() {
+boolean PubSubClient::connected() {
    int rc = (int)_client.connected();
    if (!rc) _client.stop();
    return rc;

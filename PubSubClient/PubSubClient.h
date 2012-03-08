@@ -10,10 +10,12 @@
 #include "Ethernet.h"
 #include "EthernetClient.h"
 
-#define MAX_PACKET_SIZE 128
-#define KEEPALIVE 15000 // max value = 255000
+// MQTT_MAX_PACKET_SIZE : Maximum packet size
+#define MQTT_MAX_PACKET_SIZE 128
 
-// from mqtt-v3r1 
+// MQTT_KEEPALIVE : keepAlive interval in Seconds
+#define MQTT_KEEPALIVE 15
+
 #define MQTTPROTOCOLVERSION 3
 #define MQTTCONNECT     1 << 4  // Client request to connect to Server
 #define MQTTCONNACK     2 << 4  // Connect Acknowledgment
@@ -31,33 +33,37 @@
 #define MQTTDISCONNECT  14 << 4 // Client is Disconnecting
 #define MQTTReserved    15 << 4 // Reserved
 
+#define MQTTQOS0        (0 << 1)
+#define MQTTQOS1        (1 << 1)
+#define MQTTQOS2        (2 << 1)
+
 class PubSubClient {
 private:
    EthernetClient _client;
-   uint8_t buffer[MAX_PACKET_SIZE];
-   uint8_t nextMsgId;
-   long lastOutActivity;
-   long lastInActivity;
+   uint8_t buffer[MQTT_MAX_PACKET_SIZE];
+   uint16_t nextMsgId;
+   unsigned long lastOutActivity;
+   unsigned long lastInActivity;
    bool pingOutstanding;
-   void (*callback)(char*,uint8_t*,int);
-   uint8_t readPacket();
+   void (*callback)(char*,uint8_t*,unsigned int);
+   uint16_t readPacket();
    uint8_t readByte();
-   int write(uint8_t header, uint8_t* buf, uint8_t length);
-   uint8_t writeString(char* string, uint8_t* buf, uint8_t pos);
+   boolean write(uint8_t header, uint8_t* buf, uint16_t length);
+   uint16_t writeString(char* string, uint8_t* buf, uint16_t pos);
    uint8_t *ip;
    uint16_t port;
 public:
    PubSubClient();
-   PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,int));
-   int connect(char *);
-   int connect(char*, char*, uint8_t, uint8_t, char*);
+   PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,unsigned int));
+   boolean connect(char *);
+   boolean connect(char*, char*, uint8_t, uint8_t, char*);
    void disconnect();
-   int publish(char *, char *);
-   int publish(char *, uint8_t *, uint8_t);
-   int publish(char *, uint8_t *, uint8_t, uint8_t);
-   void subscribe(char *);
-   int loop();
-   int connected();
+   boolean publish(char *, char *);
+   boolean publish(char *, uint8_t *, unsigned int);
+   boolean publish(char *, uint8_t *, unsigned int, boolean);
+   boolean subscribe(char *);
+   boolean loop();
+   boolean connected();
 };
 
 
