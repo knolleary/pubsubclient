@@ -51,10 +51,12 @@ private:
    boolean write(uint8_t header, uint8_t* buf, uint16_t length);
    uint16_t writeString(char* string, uint8_t* buf, uint16_t pos);
    uint8_t *ip;
+   char* domain;
    uint16_t port;
 public:
    PubSubClient();
    PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,unsigned int));
+   PubSubClient(char*, uint16_t, void(*)(char*,uint8_t*,unsigned int));
    boolean connect(char *);
    boolean connect(char*, char*, uint8_t, uint8_t, char*);
    void disconnect();
