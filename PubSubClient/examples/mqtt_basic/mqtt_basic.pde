@@ -15,7 +15,7 @@ byte mac[]    = {  0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
 byte server[] = { 172, 16, 0, 2 };
 byte ip[]     = { 172, 16, 0, 100 };
 
-void callback(char* topic, byte* payload,int length) {
+void callback(char* topic, byte* payload, unsigned int length) {
   // handle message arrived
 }
 
