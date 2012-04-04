@@ -24,10 +24,19 @@ PubSubClient::PubSubClient(char* domain, uint16_t port, void (*callback)(char*,u
 }
 
 boolean PubSubClient::connect(char *id) {
-   return connect(id,0,0,0,0);
+   return connect(id,NULL,NULL,0,0,0,0);
 }
 
-boolean PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t willRetain, char* willMessage) {
+boolean PubSubClient::connect(char *id, char *user, char *pass) {
+   return connect(id,user,pass,0,0,0,0);
+}
+
+boolean PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t willRetain, char* willMessage)
+{
+   return connect(id,NULL,NULL,0,0,0,0);
+}
+
+boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic, uint8_t willQos, uint8_t willRetain, char* willMessage) {
    if (!connected()) {
       int result = 0;
       
@@ -45,11 +54,24 @@ boolean PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_
          for (j = 0;j<9;j++) {
             buffer[length++] = d[j];
          }
+
+         uint8_t v;
          if (willTopic) {
-            buffer[length++] = 0x06|(willQos<<3)|(willRetain<<5);
+            v = 0x06|(willQos<<3)|(willRetain<<5);
          } else {
-            buffer[length++] = 0x02;
+            v = 0x02;
          }
+
+         if(user != NULL) {
+            v = v|0x80;
+
+            if(pass != NULL) {
+               v = v|(0x80>>1);
+            }
+         }
+
+         buffer[length++] = v;
+
          buffer[length++] = ((MQTT_KEEPALIVE) >> 8);
          buffer[length++] = ((MQTT_KEEPALIVE) & 0xff);
          length = writeString(id,buffer,length);
@@ -57,6 +79,14 @@ boolean PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_
             length = writeString(willTopic,buffer,length);
             length = writeString(willMessage,buffer,length);
          }
+
+         if(user != NULL) {
+            length = writeString(user,buffer,length);
+            if(pass != NULL) {
+               length = writeString(pass,buffer,length);
+            }
+         }
+
          write(MQTTCONNECT,buffer,length);
          lastOutActivity = millis();
          lastInActivity = millis();

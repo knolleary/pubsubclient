@@ -24,7 +24,7 @@ PubSubClient client(server, 1883, callback);
 void setup()
 {
   Ethernet.begin(mac, ip);
-  if (client.connect("arduinoClient")) {
+  if (client.connect("arduinoClient", "testuser", "testpass")) {
     client.publish("outTopic","hello world");
     client.subscribe("inTopic");
   }
