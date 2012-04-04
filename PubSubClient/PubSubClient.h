@@ -58,7 +58,9 @@ public:
    PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,unsigned int));
    PubSubClient(char*, uint16_t, void(*)(char*,uint8_t*,unsigned int));
    boolean connect(char *);
-   boolean connect(char*, char*, uint8_t, uint8_t, char*);
+   boolean connect(char *, char *, char *);
+   boolean connect(char *, char *, uint8_t, uint8_t, char *);
+   boolean connect(char *, char *, char *, char *, uint8_t, uint8_t, char*);
    void disconnect();
    boolean publish(char *, char *);
    boolean publish(char *, uint8_t *, unsigned int);
