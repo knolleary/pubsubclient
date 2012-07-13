@@ -210,6 +210,52 @@ boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plengt
    return false;
 }
 
+boolean PubSubClient::publish_P(char* topic, uint8_t* PROGMEM payload, unsigned int plength, boolean retained) {
+   uint8_t lenBuf[4];
+   uint8_t llen = 0;
+   uint8_t digit;
+   int rc;
+   uint16_t tlen;
+   int pos = 0;
+   int i;
+   uint8_t header;
+   unsigned int len;
+
+    if (!connected())
+        return false;
+
+    tlen = strlen(topic);
+
+    header = MQTTPUBLISH;
+    if (retained)
+        header |= 1;
+
+    len = plength + 2 + tlen;
+    do {
+        digit = len % 128;
+        len = len / 128;
+        if (len > 0) {
+            digit |= 0x80;
+        }
+        lenBuf[pos++] = digit;
+        llen++;
+    } while(len>0);
+
+    rc += _client.write(&header, 1);
+    rc += _client.write(lenBuf, llen);
+
+    lenBuf[0] = tlen >> 8;   // MSB
+    lenBuf[1] = tlen & 0xFF; // LSB
+
+    rc += _client.write(lenBuf, 2);
+    rc += _client.write((uint8_t *)topic, tlen);
+
+    for (i=0;i<plength;i++)
+        rc += _client.write((char)pgm_read_byte_near(payload + i));
+
+    lastOutActivity = millis();
+    return rc == len + 1 + plength;
+}
 
 boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
    uint8_t lenBuf[4];
