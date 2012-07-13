@@ -33,7 +33,7 @@ boolean PubSubClient::connect(char *id, char *user, char *pass) {
 
 boolean PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t willRetain, char* willMessage)
 {
-   return connect(id,NULL,NULL,0,0,0,0);
+   return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage);
 }
 
 boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic, uint8_t willQos, uint8_t willRetain, char* willMessage) {
