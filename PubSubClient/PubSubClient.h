@@ -65,6 +65,7 @@ public:
    boolean publish(char *, char *);
    boolean publish(char *, uint8_t *, unsigned int);
    boolean publish(char *, uint8_t *, unsigned int, boolean);
+   boolean publish_P(char *, uint8_t PROGMEM *, unsigned int, boolean);
    boolean subscribe(char *);
    boolean loop();
    boolean connected();
