@@ -7,8 +7,8 @@
 #ifndef PubSubClient_h
 #define PubSubClient_h
 
-#include "Ethernet.h"
-#include "EthernetClient.h"
+#include <Arduino.h>
+#include "Client.h"
 
 // MQTT_MAX_PACKET_SIZE : Maximum packet size
 #define MQTT_MAX_PACKET_SIZE 128
@@ -39,7 +39,7 @@
 
 class PubSubClient {
 private:
-   EthernetClient _client;
+   Client* _client;
    uint8_t buffer[MQTT_MAX_PACKET_SIZE];
    uint16_t nextMsgId;
    unsigned long lastOutActivity;
@@ -54,9 +54,9 @@ private:
    char* domain;
    uint16_t port;
 public:
-   PubSubClient();
-   PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,unsigned int));
-   PubSubClient(char*, uint16_t, void(*)(char*,uint8_t*,unsigned int));
+   PubSubClient(Client& client);
+   PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client);
+   PubSubClient(char*, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client);
    boolean connect(char *);
    boolean connect(char *, char *, char *);
    boolean connect(char *, char *, uint8_t, uint8_t, char *);

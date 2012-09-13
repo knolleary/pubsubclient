@@ -19,7 +19,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
   // handle message arrived
 }
 
-PubSubClient client(server, 1883, callback);
+EthernetClient ethClient;
+PubSubClient client(server, 1883, callback, ethClient);
 
 void setup()
 {

@@ -1,3 +1,10 @@
+1.9
+   * API change: All constructors now require an instance of Client
+      to be passed in. 
+   * Fixed example to match 1.8 api changes - dpslwk
+   * Added username/password support - WilHall
+   * Added publish_P - publishes messages from PROGMEM - jobytaffey
+
 1.8
     * KeepAlive interval is configurable in PubSubClient.h
     * Maximum packet size is configurable in PubSubClient.h

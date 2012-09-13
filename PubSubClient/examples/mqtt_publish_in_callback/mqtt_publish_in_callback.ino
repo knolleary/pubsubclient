@@ -1,0 +1,51 @@
+/*
+ Publishing in the callback 
+ 
+  - connects to an MQTT server
+  - subscribes to the topic "inTopic"
+  - when a message is received, republishes it to "outTopic"
+  
+  This example shows how to publish messages within the
+  callback function. The callback function header needs to
+  be declared before the PubSubClient constructor and the 
+  actual callback defined afterwards.
+  This ensures the client reference in the callback function
+  is valid.
+  
+*/
+
+#include <SPI.h>
+#include <Ethernet.h>
+#include <PubSubClient.h>
+
+// Update these with values suitable for your network.
+byte mac[]    = {  0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
+byte server[] = { 172, 16, 0, 2 };
+byte ip[]     = { 172, 16, 0, 100 };
+
+// Callback function header
+void callback(char* topic, byte* payload, unsigned int length);
+
+EthernetClient ethClient;
+PubSubClient client(server, 1883, callback, ethClient);
+
+// Callback function
+void callback(char* topic, byte* payload, unsigned int length) {
+  client.publish("outTopic", payload, length);
+}
+
+void setup()
+{
+  
+  Ethernet.begin(mac, ip);
+  if (client.connect("arduinoClient")) {
+    client.publish("outTopic","hello world");
+    client.subscribe("inTopic");
+  }
+}
+
+void loop()
+{
+  client.loop();
+}
+
