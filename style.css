@@ -1,0 +1,17 @@
+section { 
+   padding-top: 50px; 
+   margin-top: -50px;
+}
+body { 
+   padding-top: 60px;
+}
+
+.method { 
+   border-bottom: 3px solid #eee;
+   margin-bottom: 20px;
+   padding-bottom: 5px;
+}
+.methodname {}
+.methodreturn { font-weight: normal; color: #888;}
+.methodparams { font-weight: normal; color: #888;}
+

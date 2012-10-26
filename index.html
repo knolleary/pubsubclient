@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset=UTF-8>
+  <title>Arduino Client for MQTT</title>
+  <link rel="stylesheet" href="bootstrap/css/bootstrap.knolleary.css" type="text/css">
+  <link rel="stylesheet" href="style.css" type="text/css">
+  <link href='http://fonts.googleapis.com/css?family=Lora:400,400italic' rel='stylesheet' type='text/css'>
+  <!--[if IE]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+  <script src="bootstrap/js/bootstrap.js"></script>
+</head>
+<body>
+<div class="container">
+
+<div class="navbar navbar-fixed-top">
+ <div class="navbar-inner">
+  <div class="container">
+   <a class="brand" href="./index.html">Arduino Client for MQTT</a>
+   <div class="nav-collapse collapse">
+    <ul class="nav">
+     <li class="active"><a href="./index.html">Home</a></li>
+     <li class=""><a href="./tutorial.html">Tutorial</a></li>
+     <li class=""><a href="./api.html">API Docs</a></li>
+    </ul>
+   </div>
+  </div>
+ </div>
+</div>
+
+<div class="row">
+ <div class="span3" id="navcolumn">
+  <div class="affix">
+   <h4>Home</h4>
+   <ul class="nav nav-pills nav-stacked">
+    <li><a href="#Download">Download</a></li>
+    <li><a href="#License">License</a></li>
+    <li><a href="#ChangeHistory">Change History</a></li>
+   </ul>
+  </div>
+ </div>
+ <div class="span9" id="content">
+   <h1>Arduino Client for MQTT</h1>
+   <p>This library provides a client for doing simple publish/subscribe messaging with a server that supports MQTT v3.</p>
+   <p>For more information about MQTT, visit <a href="http://mqtt.org">mqtt.org</a>.</p>
+
+   <section id="Download">
+      <h3>Download</h3>
+      <p>The latest version of the library can be downloaded from <a href="https://github.com/knolleary/pubsubclient/tags">GitHub</a>.</p>
+   </section>
+
+   <section id="License">
+      <h3>License</h3>
+      <p>This library is released under the <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>.</p>
+   </section>
+   <section id="ChangeHistory">
+      <h3>Change History</h3>
+      <p>The complete change history is available on <a href="https://github.com/knolleary/pubsubclient/commits/master">GitHub</a>.</p>
+      <dl>
+         <dt>1.8</dt>
+         <dd>
+            <ul>
+               <li>KeepAlive interval is configurable in <code>PubSubClient.h</code></li>
+               <li>Maximum packet size is configurable in <code>PubSubClient.h</code></li>
+               <li><b><i>API change</i></b>: Return <code>boolean</code> rather than <code>int</code> from various functions</li>
+               <li><b><i>API change</i></b>: Length parameter in message callback changed from <code>int</code> to <code>unsigned int</code>
+               <li>Various internal tidy-ups around types</li>
+               <li>Able to specify server address by DNS name</li>
+            </ul>
+         </dd>
+         <dt>1.7</dt>
+         <dd>
+            <ul>
+               <li>Improved keepalive handling</li>
+               <li>Updated to the Arduino-1.0 API</li>
+            </ul>
+         </dd>
+         <dt>1.6</dt>
+         <dd>
+            <ul>
+               <li>Added ability to publish retained messages</li>
+            </ul>
+         </dd>
+         <dt>1.5</dt>
+         <dd>
+            <ul>
+               <li>Added default constructor</li>
+               <li>Fixed compile error when used with arduino-0021 or later</li>
+            </ul>
+         </dd>
+         <dt>1.4</dt>
+         <dd>
+            <ul>
+               <li>Fixed connection lost handling</li>
+            </ul>
+         </dd>
+         <dt>1.3</dt>
+         <dd>
+            <ul>
+               <li>Fixed packet reading bug</li>
+            </ul>
+         </dd>
+         <dt>1.2</dt>
+         <dd>
+            <ul>
+               <li>Fixed compile error when used with arduino-0016 or later</li>
+            </ul>
+         </dd>
+         <dt>1.1</dt>
+         <dd>
+            <ul>
+               <li>Reduced size of library</li>
+               <li>Added support for Will messages</li?
+               <li>Clarified licensing &#8211; see LICENSE.txt</li>
+            </ul>
+         </dd>
+         <dt>1.0</dt>
+         <dd>
+            <ul>
+               <li>Only Quality of Service (QOS) 0 messaging is supported</li>
+               <li>The maximum message size, including header, is 128 bytes</li>
+               <li>The keepalive interval is set to 30 seconds</li>
+               <li>No support for Will messages</li>
+            </ul>
+         </dd>
+      </dl>
+   </section>
+ </div>
+</div>
+
+</body>
+</html>

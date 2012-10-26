@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset=UTF-8>
+  <title>Arduino Client for MQTT</title>
+  <link rel="stylesheet" href="bootstrap/css/bootstrap.knolleary.css" type="text/css">
+  <link rel="stylesheet" href="style.css" type="text/css">
+  <link href='http://fonts.googleapis.com/css?family=Lora:400,400italic' rel='stylesheet' type='text/css'>
+  <!--[if IE]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+  <script src="bootstrap/js/bootstrap.js"></script>
+</head>
+<body>
+<div class="container">
+
+
+<div class="navbar navbar-fixed-top">
+ <div class="navbar-inner">
+  <div class="container">
+   <a class="brand" href="./index.html">Arduino Client for MQTT</a>
+   <div class="nav-collapse collapse">
+    <ul class="nav">
+     <li class=""><a href="./index.html">Home</a></li>
+     <li class=""><a href="./tutorial.html">Tutorial</a></li>
+     <li class="active"><a href="./api.html">API Docs</a></li>
+    </ul>
+   </div>
+  </div>
+ </div>
+</div>
+
+<div class="row">
+ <div class="span3" id="navcolumn">
+  <div class="affix">
+  <h4>API Docs</h4>
+   <ul class="nav nav-pills nav-stacked">
+<li><a href="#PubSubClient">PubSubClient(...)</a></li>
+<li><a href="#PubSubClient2">PubSubClient(...)</a></li>
+<li><a href="#connect1">boolean connect(...)</a></li>
+<li><a href="#connect2">boolean connect(...)</a></li>
+<li><a href="#connect3">boolean connect(...)</a></li>
+<li><a href="#connect4">boolean connect(...)</a></li>
+<li><a href="#disconnect">void disconnect()</a></li>
+<li><a href="#publish1">boolean publish(...)</a></li>
+<li><a href="#publish2">boolean publish(...)</a></li>
+<li><a href="#publish3">boolean publish(...)</a></li>
+<li><a href="#publish4">boolean publish_P(...)</a></li>
+<li><a href="#subscribe">boolean subscribe(...)</a></li>
+<li><a href="#loop">boolean loop()</a></li>
+<li><a href="#connected">boolean connected()</a></li>
+<li><a href="#configoptions">Configuration Options</a></li>
+</ul>
+
+   
+   </div>
+ </div>
+ <div class="span9" id="content">
+<p><i>These docs refer to the latest version of the library on <a href="https://github.com/knolleary/pubsubclient">GitHub</a></i></p>
+<section class="method" id="PubSubClient">
+<h4><span class="methodname">PubSubClient</span> <span class="methodparams">(server, port, callback, client)</span></h4>
+<p>Creates a client instance, with the server specified by IP address.</p>
+<h5>Parameters</h5>
+<ul>
+<li>server : the IP address of the server (array of 4 bytes)</li>
+<li>port : the port to connect to (int)</li>
+<li>callback : a pointer to a function called when a message arrives for a subscription created by this client. If no callback is required, set this to 0</li>
+<li>client : an instance of <code>Client</code>, typically <code>EthernetClient</code>.</li>
+</ul>
+<p>The callback function has the following signature:</p>
+<pre>
+ void callback(char* topic, byte* payload, unsigned int length)
+</pre>
+</section>
+
+<section class="method" id="PubSubClient2">
+<h4><span class="methodname">PubSubClient</span> <span class="methodparams">(serverDNS, port, callback, client)</span></h4>
+<p>Creates a client instance, with the server specified by DNS name.</p>
+<h5>Parameters</h5>
+<ul>
+<li>serverDNS : the DNS name of the server (char*)</li>
+<li>port : the port to connect to (int)</li>
+<li>callback : a pointer to a function called when a message arrives for a subscription created by this client. If no callback is required, set this to 0</li>
+<li>client : an instance of <code>Client</code>, typically <code>EthernetClient</code>.</li>
+</ul>
+<p>The callback function has the following signature:</p>
+<pre>
+ void callback(char* topic, byte* payload, unsigned int length)
+</pre>
+</section>
+
+<section class="method" id="connect1">
+<h4><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID)</span></h4>
+<p>Connects the client.</p>
+<h5>Parameters</h5>
+<ul>
+<li>clientID : the client ID to use when connecting to the server. As per MQTT, this must be between 1 and 23 characters long.</li>
+</ul>
+<h5>Returns</h5>
+<ul>
+<li>false &#8211; connection failed.</li>
+<li>true &#8211; connection succeeded.</li>
+</ul>
+</section>
+
+<section class="method" id="connect2">
+<h4><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, willTopic, willQoS, willRetain, willMessage)</span></h4>
+<p>Connects the client with a Will message specified.</p>
+<h5>Parameters</h5>
+<ul>
+<li>clientID : the client ID to use when connecting to the server. As per MQTT, this must be between 1 and 23 characters long.</li>
+<li>willTopic : the topic to be used by the will message (char*)</li>
+<li>willQoS : the quality of service to be used by the will message (int :  0,1 or 2)</li>
+<li>willRetain : whether the will should be published with the retain flag (int : 0 or 1)</li>
+<li>willMessage : the payload of the will message (char*)</li>
+</ul>
+<h5>Returns</h5>
+<ul>
+<li>false &#8211; connection failed.</li>
+<li>true &#8211; connection succeeded.</li>
+</ul>
+</section>
+
+<section class="method" id="connect3">
+<h4><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password)</span></h4>
+<p>Connects the client with a username and password specified.</p>
+<h5>Parameters</h5>
+<ul>
+<li>clientID : the client ID to use when connecting to the server. As per MQTT, this must be between 1 and 23 characters long.</li>
+<li>username : the username to use. If NULL, no username or password is used (char*)</li>
+<li>password : the password to use. If NULL, no password is used (char*)</li>
+</ul>
+<h5>Returns</h5>
+<ul>
+<li>false &#8211; connection failed.</li>
+<li>true &#8211; connection succeeded.</li>
+</ul>
+</section>
+
+<section class="method" id="connect4">
+<h4><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password, willTopic, willQoS, willRetain, willMessage)</span></h4>
+<p>Connects the client with a Will message, username and password specified.</p>
+<h5>Parameters</h5>
+<ul>
+<li>clientID : the client ID to use when connecting to the server. As per MQTT, this must be between 1 and 23 characters long.</li>
+<li>username : the username to use. If NULL, no username or password is used (char*)</li>
+<li>password : the password to use. If NULL, no password is used (char*)</li>
+<li>willTopic : the topic to be used by the will message (char*)</li>
+<li>willQoS : the quality of service to be used by the will message (int :  0,1 or 2)</li>
+<li>willRetain : whether the will should be published with the retain flag (int : 0 or 1)</li>
+<li>willMessage : the payload of the will message (char*)</li>
+</ul>
+<h5>Returns</h5>
+<ul>
+<li>false &#8211; connection failed.</li>
+<li>true &#8211; connection succeeded.</li>
+</ul>
+</section>
+
+<section class="method" id="disconnect">
+<h4><span class="methodreturn">void</span> <span class="methodname">disconnect</span> <span class="methodparams">()</span></h4>
+<p>Disconnects the client.</p>
+</section>
+
+<section class="method" id="publish1">
+<h4><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload)</span></h4>
+<p>Publishes a string message to the specified topic.</p>
+<h5>Parameters</h5>
+<ul>
+<li>topic &#8211; the topic to publish to (char*)</li>
+<li>payload &#8211; the message to publish (char*)</li>
+</ul>
+<h5>Returns</h5>
+<ul>
+<li>false &#8211; publish failed.</li>
+<li>true &#8211; publish succeeded.</li>
+</ul>
+</section>
+
+<section class="method" id="publish2">
+<h4><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, length)</span></h4>
+<p>Publishes a message to the specified topic.</p>
+<h5>Parameters</h5>
+<ul>
+<li>topic &#8211; the topic to publish to (char*)</li>
+<li>payload &#8211; the message to publish (byte array)</li>
+<li>length &#8211; the length of the message (byte)</li>
+</ul>
+<h5>Returns</h5>
+<ul>
+<li>false &#8211; publish failed.</li>
+<li>true &#8211; publish succeeded.</li>
+</ul>
+</section>
+
+<section class="method" id="publish3">
+<h4><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, length, retained)</span></h4>
+<p>Publishes a message to the specified topic, with the retained flag as specified.</p>
+<h5>Parameters</h5>
+<ul>
+<li>topic &#8211; the topic to publish to (char*)</li>
+<li>payload &#8211; the message to publish (byte array)</li>
+<li>length &#8211; the length of the message (byte)</li>
+<li>retained &#8211; whether the message should be retained (byte)
+<ul>
+<li>0 &#8211; not retained</li>
+<li>1 &#8211; retained</li>
+</ul>
+</li>
+</ul>
+<h5>Returns</h5>
+<ul>
+<li>false &#8211; publish failed.</li>
+<li>true &#8211; publish succeeded.</li>
+</ul>
+</section>
+
+<section class="method" id="publish4">
+<h4><span class="methodreturn">int</span> <span class="methodname">publish_P</span> <span class="methodparams">(topic, payload, length, retained)</span></h4>
+<p>Publishes a message stored in <code>PROGMEN</code> to the specified topic, with the retained flag as specified.</p>
+<h5>Parameters</h5>
+<ul>
+<li>topic &#8211; the topic to publish to (char*)</li>
+<li>payload &#8211; the message to publish (PROGMEM byte array)</li>
+<li>length &#8211; the length of the message (byte)</li>
+<li>retained &#8211; whether the message should be retained (byte)
+<ul>
+<li>0 &#8211; not retained</li>
+<li>1 &#8211; retained</li>
+</ul>
+</li>
+</ul>
+<h5>Returns</h5>
+<ul>
+<li>false &#8211; publish failed.</li>
+<li>true &#8211; publish succeeded.</li>
+</ul>
+</section>
+
+<section class="method" id="subscribe">
+<h4><span class="methodreturn">boolean</span> <span class="methodname">subscribe</span> <span class="methodparams">(topic)</span></h4>
+<p>Subscribes to messages published to the specified topic.</p>
+<h5>Parameters</h5>
+<ul>
+<li>topic &#8211; the topic to publish to (char*)</li>
+</ul>
+<h5>Returns</h5>
+<ul>
+<li>false &#8211; sending the subscribe failed.</li>
+<li>true &#8211; sending the subscribe succeeded. The request completes asynchronously.</li>
+</ul>
+</section>
+
+<section class="method" id="loop">
+<h4><span class="methodreturn">boolean</span> <span class="methodname">loop</span> <span class="methodparams">()</span></h4>
+<p>This should be called regularly to allow the client to process incoming messages and maintain its connection to the server.</p>
+<h5>Returns</h5>
+<ul>
+<li>false &#8211; the client is no longer connected</li>
+<li>true &#8211; the client is still connected</li>
+</ul>
+</section>
+
+<section class="method" id="connected">
+<h4><span class="methodreturn">int</span> <span class="methodname">connected</span> <span class="methodparams">()</span></h4>
+<p>Checks whether the client is connected to the server.</p>
+<h5>Returns</h5>
+<ul>
+<li>false &#8211; the client is no longer connected</li>
+<li>true &#8211; the client is still connected</li>
+</ul>
+</section>
+
+<section class="method" id="configoptions">
+<h4>Configuration Options</h4>
+<p>The following configuration options can be used to configure the library. They are contained in <code>PubSubClient.h</code>.</p>
+<dl>
+<dt><code>MQTT_MAX_PACKET_SIZE</code></dt>
+<dd>Sets the largest packet size, in bytes, the client will handle. Any packet received that exceeds this size will be ignored.</p>
+<p>Default: 128 bytes
+</dd>
+<dt><code>MQTT_KEEPALIVE</code></dt>
+<dd>Sets the keepalive interval, in seconds, the client will use. This is used to maintain the connection when no other packets are being<br />
+sent or received.</p>
+<p>Default: 15 seconds
+</dd>
+</dl>
+</section>
+ 
+ </div>
+</div>
+
+</body>
+</html>
