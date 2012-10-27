@@ -94,7 +94,7 @@ boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic,
          lastInActivity = millis();
          while (!_client->available()) {
             unsigned long t= millis();
-            if (t-lastInActivity > MQTT_KEEPALIVE*1000) {
+            if (t-lastInActivity > MQTT_KEEPALIVE*1000UL) {
                _client->stop();
                return false;
             }
@@ -146,7 +146,7 @@ uint16_t PubSubClient::readPacket() {
 boolean PubSubClient::loop() {
    if (connected()) {
       unsigned long t = millis();
-      if ((t - lastInActivity > MQTT_KEEPALIVE*1000) || (t - lastOutActivity > MQTT_KEEPALIVE*1000)) {
+      if ((t - lastInActivity > MQTT_KEEPALIVE*1000UL) || (t - lastOutActivity > MQTT_KEEPALIVE*1000UL)) {
          if (pingOutstanding) {
             _client->stop();
             return false;
