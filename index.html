@@ -59,6 +59,16 @@
       <h3>Change History</h3>
       <p>The complete change history is available on <a href="https://github.com/knolleary/pubsubclient/commits/master">GitHub</a>.</p>
       <dl>
+         <dt>1.9</dt>
+         <dd>
+            <ul>
+               <li>Do not split MQTT packets over multiple calls to <code>_client->write()</code></li>
+               <li><b><i>API change</i></b>: All constructors now require an instance of Client to be passed in.</li>
+               <li>Fixed example to match 1.8 api changes - dpslwk</li>
+               <li>Added username/password support - WilHall</li>
+               <li>Added <code>publish_P</code> - publishes messages from <code>PROGMEM</code> - jobytaffey</li>
+            </ul>
+         </dd>
          <dt>1.8</dt>
          <dd>
             <ul>
