@@ -1,4 +1,5 @@
 1.9
+   * Do not split MQTT packets over multiple calls to _client->write()
    * API change: All constructors now require an instance of Client
       to be passed in. 
    * Fixed example to match 1.8 api changes - dpslwk
