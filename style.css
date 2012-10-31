@@ -1,17 +1,30 @@
-section { 
-   padding-top: 50px; 
-   margin-top: -50px;
-}
-body { 
-   padding-top: 60px;
-}
-
 .method { 
    border-bottom: 3px solid #eee;
    margin-bottom: 20px;
-   padding-bottom: 5px;
+   padding-bottom: 15px;
 }
 .methodname {}
-.methodreturn { font-weight: normal; color: #888;}
-.methodparams { font-weight: normal; color: #888;}
+.methodreturn { font-weight: normal; color: #777;}
+.methodparams { font-weight: normal; color: #777;}
 
+li.active {
+   font-weight: bold;
+   text-decoration: underline !important;
+}
+
+#ChangeHistory * dd { margin-left: 25px;}
+
+#toc a {
+   color: #333;
+}
+
+h4 { font-size: 1.3em; }
+h5 {
+   margin: 0px;
+   padding: 0px;
+   font-size: 1.0em;
+}
+
+#content ul {
+   margin: 0px;
+}

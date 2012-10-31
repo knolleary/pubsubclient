@@ -1,63 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-  <meta charset=UTF-8>
-  <title>Arduino Client for MQTT</title>
-  <link rel="stylesheet" href="bootstrap/css/bootstrap.knolleary.css" type="text/css">
-  <link rel="stylesheet" href="style.css" type="text/css">
-  <link href='http://fonts.googleapis.com/css?family=Lora:400,400italic' rel='stylesheet' type='text/css'>
-  <!--[if IE]>
-    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-  <![endif]-->
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
-  <script src="bootstrap/js/bootstrap.js"></script>
-</head>
-<body>
-<div class="container">
-
-
-<div class="navbar navbar-fixed-top">
- <div class="navbar-inner">
-  <div class="container">
-   <a class="brand" href="./index.html">Arduino Client for MQTT</a>
-   <div class="nav-collapse collapse">
-    <ul class="nav">
-     <li class=""><a href="./index.html">Home</a></li>
-     <li class=""><a href="./tutorial.html">Tutorial</a></li>
-     <li class="active"><a href="./api.html">API Docs</a></li>
-    </ul>
-   </div>
-  </div>
- </div>
-</div>
-
-<div class="row">
- <div class="span3" id="navcolumn">
-  <div class="affix">
-  <h4>API Docs</h4>
-   <ul class="nav nav-pills nav-stacked">
-<li><a href="#PubSubClient">PubSubClient(...)</a></li>
-<li><a href="#PubSubClient2">PubSubClient(...)</a></li>
-<li><a href="#connect1">boolean connect(...)</a></li>
-<li><a href="#connect2">boolean connect(...)</a></li>
-<li><a href="#connect3">boolean connect(...)</a></li>
-<li><a href="#connect4">boolean connect(...)</a></li>
-<li><a href="#disconnect">void disconnect()</a></li>
-<li><a href="#publish1">boolean publish(...)</a></li>
-<li><a href="#publish2">boolean publish(...)</a></li>
-<li><a href="#publish3">boolean publish(...)</a></li>
-<li><a href="#publish4">boolean publish_P(...)</a></li>
-<li><a href="#subscribe">boolean subscribe(...)</a></li>
-<li><a href="#loop">boolean loop()</a></li>
-<li><a href="#connected">boolean connected()</a></li>
-<li><a href="#configoptions">Configuration Options</a></li>
-</ul>
-
-   
-   </div>
- </div>
- <div class="span9" id="content">
+---
+layout: default
+title: API Docs
+---
 <p><i>These docs refer to the latest version of the library on <a href="https://github.com/knolleary/pubsubclient">GitHub</a></i></p>
+
+<section class="method" id="toc">
+<h5>Constructors</h5>
+<ul>
+<li><a href="#PubSubClient"><span class="methodname">PubSubClient</span> <span class="methodparams">(server, port, callback, client)</span></a></li>
+<li><a href="#PubSubClient2"><span class="methodname">PubSubClient</span> <span class="methodparams">(serverDNS, port, callback, client)</span></a></li>
+</ul>
+<h5>Functions</h5>
+<ul>
+<li><a href="#connect1"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID)</span></a></li>
+<li><a href="#connect2"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, willTopic, willQoS, willRetain, willMessage)</span></a></li>
+<li><a href="#connect3"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password)</span></a></li>
+<li><a href="#connect4"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password, willTopic, willQoS, willRetain, willMessage)</span></a></li>
+<li><a href="#disconnect"><span class="methodreturn">void</span> <span class="methodname">disconnect</span> <span class="methodparams">()</span></a></li>
+<li><a href="#publish1"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload)</span></a></li>
+<li><a href="#publish2"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, length)</span></a></li>
+<li><a href="#publish3"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, length, retained)</span></a></li>
+<li><a href="#publish4"><span class="methodreturn">int</span> <span class="methodname">publish_P</span> <span class="methodparams">(topic, payload, length, retained)</span></a></li>
+<li><a href="#subscribe"><span class="methodreturn">boolean</span> <span class="methodname">subscribe</span> <span class="methodparams">(topic)</span></a></li>
+<li><a href="#loop"><span class="methodreturn">boolean</span> <span class="methodname">loop</span> <span class="methodparams">()</span></a></li>
+<li><a href="#connected"><span class="methodreturn">int</span> <span class="methodname">connected</span> <span class="methodparams">()</span></a></li>
+</ul>
+<h5>Other</h5>
+<ul>
+<li><a href="#configoptions">Configuration Options</a></li>
+<li><a href="#callback">Subscription Callback</a></li>
+</ul>
+</section>
+
 <section class="method" id="PubSubClient">
 <h4><span class="methodname">PubSubClient</span> <span class="methodparams">(server, port, callback, client)</span></h4>
 <p>Creates a client instance, with the server specified by IP address.</p>
@@ -65,13 +39,9 @@
 <ul>
 <li>server : the IP address of the server (array of 4 bytes)</li>
 <li>port : the port to connect to (int)</li>
-<li>callback : a pointer to a function called when a message arrives for a subscription created by this client. If no callback is required, set this to 0</li>
+<li>callback : a pointer to a function called when a message arrives for a subscription created by this client. If no callback is required, set this to 0. See <a href="#callback">Subscription Callback</a>.</li>
 <li>client : an instance of <code>Client</code>, typically <code>EthernetClient</code>.</li>
 </ul>
-<p>The callback function has the following signature:</p>
-<pre>
- void callback(char* topic, byte* payload, unsigned int length)
-</pre>
 </section>
 
 <section class="method" id="PubSubClient2">
@@ -81,13 +51,9 @@
 <ul>
 <li>serverDNS : the DNS name of the server (char*)</li>
 <li>port : the port to connect to (int)</li>
-<li>callback : a pointer to a function called when a message arrives for a subscription created by this client. If no callback is required, set this to 0</li>
+<li>callback : a pointer to a function called when a message arrives for a subscription created by this client. If no callback is required, set this to 0. See <a href="#callback">Subscription Callback</a>.</li>
 <li>client : an instance of <code>Client</code>, typically <code>EthernetClient</code>.</li>
 </ul>
-<p>The callback function has the following signature:</p>
-<pre>
- void callback(char* topic, byte* payload, unsigned int length)
-</pre>
 </section>
 
 <section class="method" id="connect1">
@@ -288,8 +254,25 @@ sent or received.</p>
 </dl>
 </section>
  
- </div>
-</div>
+<section class="method" id="callback">
+<h4>Subscription Callback</h4>
+<p>If the client is used to subscribe to topics, a callback function must be provided in the constructor. This function
+is called when new messages arrive at the client.</p>
+<p>The callback function has the following signature:
+<pre>
+ void callback(char* topic, byte* payload, unsigned int length)
+</pre>
+<h5>Parameters</h5>
+<ul>
+<li>topic &#8211; the topic the message arrived on (char*)</li>
+<li>payload &#8211; the message payload (byte array)</li>
+<li>length &#8211; the length of the message payload (unsigned int)</li>
+</ul>
+<p>Internally, the client uses the same buffer for both inbound and outbound
+messages. After the callback function returns, or if a call to either <code>publish</code>
+or <code>subscribe</code> is made from within the callback function, the <code>topic</code>
+and <code>payload</code> values passed to the function will be overwritten. The application
+should create its own copy of the values if they are required beyond this.</p>
+</section>
+ 
 
-</body>
-</html>
