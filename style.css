@@ -1,3 +1,8 @@
+section {
+   padding-top:40px;
+   margin-top: -40px;
+}
+   
 .method { 
    border-bottom: 3px solid #eee;
    margin-bottom: 20px;
