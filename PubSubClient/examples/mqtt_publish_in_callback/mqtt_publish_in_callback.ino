@@ -31,7 +31,17 @@ PubSubClient client(server, 1883, callback, ethClient);
 
 // Callback function
 void callback(char* topic, byte* payload, unsigned int length) {
-  client.publish("outTopic", payload, length);
+  // In order to republish this payload, a copy must be made
+  // as the orignal payload buffer will be overwritten whilst
+  // constructing the PUBLISH packet.
+  
+  // Allocate the correct amount of memory for the payload copy
+  byte* p = (byte*)malloc(length);
+  // Copy the payload to the new buffer
+  memcpy(p,payload,length);
+  client.publish("outTopic", p, length);
+  // Free the memory
+  free(p);
 }
 
 void setup()
