@@ -1,2 +1,4 @@
+.build
 tmpbin
 logs
+*.pyc
