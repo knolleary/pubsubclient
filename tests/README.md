@@ -2,6 +2,9 @@
 
 This is a regression test suite for the `PubSubClient` library.
 
+It is a work-in-progress and is subject to complete refactoring as the whim takes
+me.
+
 Without a suitable arduino plugged in, the test suite will only check the
 example sketches compile cleanly against the library.
 
@@ -15,15 +18,12 @@ test case is built, uploaded and then the tests run.
 
 ## Running
 
-Without a suitable arduino plugged in, the test suite will only check the
-example sketches compile cleanly against the library.
-
-With an arduino plugged in, each sketch that has a corresponding python
-test case is built, uploaded and then the tests run.
-
-The test suite _does not_ run an MQTT server - it is assumed to be already running.
+The test suite _does not_ run an MQTT server - it is assumed to be running already.
  
    $ python testsuite.py
+
+A summary of activity is printed to the console. More comprehensive logs are written
+to the `logs` directory.
 
 ## What it does
 
