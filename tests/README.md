@@ -20,15 +20,15 @@ test case is built, uploaded and then the tests run.
 
 The test suite _does not_ run an MQTT server - it is assumed to be running already.
  
-   $ python testsuite.py
+    $ python testsuite.py
 
 A summary of activity is printed to the console. More comprehensive logs are written
 to the `logs` directory.
 
 ## What it does
 
-For each example sketch, `sketch.ino`, the suite looks for a matching test case
-`testcases/sketch.py`.
+For each sketch in the library's `examples` directory, e.g. `mqtt_basic.ino`, the suite looks for a matching test case
+`testcases/mqtt_basic.py`.
 
 The test case must follow these conventions:
  - sub-class `unittest.TestCase`
@@ -44,8 +44,8 @@ a client and subscribing to topics.
 
 The file `testcases/settings.py` is used to config the test environment.
 
- - `server_ip` - the IP address of the broker the client should connect to
- - `arduino_ip` - the IP address the arduino should us
+ - `server_ip` - the IP address of the broker the client should connect to (the broker port is assumed to be 1883).
+ - `arduino_ip` - the IP address the arduino should use (when not testing DHCP).
 
 Before each sketch is compiled, these values are automatically substituted in. To
 do this, the suite looks for lines that _start_ with the following:
