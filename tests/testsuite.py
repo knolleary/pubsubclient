@@ -6,6 +6,9 @@ import shutil
 from subprocess import call
 import importlib
 import unittest
+import re
+
+from testcases import settings
 
 class Workspace(object):
   
@@ -66,7 +69,23 @@ class Sketch(object):
   def build(self):
     sys.stdout.write(" Build:   ")
     sys.stdout.flush()
-    shutil.copy(self.filename,os.path.join(self.w.build_dir,"src","sketch.ino"))
+    
+    # Copy sketch over, replacing IP addresses as necessary
+    fin = open(self.filename,"r")
+    lines = fin.readlines()
+    fin.close()
+    fout = open(os.path.join(self.w.build_dir,"src","sketch.ino"),"w")
+    for l in lines:
+      if re.match(r"^byte server\[\]",l):
+        fout.write("byte server[] = { %s };\n"%(settings.server_ip.replace(".",", "),))
+      elif re.match(r"^byte ip\[\]",l):
+        fout.write("byte ip[] = { %s };\n"%(settings.arduino_ip.replace(".",", "),))
+      else:
+        fout.write(l)
+    fout.flush()
+    fout.close()
+    
+    # Run build
     fout = open(self.build_log, "w")
     ferr = open(self.build_err_log, "w")
     rc = call(["ino","build"],stdout=fout,stderr=ferr)
@@ -104,6 +123,7 @@ class Sketch(object):
 
 
   def test(self):
+    # import the matching test case, if it exists
     try:
       basename = os.path.basename(self.filename)[:-4]
       i = importlib.import_module("testcases."+basename)
@@ -111,25 +131,33 @@ class Sketch(object):
       sys.stdout.write(" Test:    no tests found")
       sys.stdout.write("\n")
       return
+    c = getattr(i,basename)
+    
+    testmethods = [m for m in dir(c) if m.startswith("test_")]
+    testmethods.sort()
+    tests = []
+    for m in testmethods:
+      tests.append(c(m))
+      
+    result = unittest.TestResult()
+    c.setUpClass()
     if self.upload():
       sys.stdout.write(" Test:    ")
       sys.stdout.flush()
-      c = getattr(i,basename)
-      suite = unittest.makeSuite(c,'test')
-      result = unittest.TestResult()
-      suite.run(result)
-      print "%d/%d"%(result.testsRun-len(result.failures)-len(result.errors),result.testsRun)
-      if not result.wasSuccessful():
-        if len(result.failures) > 0:
-          for f in result.failures:
-            print "-- %s"%(str(f[0]),)
-            print f[1]
-        if len(result.errors) > 0:
-          print " Errors:"
-          for f in result.errors:
-            print "-- %s"%(str(f[0]),)
-            print f[1]
-
+      for t in tests:
+        t.run(result)
+        print "%d/%d"%(result.testsRun-len(result.failures)-len(result.errors),result.testsRun)
+        if not result.wasSuccessful():
+          if len(result.failures) > 0:
+            for f in result.failures:
+              print "-- %s"%(str(f[0]),)
+              print f[1]
+          if len(result.errors) > 0:
+            print " Errors:"
+            for f in result.errors:
+              print "-- %s"%(str(f[0]),)
+              print f[1]
+    c.tearDownClass()
 
 if __name__ == '__main__':
   run_tests = True
