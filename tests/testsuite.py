@@ -76,9 +76,9 @@ class Sketch(object):
     fin.close()
     fout = open(os.path.join(self.w.build_dir,"src","sketch.ino"),"w")
     for l in lines:
-      if re.match(r"^byte server\[\]",l):
+      if re.match(r"^byte server\[\] = {",l):
         fout.write("byte server[] = { %s };\n"%(settings.server_ip.replace(".",", "),))
-      elif re.match(r"^byte ip\[\]",l):
+      elif re.match(r"^byte ip\[\] = {",l):
         fout.write("byte ip[] = { %s };\n"%(settings.arduino_ip.replace(".",", "),))
       else:
         fout.write(l)
