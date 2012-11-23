@@ -215,13 +215,13 @@ boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plengt
    return false;
 }
 
-boolean PubSubClient::publish_P(char* topic, uint8_t* PROGMEM payload, unsigned int plength, boolean retained) {
+boolean PubSubClient::publish_P(char* topic, uint8_t* payload, unsigned int plength, boolean retained) {
    uint8_t llen = 0;
    uint8_t digit;
-   int rc;
+   uint16_t rc;
    uint16_t tlen;
    int pos = 0;
-   int i;
+   uint16_t i;
    uint8_t header;
    unsigned int len;
    
@@ -249,7 +249,7 @@ boolean PubSubClient::publish_P(char* topic, uint8_t* PROGMEM payload, unsigned 
    
    pos = writeString(topic,buffer,pos);
    
-   rc += _client->write(buffer,pos);
+   rc = _client->write(buffer,pos);
    
    for (i=0;i<plength;i++) {
       rc += _client->write((char)pgm_read_byte_near(payload + i));
