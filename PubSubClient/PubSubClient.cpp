@@ -7,15 +7,12 @@
 #include "PubSubClient.h"
 #include <string.h>
 
-PubSubClient::PubSubClient(Client& client) {
-   this->_client = &client;
-}
-
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client) {
    this->_client = &client;
    this->callback = callback;
    this->ip = ip;
    this->port = port;
+   this->domain = NULL;
 }
 
 PubSubClient::PubSubClient(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client) {
