@@ -32,6 +32,7 @@ PubSubClient client(server, 1883, callback, ethClient);
 
 void setup()
 {
+  Serial.begin(9600);
   Ethernet.begin(mac, ip);
   if (client.connect("arduinoClient")) {
     client.subscribe("inTopic");
