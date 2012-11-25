@@ -148,20 +148,7 @@ uint16_t PubSubClient::readPacket() {
 boolean PubSubClient::loop() {
    if (connected()) {
       unsigned long t = millis();
-      if ((t - lastInActivity > MQTT_KEEPALIVE*1000UL) || (t - lastOutActivity > MQTT_KEEPALIVE*1000UL)) {
-         if (pingOutstanding) {
-            _client->stop();
-            return false;
-         } else {
-            buffer[0] = MQTTPINGREQ;
-            buffer[1] = 0;
-            _client->write(buffer,2);
-            lastOutActivity = t;
-            lastInActivity = t;
-            pingOutstanding = true;
-         }
-      }
-      if (_client->available()) {
+      while (_client->available()) {
          uint16_t len = readPacket();
          if (len > 0) {
             lastInActivity = t;
@@ -185,6 +172,19 @@ boolean PubSubClient::loop() {
             } else if (type == MQTTPINGRESP) {
                pingOutstanding = false;
             }
+         }
+      }
+      if ((t - lastInActivity > MQTT_KEEPALIVE*1000UL) || (t - lastOutActivity > MQTT_KEEPALIVE*1000UL)) {
+         if (pingOutstanding) {
+            _client->stop();
+            return false;
+         } else {
+            buffer[0] = MQTTPINGREQ;
+            buffer[1] = 0;
+            _client->write(buffer,2);
+            lastOutActivity = t;
+            lastInActivity = t;
+            pingOutstanding = true;
          }
       }
       return true;
