@@ -17,12 +17,12 @@ byte ip[]     = { 172, 16, 0, 100 };
 
 void callback(char* topic, byte* payload, unsigned int length) {
   // handle message arrived
-  Serial.println(“Callback”);
-  Serial.print(“Topic:”);
+  Serial.println("Callback");
+  Serial.print("Topic:");
   Serial.println(topic);
-  Serial.print(“Length:”);
+  Serial.print("Length:");
   Serial.println(length);
-  Serial.print(“Payload:”);
+  Serial.print("Payload:");
   Serial.write(payload,length);
   Serial.println();
 }
