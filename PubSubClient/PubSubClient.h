@@ -14,7 +14,7 @@
 #define MQTT_MAX_PACKET_SIZE 128
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
-#define MQTT_KEEPALIVE 15
+#define MQTT_KEEPALIVE 300
 
 #define MQTTPROTOCOLVERSION 3
 #define MQTTCONNECT     1 << 4  // Client request to connect to Server
@@ -54,7 +54,6 @@ private:
    char* domain;
    uint16_t port;
 public:
-   PubSubClient(Client& client);
    PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client);
    PubSubClient(char*, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client);
    boolean connect(char *);
@@ -65,7 +64,7 @@ public:
    boolean publish(char *, char *);
    boolean publish(char *, uint8_t *, unsigned int);
    boolean publish(char *, uint8_t *, unsigned int, boolean);
-   boolean publish_P(char *, uint8_t PROGMEM *, unsigned int, boolean);
+   boolean publish_P(char *, uint8_t *, unsigned int, boolean);
    boolean subscribe(char *);
    boolean loop();
    boolean connected();
