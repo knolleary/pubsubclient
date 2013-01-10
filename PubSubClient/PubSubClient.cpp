@@ -290,7 +290,6 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
    return (rc == 1+llen+length);
 }
 
-
 boolean PubSubClient::subscribe(char* topic) {
    if (connected()) {
       // Leave room in the buffer for header and variable length field
@@ -304,6 +303,21 @@ boolean PubSubClient::subscribe(char* topic) {
       length = writeString(topic, buffer,length);
       buffer[length++] = 0; // Only do QoS 0 subs
       return write(MQTTSUBSCRIBE|MQTTQOS1,buffer,length-5);
+   }
+   return false;
+}
+
+boolean PubSubClient::unsubscribe(char* topic) {
+   if (connected()) {
+      uint16_t length = 5;
+      nextMsgId++;
+      if (nextMsgId == 0) {
+         nextMsgId = 1;
+      }
+      buffer[length++] = (nextMsgId >> 8);
+      buffer[length++] = (nextMsgId & 0xFF);
+      length = writeString(topic, buffer,length);
+      return write(MQTTUNSUBSCRIBE|MQTTQOS1,buffer,length-5);
    }
    return false;
 }
