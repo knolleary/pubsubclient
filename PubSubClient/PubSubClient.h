@@ -54,7 +54,7 @@ private:
    char* domain;
    uint16_t port;
 public:
-   PubSubClient(Client& client);
+   PubSubClient();
    PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client);
    PubSubClient(char*, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client);
    boolean connect(char *);

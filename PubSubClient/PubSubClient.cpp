@@ -7,8 +7,8 @@
 #include "PubSubClient.h"
 #include <string.h>
 
-PubSubClient::PubSubClient(Client& client) {
-   this->_client = &client;
+PubSubClient::PubSubClient() {
+   this->_client = NULL;
 }
 
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client) {
@@ -16,6 +16,7 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,ui
    this->callback = callback;
    this->ip = ip;
    this->port = port;
+   this->domain = NULL;
 }
 
 PubSubClient::PubSubClient(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client) {
@@ -293,13 +294,13 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
 boolean PubSubClient::subscribe(char* topic) {
    if (connected()) {
       // Leave room in the buffer for header and variable length field
-      uint16_t length = 7;
+      uint16_t length = 5;
       nextMsgId++;
       if (nextMsgId == 0) {
          nextMsgId = 1;
       }
-      buffer[0] = (nextMsgId >> 8);
-      buffer[1] = (nextMsgId & 0xFF);
+      buffer[length++] = (nextMsgId >> 8);
+      buffer[length++] = (nextMsgId & 0xFF);
       length = writeString(topic, buffer,length);
       buffer[length++] = 0; // Only do QoS 0 subs
       return write(MQTTSUBSCRIBE|MQTTQOS1,buffer,length-5);
@@ -330,8 +331,13 @@ uint16_t PubSubClient::writeString(char* string, uint8_t* buf, uint16_t pos) {
 
 
 boolean PubSubClient::connected() {
-   int rc = (int)_client->connected();
-   if (!rc) _client->stop();
+   boolean rc;
+   if (_client == NULL ) {
+      rc = false;
+   } else {
+      rc = (int)_client->connected();
+      if (!rc) _client->stop();
+   }
    return rc;
 }
 
