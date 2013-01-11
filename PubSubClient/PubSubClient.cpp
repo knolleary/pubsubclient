@@ -102,7 +102,8 @@ boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic,
                return false;
             }
          }
-         uint16_t len = readPacket();
+         uint8_t llen;
+         uint16_t len = readPacket(&llen);
          
          if (len == 4 && buffer[3] == 0) {
             lastInActivity = millis();
@@ -120,7 +121,7 @@ uint8_t PubSubClient::readByte() {
    return _client->read();
 }
 
-uint16_t PubSubClient::readPacket() {
+uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
    uint16_t len = 0;
    buffer[len++] = readByte();
    uint8_t multiplier = 1;
@@ -132,7 +133,7 @@ uint16_t PubSubClient::readPacket() {
       length += (digit & 127) * multiplier;
       multiplier *= 128;
    } while ((digit & 128) != 0);
-   
+   *lengthLength = len-1;
    for (uint16_t i = 0;i<length;i++)
    {
       if (len < MQTT_MAX_PACKET_SIZE) {
@@ -163,21 +164,22 @@ boolean PubSubClient::loop() {
          }
       }
       if (_client->available()) {
-         uint16_t len = readPacket();
+         uint8_t llen;
+         uint16_t len = readPacket(&llen);
          if (len > 0) {
             lastInActivity = t;
             uint8_t type = buffer[0]&0xF0;
             if (type == MQTTPUBLISH) {
                if (callback) {
-                  uint16_t tl = (buffer[2]<<8)+buffer[3];
+                  uint16_t tl = (buffer[llen+1]<<8)+buffer[llen+2];
                   char topic[tl+1];
                   for (uint16_t i=0;i<tl;i++) {
-                     topic[i] = buffer[4+i];
+                     topic[i] = buffer[llen+3+i];
                   }
                   topic[tl] = 0;
                   // ignore msgID - only support QoS 0 subs
-                  uint8_t *payload = buffer+4+tl;
-                  callback(topic,payload,len-4-tl);
+                  uint8_t *payload = buffer+llen+3+tl;
+                  callback(topic,payload,len-llen-3-tl);
                }
             } else if (type == MQTTPINGREQ) {
                buffer[0] = MQTTPINGRESP;
