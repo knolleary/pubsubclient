@@ -124,7 +124,7 @@ uint8_t PubSubClient::readByte() {
 uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
    uint16_t len = 0;
    buffer[len++] = readByte();
-   uint8_t multiplier = 1;
+   uint32_t multiplier = 1;
    uint16_t length = 0;
    uint8_t digit = 0;
    do {
