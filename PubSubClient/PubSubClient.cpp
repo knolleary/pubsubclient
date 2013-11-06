@@ -212,7 +212,7 @@ boolean PubSubClient::publish(char* topic, float payload, boolean retained, unsi
 }
 
 boolean PubSubClient::publish(char* topic, int payload, boolean retained) {
-	return publish(topic, (long)mqtt_messagebuff, strlen(mqtt_messagebuff), retained);
+	return publish(topic, (long)payload, retained);
 }
 
 boolean PubSubClient::publish(char* topic, long payload, boolean retained) {
