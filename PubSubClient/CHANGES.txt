@@ -1,3 +1,6 @@
+1.9.1
+   * Add functions to publish int, float, long. Handles type conversion. Added for flexibility
+
 1.9
    * Do not split MQTT packets over multiple calls to _client->write()
    * API change: All constructors now require an instance of Client

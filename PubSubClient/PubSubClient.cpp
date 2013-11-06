@@ -203,6 +203,25 @@ boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plengt
    return publish(topic, payload, plength, false);
 }
 
+boolean PubSubClient::publish(char* topic, float payload, boolean retained, unsigned int minlength, unsigned int precision) {
+	if (minlength < 4 && payload < 0) minlength = 4; // 4 = sign + 1 integral digit + fractional point + 1 franctional digit
+	char mqtt_messagebuff[longNbDigits((long) payload) + 1 + precision + 1];
+	
+	dtostrf(payload, minlength, precision, mqtt_messagebuff);
+	return publish(topic, (uint8_t*)mqtt_messagebuff, strlen(mqtt_messagebuff), retained);
+}
+
+boolean PubSubClient::publish(char* topic, int payload, boolean retained) {
+	return publish(topic, (long)payload, retained);
+}
+
+boolean PubSubClient::publish(char* topic, long payload, boolean retained) {
+	char mqtt_messagebuff[longNbDigits(payload) + 1]; //number of digits including sign + null terminaison
+	
+	itoa(payload, mqtt_messagebuff, 10);
+	return publish(topic, (uint8_t*)mqtt_messagebuff, strlen(mqtt_messagebuff), retained);
+}
+
 boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plength, boolean retained) {
    if (connected()) {
       // Leave room in the buffer for header and variable length field
@@ -357,3 +376,8 @@ boolean PubSubClient::connected() {
    return rc;
 }
 
+unsigned int PubSubClient::longNbDigits (long number) {
+	if (number < 0 ) return 1 + longNbDigits (abs(number));
+	if (number < 10) return 1;
+	return 1 + longNbDigits (number / 10);
+}

@@ -53,6 +53,7 @@ private:
    uint8_t *ip;
    char* domain;
    uint16_t port;
+   unsigned int longNbDigits (long);
 public:
    PubSubClient();
    PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client);
@@ -65,6 +66,9 @@ public:
    boolean publish(char *, char *);
    boolean publish(char *, uint8_t *, unsigned int);
    boolean publish(char *, uint8_t *, unsigned int, boolean);
+   boolean publish(char *, float, boolean, unsigned int, unsigned int);
+   boolean publish(char *, int, boolean);
+   boolean publish(char *, long, boolean);
    boolean publish_P(char *, uint8_t PROGMEM *, unsigned int, boolean);
    boolean subscribe(char *);
    boolean unsubscribe(char *);
