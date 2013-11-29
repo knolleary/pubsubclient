@@ -306,6 +306,9 @@ boolean PubSubClient::subscribe(char* topic) {
 }
 
 boolean PubSubClient::subscribe(char* topic, uint8_t qos) {
+   if (qos < 0 || qos > 1)
+     return false;
+
    if (connected()) {
       // Leave room in the buffer for header and variable length field
       uint16_t length = 5;
