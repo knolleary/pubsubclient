@@ -157,18 +157,18 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
    for (uint16_t i = 0;i<length;i++)
    {
       digit = readByte();
-      if(this->stream && buffer[0]&MQTTPUBLISH)
+      if(this->stream && ((buffer[0]&0xF0) == MQTTPUBLISH))
         this->stream->write(digit);
       if (len < MQTT_MAX_PACKET_SIZE) {
          buffer[len++] = digit;
       } else {
-         len = 0; // This will cause the packet to be ignored.
+         if(!this->stream) len = 0; // This will cause the packet to be ignored.
       }
    }
 
    // If a stream has been provided, indicate that we wrote the whole length,
    // else return 0 if the length exceed the max packet size
-   return this->stream ? length : len;
+   return len;
 }
 
 boolean PubSubClient::loop() {
