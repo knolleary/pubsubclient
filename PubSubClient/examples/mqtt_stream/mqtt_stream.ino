@@ -19,20 +19,23 @@ byte mac[]    = {  0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
 byte server[] = { 172, 16, 0, 2 };
 byte ip[]     = { 172, 16, 0, 100 };
 
-SRAM sram(SRAM_CS_PIN, SRAM_1024);
+SRAM sram(4, SRAM_1024);
 
 void callback(char* topic, byte* payload, unsigned int length) {
   sram.seek(1);
 
   // do something with the message
-  myfunctionthattakesastreamargument(&sram);
-
+  for(uint8_t i=0; i<length; i++) {
+    Serial.write(sram.read());
+  }
+  Serial.println();
+  
   // Reset position for the next message to be stored
   sram.seek(1);
 }
 
 EthernetClient ethClient;
-PubSubClient client(server, 1883, callback, ethClient);
+PubSubClient client(server, 1883, callback, ethClient, &sram);
 
 void setup()
 {
@@ -44,6 +47,8 @@ void setup()
 
   sram.begin();
   sram.seek(1);
+  
+  Serial.begin(9600);
 }
 
 void loop()
