@@ -154,11 +154,23 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
       multiplier *= 128;
    } while ((digit & 128) != 0);
    *lengthLength = len-1;
-   for (uint16_t i = 0;i<length;i++)
+
+   // Read in topic length to calculate bytes to skip over for Stream writing
+   buffer[len++] = readByte();
+   buffer[len++] = readByte();
+   uint16_t skip = (buffer[*lengthLength+1]<<8)+buffer[*lengthLength+2];
+
+   if (buffer[0]&MQTTQOS1) {
+     // skip message id
+     skip += 2;
+   }
+
+   for (uint16_t i = 2;i<length;i++)
    {
       digit = readByte();
-      if(this->stream && ((buffer[0]&0xF0) == MQTTPUBLISH))
+      if(this->stream && ((buffer[0]&0xF0) == MQTTPUBLISH) && len-*lengthLength-2>skip) {
         this->stream->write(digit);
+      }
       if (len < MQTT_MAX_PACKET_SIZE) {
          buffer[len++] = digit;
       } else {
