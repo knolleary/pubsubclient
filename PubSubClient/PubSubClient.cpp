@@ -147,6 +147,9 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
    uint32_t multiplier = 1;
    uint16_t length = 0;
    uint8_t digit = 0;
+   uint16_t skip = 0;
+   uint8_t start = 0;
+   
    do {
       digit = readByte();
       buffer[len++] = digit;
@@ -155,26 +158,27 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
    } while ((digit & 128) != 0);
    *lengthLength = len-1;
 
-   // Read in topic length to calculate bytes to skip over for Stream writing
-   buffer[len++] = readByte();
-   buffer[len++] = readByte();
-   uint16_t skip = (buffer[*lengthLength+1]<<8)+buffer[*lengthLength+2];
-
-   if (buffer[0]&MQTTQOS1) {
-     // skip message id
-     skip += 2;
+   if ((buffer[0]&0xF0) == MQTTPUBLISH) {
+      // Read in topic length to calculate bytes to skip over for Stream writing
+      buffer[len++] = readByte();
+      buffer[len++] = readByte();
+      skip = (buffer[*lengthLength+1]<<8)+buffer[*lengthLength+2];
+      start = 2;
+      if (buffer[0]&MQTTQOS1) {
+         // skip message id
+         skip += 2;
+      }
    }
 
-   for (uint16_t i = 2;i<length;i++)
-   {
+   for (uint16_t i = start;i<length;i++) {
       digit = readByte();
       if(this->stream && ((buffer[0]&0xF0) == MQTTPUBLISH) && len-*lengthLength-2>skip) {
-        this->stream->write(digit);
+         this->stream->write(digit);
       }
       if (len < MQTT_MAX_PACKET_SIZE) {
          buffer[len++] = digit;
-      } else {
-         if(!this->stream) len = 0; // This will cause the packet to be ignored.
+      } else if (!this->stream) {
+         len = 0; // This will cause the packet to be ignored.
       }
    }
 
