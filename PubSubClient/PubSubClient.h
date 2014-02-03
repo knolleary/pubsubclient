@@ -9,6 +9,7 @@
 
 #include <Arduino.h>
 #include "Client.h"
+#include "Stream.h"
 
 // MQTT_MAX_PACKET_SIZE : Maximum packet size
 #define MQTT_MAX_PACKET_SIZE 128
