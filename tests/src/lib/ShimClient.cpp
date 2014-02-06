@@ -18,20 +18,42 @@ ShimClient::ShimClient() {
     this->expectBuffer = new Buffer();
     this->_allowConnect = true;
     this->_connected = false;
-    this->_receivedExpected = true;
+    this->_error = false;
     this->expectAnything = true;
     this->_received = 0;
+    this->_expectedPort = 0;
 }
 
 int ShimClient::connect(IPAddress ip, uint16_t port) {
     if (this->_allowConnect) {
         this->_connected = true;
     }
+    if (this->_expectedPort !=0) {
+        if (memcmp(ip,this->_expectedIP,4) != 0) {
+            TRACE( "ip mismatch\n");
+            this->_error = true;
+        }
+        if (port != this->_expectedPort) {
+            TRACE( "port mismatch\n");
+            this->_error = true;
+        }
+    }
     return this->_connected;
 }
 int ShimClient::connect(const char *host, uint16_t port)  {
     if (this->_allowConnect) {
         this->_connected = true;
+    }
+    if (this->_expectedPort !=0) {
+        if (strcmp(host,this->_expectedHost) != 0) {
+            TRACE( "host mismatch\n");
+            this->_error = true;
+        }
+        if (port != this->_expectedPort) {
+            TRACE( "port mismatch\n");
+            this->_error = true;
+        }
+
     }
     return this->_connected;
 }
@@ -50,15 +72,15 @@ size_t ShimClient::write(const uint8_t *buf, size_t size)  {
             if (this->expectBuffer->available()) {
                 uint8_t expected = this->expectBuffer->next();
                 if (expected != buf[i]) {
+                    this->_error = true;
                     TRACE("!=" << (unsigned int)expected);
-                    this->_receivedExpected = false;
                 }
             } else {
-                this->_receivedExpected = false;
+                this->_error = true;
             }
         }
     }
-    TRACE("\n");
+    TRACE("\n"<<std::dec);
     return size;
 }
 int ShimClient::available()  {
@@ -99,10 +121,21 @@ void ShimClient::setAllowConnect(bool b) {
     this->_allowConnect = b;
 }
 
-bool ShimClient::receivedExpected() {
-    return !this->expectBuffer->available() && this->_receivedExpected;
+bool ShimClient::error() {
+    return this->_error;
 }
 
 uint16_t ShimClient::received() {
     return this->_received;
 }
+
+void ShimClient::expectConnect(IPAddress ip, uint16_t port) {
+    this->_expectedIP = ip;
+    this->_expectedPort = port;
+}
+
+void ShimClient::expectConnect(const char *host, uint16_t port) {
+    this->_expectedHost = host;
+    this->_expectedPort = port;
+}
+

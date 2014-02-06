@@ -6,6 +6,7 @@
 
 
 byte server[] = { 172, 16, 0, 2 };
+byte server2[] = { 172, 16, 0, 2 };
 
 void callback(char* topic, byte* payload, unsigned int length) {
   // handle message arrived
@@ -37,6 +38,8 @@ int test_connect_properly_formatted() {
     ShimClient shimClient;
     
     shimClient.setAllowConnect(true);
+    byte expectServer[] = { 172, 16, 0, 2 };
+    shimClient.expectConnect(expectServer,1883);
     byte connect[] = {0x10,0x1a,0x0,0x6,0x4d,0x51,0x49,0x73,0x64,0x70,0x3,0x2,0x0,0xf,0x0,0xc,0x63,0x6c,0x69,0x65,0x6e,0x74,0x5f,0x74,0x65,0x73,0x74,0x31};
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
 
@@ -46,7 +49,7 @@ int test_connect_properly_formatted() {
     PubSubClient client(server, 1883, callback, shimClient);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
-    IS_TRUE(shimClient.receivedExpected());
+    IS_FALSE(shimClient.error());
     
     END_IT
 }
@@ -56,12 +59,14 @@ int test_connect_properly_formatted_hostname() {
     ShimClient shimClient;
     
     shimClient.setAllowConnect(true);
+    shimClient.expectConnect((char* const)"localhost",1883);
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
     
     PubSubClient client((char* const)"localhost", 1883, callback, shimClient);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
+    IS_FALSE(shimClient.error());
     
     END_IT
 }
@@ -93,7 +98,7 @@ int test_connect_accepts_username_password() {
     PubSubClient client(server, 1883, callback, shimClient);
     int rc = client.connect((char*)"client_test1",(char*)"user",(char*)"pass");
     IS_TRUE(rc);
-    IS_TRUE(shimClient.receivedExpected());
+    IS_FALSE(shimClient.error());
 
     END_IT
 }
@@ -111,7 +116,7 @@ int test_connect_accepts_username_no_password() {
     PubSubClient client(server, 1883, callback, shimClient);
     int rc = client.connect((char*)"client_test1",(char*)"user",'\0');
     IS_TRUE(rc);
-    IS_TRUE(shimClient.receivedExpected());
+    IS_FALSE(shimClient.error());
 
     END_IT
 }
@@ -129,7 +134,7 @@ int test_connect_ignores_password_no_username() {
     PubSubClient client(server, 1883, callback, shimClient);
     int rc = client.connect((char*)"client_test1",'\0',(char*)"pass");
     IS_TRUE(rc);
-    IS_TRUE(shimClient.receivedExpected());
+    IS_FALSE(shimClient.error());
 
     END_IT
 }
@@ -147,7 +152,7 @@ int test_connect_with_will() {
     PubSubClient client(server, 1883, callback, shimClient);
     int rc = client.connect((char*)"client_test1",(char*)"willTopic",1,0,(char*)"willMessage");
     IS_TRUE(rc);
-    IS_TRUE(shimClient.receivedExpected());
+    IS_FALSE(shimClient.error());
 
     END_IT
 }
@@ -165,7 +170,7 @@ int test_connect_with_will_username_password() {
     PubSubClient client(server, 1883, callback, shimClient);
     int rc = client.connect((char*)"client_test1",(char*)"user",(char*)"password",(char*)"willTopic",1,0,(char*)"willMessage");
     IS_TRUE(rc);
-    IS_TRUE(shimClient.receivedExpected());
+    IS_FALSE(shimClient.error());
 
     END_IT
 }
@@ -173,7 +178,7 @@ int test_connect_with_will_username_password() {
 int main()
 {
     test_connect_fails_no_network();
-    test_connect_fails_on_no_response();
+    //test_connect_fails_on_no_response();
     test_connect_properly_formatted();
     test_connect_fails_on_bad_rc();
     test_connect_properly_formatted_hostname();

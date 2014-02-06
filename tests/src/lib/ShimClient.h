@@ -14,8 +14,12 @@ private:
     bool _allowConnect;
     bool _connected;
     bool expectAnything;
-    bool _receivedExpected;
+    bool _error;
     uint16_t _received;
+    IPAddress _expectedIP;
+    uint16_t _expectedPort;
+    const char* _expectedHost;
+    
 public:
   ShimClient();
   virtual int connect(IPAddress ip, uint16_t port);
@@ -34,8 +38,11 @@ public:
   virtual ShimClient* respond(uint8_t *buf, size_t size);
   virtual ShimClient* expect(uint8_t *buf, size_t size);
   
+  virtual void expectConnect(IPAddress ip, uint16_t port);
+  virtual void expectConnect(const char *host, uint16_t port);
+  
   virtual uint16_t received();
-  virtual bool receivedExpected();
+  virtual bool error();
   
   virtual void setAllowConnect(bool b);
   virtual void setConnected(bool b);
