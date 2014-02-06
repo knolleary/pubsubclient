@@ -6,7 +6,6 @@
 
 
 byte server[] = { 172, 16, 0, 2 };
-byte server2[] = { 172, 16, 0, 2 };
 
 void callback(char* topic, byte* payload, unsigned int length) {
   // handle message arrived
@@ -178,7 +177,7 @@ int test_connect_with_will_username_password() {
 int main()
 {
     test_connect_fails_no_network();
-    //test_connect_fails_on_no_response();
+    test_connect_fails_on_no_response();
     test_connect_properly_formatted();
     test_connect_fails_on_bad_rc();
     test_connect_properly_formatted_hostname();
