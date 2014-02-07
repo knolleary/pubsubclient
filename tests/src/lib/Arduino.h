@@ -15,8 +15,9 @@ extern "C"{
     extern void setup( void ) ;
     extern void loop( void ) ;
     uint32_t millis( void );
-    uint8_t pgm_read_byte_near(uint8_t*);
-#define PROGMEM 
 }
+
+#define PROGMEM
+#define pgm_read_byte_near(x) *(x)
 
 #endif // Arduino_h

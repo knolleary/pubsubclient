@@ -8,9 +8,6 @@ extern "C" {
     uint32_t millis(void) {
        return time(0)*1000;
     }
-    uint8_t pgm_read_byte_near(uint8_t*) {
-       return 0;
-    }
 }
 
 ShimClient::ShimClient() {
@@ -57,7 +54,23 @@ int ShimClient::connect(const char *host, uint16_t port)  {
     }
     return this->_connected;
 }
-size_t ShimClient::write(uint8_t b)  { std::cout << "!!not implemented!! " << b; return 1; }
+size_t ShimClient::write(uint8_t b)  {
+    this->_received += 1;
+    TRACE(std::hex << (unsigned int)b);
+    if (!this->expectAnything) {
+        if (this->expectBuffer->available()) {
+            uint8_t expected = this->expectBuffer->next();
+            if (expected != b) {
+                this->_error = true;
+                TRACE("!=" << (unsigned int)expected);
+            }
+        } else {
+            this->_error = true;
+        }
+    }
+    TRACE("\n"<< std::dec);
+    return 1;
+}
 size_t ShimClient::write(const uint8_t *buf, size_t size)  {
     this->_received += size;
     TRACE( "[" << std::dec << (unsigned int)(size) << "] ");
