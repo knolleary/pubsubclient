@@ -14,6 +14,12 @@ me.
 
 ## Local tests
 
+These are a set of executables that can be run to test specific areas of functionality.
+They do not require a real Arduino to be attached, nor the use of the Arduino IDE.
+
+The tests include a set of mock files to stub out the parts of the Arduino environment the library
+depends on.
+
 ### Dependencies
 
  - g++
