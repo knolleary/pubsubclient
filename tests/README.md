@@ -1,9 +1,36 @@
-## Arduino Client for MQTT Test Suite
+# Arduino Client for MQTT Test Suite
 
 This is a regression test suite for the `PubSubClient` library.
 
+There are two parts:
+
+ - Tests that can be compiled and run on any machine
+ - Tests that build the example sketches using the Arduino IDE
+
+
 It is a work-in-progress and is subject to complete refactoring as the whim takes
 me.
+
+
+## Local tests
+
+### Dependencies
+
+ - g++
+
+### Running
+
+Build the tests using the provided `Makefile`:
+
+    $ make
+
+This will create a set of executables in `./bin/`. Run each of these executables to test the corresponding functionality. 
+
+*Note:* the `connect_spec` and `keepalive_spec` tests involve testing keepalive timers so naturally take a few minutes to run through.
+
+## Arduino tests
+
+*Note:* INO Tool doesn't currently play nicely with Arduino 1.5. This has broken this test suite. 
 
 Without a suitable arduino plugged in, the test suite will only check the
 example sketches compile cleanly against the library.
@@ -11,12 +38,12 @@ example sketches compile cleanly against the library.
 With an arduino plugged in, each sketch that has a corresponding python
 test case is built, uploaded and then the tests run.
 
-## Dependencies
+### Dependencies
 
  - Python 2.7+
  - [INO Tool](http://inotool.org/) - this provides command-line build/upload of Arduino sketches
 
-## Running
+### Running
 
 The test suite _does not_ run an MQTT server - it is assumed to be running already.
  
@@ -25,7 +52,7 @@ The test suite _does not_ run an MQTT server - it is assumed to be running alrea
 A summary of activity is printed to the console. More comprehensive logs are written
 to the `logs` directory.
 
-## What it does
+### What it does
 
 For each sketch in the library's `examples` directory, e.g. `mqtt_basic.ino`, the suite looks for a matching test case
 `testcases/mqtt_basic.py`.
@@ -40,7 +67,7 @@ allows any test setup to be performed before the sketch runs - such as connectin
 a client and subscribing to topics.
 
 
-## Settings
+### Settings
 
 The file `testcases/settings.py` is used to config the test environment.
 
