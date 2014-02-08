@@ -44,7 +44,7 @@ int test_receive_callback() {
     shimClient.respond(publish,16);
     
     rc = client.loop();
-    
+
     IS_TRUE(rc);
     
     IS_TRUE(callback_called);
@@ -132,12 +132,47 @@ int test_receive_oversized_message() {
 }
 
 
+int test_receive_qos1() {
+    IT("receives a qos1 message");
+    reset_callback();
+    
+    ShimClient shimClient;
+    shimClient.setAllowConnect(true);
+    
+    byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
+    shimClient.respond(connack,4);
+    
+    PubSubClient client(server, 1883, callback, shimClient);
+    int rc = client.connect((char*)"client_test1");
+    IS_TRUE(rc);
+    
+    byte publish[] = {0x32,0x10,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x12,0x34,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
+    shimClient.respond(publish,18);
+    
+    byte puback[] = {0x40,0x2,0x12,0x34};
+    shimClient.expect(puback,4);
+    
+    rc = client.loop();
+    
+    IS_TRUE(rc);
+    
+    IS_TRUE(callback_called);
+    IS_TRUE(strcmp(lastTopic,"topic")==0);
+    IS_TRUE(memcmp(lastPayload,"payload",7)==0);
+    IS_TRUE(lastLength == 7);
+    
+    IS_FALSE(shimClient.error());
+
+    END_IT
+}
+
 int main()
 {
     test_receive_callback();
     test_receive_stream();
     test_receive_max_sized_message();
     test_receive_oversized_message();
+    test_receive_qos1();
     
     FINISH
 }

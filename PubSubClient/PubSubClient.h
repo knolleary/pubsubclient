@@ -51,6 +51,7 @@ private:
    uint8_t readByte();
    boolean write(uint8_t header, uint8_t* buf, uint16_t length);
    uint16_t writeString(char* string, uint8_t* buf, uint16_t pos);
+   boolean puback(uint16_t msgId);
    uint8_t *ip;
    char* domain;
    uint16_t port;
@@ -73,7 +74,6 @@ public:
    boolean subscribe(char *);
    boolean subscribe(char *, uint8_t qos);
    boolean unsubscribe(char *);
-   boolean puback(uint16_t msgId);
    boolean loop();
    boolean connected();
 };
