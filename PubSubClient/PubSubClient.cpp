@@ -29,21 +29,21 @@ PubSubClient::PubSubClient(char* domain, uint16_t port, void (*callback)(char*,u
    this->stream = NULL;
 }
 
-PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client, Stream *stream) {
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client, Stream& stream) {
    this->_client = &client;
    this->callback = callback;
    this->ip = ip;
    this->port = port;
    this->domain = NULL;
-   this->stream = stream;
+   this->stream = &stream;
 }
 
-PubSubClient::PubSubClient(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client, Stream *stream) {
+PubSubClient::PubSubClient(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client, Stream& stream) {
    this->_client = &client;
    this->callback = callback;
    this->domain = domain;
    this->port = port;
-   this->stream = stream;
+   this->stream = &stream;
 }
 
 boolean PubSubClient::connect(char *id) {
@@ -144,6 +144,7 @@ uint8_t PubSubClient::readByte() {
 uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
    uint16_t len = 0;
    buffer[len++] = readByte();
+   bool isPublish = (buffer[0]&0xF0) == MQTTPUBLISH;
    uint32_t multiplier = 1;
    uint16_t length = 0;
    uint8_t digit = 0;
@@ -158,7 +159,7 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
    } while ((digit & 128) != 0);
    *lengthLength = len-1;
 
-   if ((buffer[0]&0xF0) == MQTTPUBLISH) {
+   if (isPublish) {
       // Read in topic length to calculate bytes to skip over for Stream writing
       buffer[len++] = readByte();
       buffer[len++] = readByte();
@@ -172,18 +173,21 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
 
    for (uint16_t i = start;i<length;i++) {
       digit = readByte();
-      if(this->stream && ((buffer[0]&0xF0) == MQTTPUBLISH) && len-*lengthLength-2>skip) {
-         this->stream->write(digit);
+      if (this->stream) {
+         if (isPublish && len-*lengthLength-2>skip) {
+             this->stream->write(digit);
+         }
       }
       if (len < MQTT_MAX_PACKET_SIZE) {
-         buffer[len++] = digit;
-      } else if (!this->stream) {
-         len = 0; // This will cause the packet to be ignored.
+         buffer[len] = digit;
       }
+      len++;
+   }
+   
+   if (!this->stream && len > MQTT_MAX_PACKET_SIZE) {
+       len = 0; // This will cause the packet to be ignored.
    }
 
-   // If a stream has been provided, indicate that we wrote the whole length,
-   // else return 0 if the length exceed the max packet size
    return len;
 }
 
@@ -220,11 +224,18 @@ boolean PubSubClient::loop() {
                   }
                   topic[tl] = 0;
                   // msgId only present for QOS>0
-                  if (buffer[0]&MQTTQOS1) {
+                  if ((buffer[0]&0x06) == MQTTQOS1) {
                     msgId = (buffer[llen+3+tl]<<8)+buffer[llen+3+tl+1];
                     payload = buffer+llen+3+tl+2;
                     callback(topic,payload,len-llen-3-tl-2);
-                    puback(msgId);
+                    
+                    buffer[0] = MQTTPUBACK;
+                    buffer[1] = 2;
+                    buffer[2] = (msgId >> 8);
+                    buffer[3] = (msgId & 0xFF);
+                    _client->write(buffer,4);
+                    lastOutActivity = t;
+
                   } else {
                     payload = buffer+llen+3+tl;
                     callback(topic,payload,len-llen-3-tl);
@@ -364,17 +375,6 @@ boolean PubSubClient::subscribe(char* topic, uint8_t qos) {
       return write(MQTTSUBSCRIBE|MQTTQOS1,buffer,length-5);
    }
    return false;
-}
-
-boolean PubSubClient::puback(uint16_t msgId) {
-  if(connected()) {
-    // Leave room in the buffer for header and variable length field
-    uint16_t length = 5;
-    buffer[length++] = (msgId >> 8);
-    buffer[length++] = (msgId & 0xFF);
-    return write(MQTTPUBACK,buffer,length-5);
-  }
-  return false;
 }
 
 boolean PubSubClient::unsubscribe(char* topic) {
