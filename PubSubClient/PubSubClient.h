@@ -50,6 +50,7 @@ private:
    uint16_t readPacket(uint8_t*);
    uint8_t readByte();
    boolean write(uint8_t header, uint8_t* buf, uint16_t length);
+   boolean write(uint8_t header, uint8_t* buf, uint16_t length, bool sendData);
    uint16_t writeString(char* string, uint8_t* buf, uint16_t pos);
    uint8_t *ip;
    char* domain;
@@ -69,6 +70,7 @@ public:
    boolean publish(char *, char *);
    boolean publish(char *, uint8_t *, unsigned int);
    boolean publish(char *, uint8_t *, unsigned int, boolean);
+   boolean publishHeader(char* topic, unsigned int plength, boolean retained);
    boolean publish_P(char *, uint8_t PROGMEM *, unsigned int, boolean);
    boolean subscribe(char *);
    boolean subscribe(char *, uint8_t qos);
