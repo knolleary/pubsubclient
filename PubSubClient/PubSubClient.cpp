@@ -281,6 +281,25 @@ boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plengt
    return false;
 }
 
+//Streaming send - send the mqtt header with length, but user is responsable for writing actual buffer
+boolean PubSubClient::publishHeader(char* topic, unsigned int plength, boolean retained) {
+   if (connected()) {
+      // Leave room in the buffer for header and variable length field
+      uint16_t length = 5;
+      length = writeString(topic,buffer,length);
+      uint16_t i;
+      for (i=0;i<plength;i++) {
+         length++;
+      }
+      uint8_t header = MQTTPUBLISH;
+      if (retained) {
+         header |= 1;
+      }
+      return write(header,buffer,length-5, false);
+   }
+   return false;
+}
+
 boolean PubSubClient::publish_P(char* topic, uint8_t* PROGMEM payload, unsigned int plength, boolean retained) {
    uint8_t llen = 0;
    uint8_t digit;
@@ -327,6 +346,10 @@ boolean PubSubClient::publish_P(char* topic, uint8_t* PROGMEM payload, unsigned 
 }
 
 boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
+   return write(header, buf, length, true);
+}
+
+boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length, bool sendData) {
    uint8_t lenBuf[4];
    uint8_t llen = 0;
    uint8_t digit;
@@ -347,10 +370,21 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
    for (int i=0;i<llen;i++) {
       buf[5-llen+i] = lenBuf[i];
    }
-   rc = _client->write(buf+(4-llen),length+1+llen);
-   
-   lastOutActivity = millis();
-   return (rc == 1+llen+length);
+
+   if(sendData){
+
+      rc = _client->write(buf+(4-llen),length+1+llen);
+
+      lastOutActivity = millis();
+      return (rc == 1+llen+length);
+
+   }else{
+
+      rc = _client->write(buf+(4-llen),5+llen);
+
+      lastOutActivity = millis();
+      return (rc == 5+llen);
+   }
 }
 
 boolean PubSubClient::subscribe(char* topic) {
