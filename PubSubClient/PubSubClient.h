@@ -7,9 +7,13 @@
 #ifndef PubSubClient_h
 #define PubSubClient_h
 
+#ifdef SPARK
+#include "application.h"
+#else
 #include <Arduino.h>
 #include "Client.h"
 #include "Stream.h"
+#endif
 
 // MQTT_MAX_PACKET_SIZE : Maximum packet size
 #define MQTT_MAX_PACKET_SIZE 128
@@ -71,7 +75,7 @@ public:
    boolean publish(char *, uint8_t *, unsigned int);
    boolean publish(char *, uint8_t *, unsigned int, boolean);
    boolean publishHeader(char* topic, unsigned int plength, boolean retained);
-   boolean publish_P(char *, uint8_t PROGMEM *, unsigned int, boolean);
+   // boolean publish_P(char *, uint8_t PROGMEM *, unsigned int, boolean);
    boolean subscribe(char *);
    boolean subscribe(char *, uint8_t qos);
    boolean unsubscribe(char *);

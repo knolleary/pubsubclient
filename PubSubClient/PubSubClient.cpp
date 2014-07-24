@@ -300,50 +300,50 @@ boolean PubSubClient::publishHeader(char* topic, unsigned int plength, boolean r
    return false;
 }
 
-boolean PubSubClient::publish_P(char* topic, uint8_t* PROGMEM payload, unsigned int plength, boolean retained) {
-   uint8_t llen = 0;
-   uint8_t digit;
-   unsigned int rc = 0;
-   uint16_t tlen;
-   unsigned int pos = 0;
-   unsigned int i;
-   uint8_t header;
-   unsigned int len;
+// boolean PubSubClient::publish_P(char* topic, uint8_t* PROGMEM payload, unsigned int plength, boolean retained) {
+//    uint8_t llen = 0;
+//    uint8_t digit;
+//    unsigned int rc = 0;
+//    uint16_t tlen;
+//    unsigned int pos = 0;
+//    unsigned int i;
+//    uint8_t header;
+//    unsigned int len;
    
-   if (!connected()) {
-      return false;
-   }
+//    if (!connected()) {
+//       return false;
+//    }
    
-   tlen = strlen(topic);
+//    tlen = strlen(topic);
    
-   header = MQTTPUBLISH;
-   if (retained) {
-      header |= 1;
-   }
-   buffer[pos++] = header;
-   len = plength + 2 + tlen;
-   do {
-      digit = len % 128;
-      len = len / 128;
-      if (len > 0) {
-         digit |= 0x80;
-      }
-      buffer[pos++] = digit;
-      llen++;
-   } while(len>0);
+//    header = MQTTPUBLISH;
+//    if (retained) {
+//       header |= 1;
+//    }
+//    buffer[pos++] = header;
+//    len = plength + 2 + tlen;
+//    do {
+//       digit = len % 128;
+//       len = len / 128;
+//       if (len > 0) {
+//          digit |= 0x80;
+//       }
+//       buffer[pos++] = digit;
+//       llen++;
+//    } while(len>0);
    
-   pos = writeString(topic,buffer,pos);
+//    pos = writeString(topic,buffer,pos);
    
-   rc += _client->write(buffer,pos);
+//    rc += _client->write(buffer,pos);
    
-   for (i=0;i<plength;i++) {
-      rc += _client->write((char)pgm_read_byte_near(payload + i));
-   }
+//    for (i=0;i<plength;i++) {
+//       rc += _client->write((char)pgm_read_byte_near(payload + i));
+//    }
    
-   lastOutActivity = millis();
+//    lastOutActivity = millis();
    
-   return rc == tlen + 4 + plength;
-}
+//    return rc == tlen + 4 + plength;
+// }
 
 boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
    return write(header, buf, length, true);
