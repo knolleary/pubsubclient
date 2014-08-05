@@ -11,6 +11,17 @@
 #include "Client.h"
 #include "Stream.h"
 
+#define MQTT_DEBUG
+#ifdef MQTT_DEBUG
+   #define WRITE( ... ) Serial.write( (__VA_ARGS__) )
+   #define PRINTLN( ... ) Serial.println( __VA_ARGS__ )
+   #define PRINT( ... ) Serial.print( __VA_ARGS__ )
+#else
+   #define WRITE( ... )
+   #define PRINTLN( ... )
+   #define PRINT( ... )
+#endif
+
 // MQTT_MAX_PACKET_SIZE : Maximum packet size
 #define MQTT_MAX_PACKET_SIZE 128
 
