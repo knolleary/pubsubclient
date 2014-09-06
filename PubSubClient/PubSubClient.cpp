@@ -130,6 +130,8 @@ boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic,
          uint8_t llen;
          uint16_t len = readPacket(&llen);
          
+         pubsubStatus = buffer[3];
+
          if (len == 4 && buffer[3] == 0) {
             lastInActivity = millis();
             pingOutstanding = false;
@@ -145,6 +147,10 @@ boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic,
       _client->stop();
    }
    return false;
+}
+
+uint8_t PubSubClient::status(){
+   return pubsubStatus;
 }
 
 uint8_t PubSubClient::readByte() {
