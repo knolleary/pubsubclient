@@ -1,0 +1,8 @@
+{
+  "name": "MQTT",
+  "author": "Jacob Rosenthal <jakerosenthal@gmail.com>",
+  "license": "MIT",
+  "version": "0.0.10",
+  "description": "Fork of Nick o'leary's PubSubClient http://knolleary.net/arduino-client-for-mqtt/",
+  "firmware-root-path": "PubSubClient"
+}
