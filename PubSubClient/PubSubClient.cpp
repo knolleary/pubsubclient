@@ -63,6 +63,8 @@ boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic,
    if (!connected()) {
       int result = 0;
       
+      // PRINTLNF("trying TCP");
+
       if (domain != NULL) {
         result = _client->connect(this->domain, this->port);
       } else {
@@ -110,7 +112,9 @@ boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic,
                length = writeString(pass,buffer,length);
             }
          }
-         
+
+         // PRINTLNF("sending MQTTCONNECT");
+
          write(MQTTCONNECT,buffer,length-5);
          
          lastInActivity = lastOutActivity = millis();
@@ -118,6 +122,7 @@ boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic,
          while (!_client->available()) {
             unsigned long t = millis();
             if (t-lastInActivity > MQTT_KEEPALIVE*1000UL) {
+               PRINTLNF("Err: MQTT_KEEPALIVE timeout");
                _client->stop();
                return false;
             }
@@ -125,23 +130,40 @@ boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic,
          uint8_t llen;
          uint16_t len = readPacket(&llen);
          
+         pubsubStatus = buffer[3];
+
          if (len == 4 && buffer[3] == 0) {
             lastInActivity = millis();
             pingOutstanding = false;
             return true;
          }
+
+         PRINTF("Err: MQTT: ");
+         PRINTLN(buffer[3]);
+      }
+      else{
+         PRINTLNF("Err: TCP");
       }
       _client->stop();
    }
    return false;
 }
 
+uint8_t PubSubClient::status(){
+   return pubsubStatus;
+}
+
 uint8_t PubSubClient::readByte() {
    while(!_client->available()) {}
-   return _client->read();
+   char c = _client->read();
+   PRINTCH(c, HEX);
+   PRINTCH(',');
+   return c;
 }
 
 uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
+   // PRINTLNF("Received");
+
    uint16_t len = 0;
    buffer[len++] = readByte();
    bool isPublish = (buffer[0]&0xF0) == MQTTPUBLISH;
@@ -184,23 +206,31 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
       len++;
    }
    
+   PRINTLN();
+
    if (!this->stream && len > MQTT_MAX_PACKET_SIZE) {
        len = 0; // This will cause the packet to be ignored.
+       PRINTLNF("Err: MQTT_MAX_PACKET_SIZE");
    }
+
+
 
    return len;
 }
 
 boolean PubSubClient::loop() {
+
    if (connected()) {
       unsigned long t = millis();
       if ((t - lastInActivity > MQTT_KEEPALIVE*1000UL) || (t - lastOutActivity > MQTT_KEEPALIVE*1000UL)) {
          if (pingOutstanding) {
             _client->stop();
+            PRINTLNF("Err: Ping timed out");
             return false;
          } else {
             buffer[0] = MQTTPINGREQ;
             buffer[1] = 0;
+            // PRINTLNF("sending MQTTPINGREQ");
             _client->write(buffer,2);
             lastOutActivity = t;
             lastInActivity = t;
@@ -216,6 +246,7 @@ boolean PubSubClient::loop() {
             lastInActivity = t;
             uint8_t type = buffer[0]&0xF0;
             if (type == MQTTPUBLISH) {
+               // PRINTLNF("MQTTPUBLISH");
                if (callback) {
                   uint16_t tl = (buffer[llen+1]<<8)+buffer[llen+2];
                   char topic[tl+1];
@@ -233,6 +264,7 @@ boolean PubSubClient::loop() {
                     buffer[1] = 2;
                     buffer[2] = (msgId >> 8);
                     buffer[3] = (msgId & 0xFF);
+                    // PRINTLNF("sending MQTTPUBACK");
                     _client->write(buffer,4);
                     lastOutActivity = t;
 
@@ -242,10 +274,13 @@ boolean PubSubClient::loop() {
                   }
                }
             } else if (type == MQTTPINGREQ) {
+               // PRINTLNF("MQTTPINGREQ");
                buffer[0] = MQTTPINGRESP;
                buffer[1] = 0;
+               // PRINTLNF("sending MQTTPINGRESP");
                _client->write(buffer,2);
             } else if (type == MQTTPINGRESP) {
+               // PRINTLNF("MQTTPINGRESP");
                pingOutstanding = false;
             }
          }
@@ -265,6 +300,9 @@ boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plengt
 
 boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plength, boolean retained) {
    if (connected()) {
+
+      // PRINTLNF("Publishing");
+
       // Leave room in the buffer for header and variable length field
       uint16_t length = 5;
       length = writeString(topic,buffer,length);
@@ -284,6 +322,9 @@ boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plengt
 //Streaming send - send the mqtt header with length, but user is responsable for writing actual buffer
 boolean PubSubClient::publishHeader(char* topic, unsigned int plength, boolean retained) {
    if (connected()) {
+
+      // PRINTLNF("Publishing");
+
       // Leave room in the buffer for header and variable length field
       uint16_t length = 5;
       length = writeString(topic,buffer,length);
@@ -373,15 +414,19 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length, bool 
 
    if(sendData){
 
+      WRITE(buf+(4-llen),length+1+llen);
       rc = _client->write(buf+(4-llen),length+1+llen);
+      PRINTLN();
 
       lastOutActivity = millis();
       return (rc == 1+llen+length);
 
    }else{
 
+      WRITE(buf+(4-llen),5+llen);
       rc = _client->write(buf+(4-llen),5+llen);
-
+      PRINTLN();
+      
       lastOutActivity = millis();
       return (rc == 5+llen);
    }
@@ -396,6 +441,9 @@ boolean PubSubClient::subscribe(char* topic, uint8_t qos) {
      return false;
 
    if (connected()) {
+
+      // PRINTLNF("sending MQTTSUBSCRIBE|MQTTQOS1");
+
       // Leave room in the buffer for header and variable length field
       uint16_t length = 5;
       nextMsgId++;
@@ -406,13 +454,17 @@ boolean PubSubClient::subscribe(char* topic, uint8_t qos) {
       buffer[length++] = (nextMsgId & 0xFF);
       length = writeString(topic, buffer,length);
       buffer[length++] = qos;
-      return write(MQTTSUBSCRIBE|MQTTQOS1,buffer,length-5);
+      int toReturn = write(MQTTSUBSCRIBE|MQTTQOS1,buffer,length-5);
+      return toReturn;
    }
    return false;
 }
 
 boolean PubSubClient::unsubscribe(char* topic) {
    if (connected()) {
+
+      // PRINTLNF("sending MQTTUNSUBSCRIBE|MQTTQOS1");
+
       uint16_t length = 5;
       nextMsgId++;
       if (nextMsgId == 0) {
@@ -421,17 +473,23 @@ boolean PubSubClient::unsubscribe(char* topic) {
       buffer[length++] = (nextMsgId >> 8);
       buffer[length++] = (nextMsgId & 0xFF);
       length = writeString(topic, buffer,length);
-      return write(MQTTUNSUBSCRIBE|MQTTQOS1,buffer,length-5);
+      int toReturn = write(MQTTUNSUBSCRIBE|MQTTQOS1,buffer,length-5);
+      PRINTLN();
+      return toReturn;
    }
    return false;
 }
 
 void PubSubClient::disconnect() {
+   // PRINTLNF("sending MQTTDISCONNECT");
+
    buffer[0] = MQTTDISCONNECT;
    buffer[1] = 0;
    _client->write(buffer,2);
    _client->stop();
    lastInActivity = lastOutActivity = millis();
+
+   PRINTLN();
 }
 
 uint16_t PubSubClient::writeString(char* string, uint8_t* buf, uint16_t pos) {
