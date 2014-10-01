@@ -7,5 +7,6 @@
     "type": "git",
     "url": "https://github.com/knolleary/pubsubclient.git"
   },
-  "src": "PubSubClient"
+  "src": "PubSubClient",
+  "examples": "PubSubClient/examples/*/*.ino"
 }
