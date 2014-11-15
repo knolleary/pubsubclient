@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/knolleary/pubsubclient.git"
   },
-  "src": "PubSubClient",
+  "include": "PubSubClient",
   "examples": "PubSubClient/examples/*/*.ino",
   "frameworks": "arduino",
   "platforms": "atmelavr"
