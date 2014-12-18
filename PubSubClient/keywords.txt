@@ -18,6 +18,7 @@ publish 	KEYWORD2
 subscribe 	KEYWORD2
 loop 	KEYWORD2
 connected 	KEYWORD2
+setPort 	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
