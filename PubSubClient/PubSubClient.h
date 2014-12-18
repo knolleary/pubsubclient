@@ -75,6 +75,7 @@ public:
    boolean unsubscribe(char *);
    boolean loop();
    boolean connected();
+   void setPort(uint16_t);
 };
 
 

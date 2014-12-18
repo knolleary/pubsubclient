@@ -425,3 +425,8 @@ boolean PubSubClient::connected() {
    return rc;
 }
 
+
+void PubSubClient::setPort(uint16_t port) {
+	this->port = port;
+}
+
