@@ -8,12 +8,11 @@
 #include <string.h>
 
 PubSubClient::PubSubClient() {
-   this->_client = 0;
+   this->_client = NULL;
+   this->stream = NULL;   
    setCallback(NULL);
-   setBrokerIP(ip);
    setPort(1883);
    setBrokerDomain(NULL);
-   this->stream = 0;
 }
 
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client) {
@@ -22,7 +21,7 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,ui
    setBrokerIP(ip);
    setPort(port);
    setBrokerDomain(NULL);
-   this->stream = 0;
+   this->stream = NULL;
 }
 
 PubSubClient::PubSubClient(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client) {
@@ -30,7 +29,7 @@ PubSubClient::PubSubClient(char* domain, uint16_t port, void (*callback)(char*,u
    setCallback(callback);
    setBrokerDomain(domain);
    setPort(port);
-   this->stream = 0;
+   this->stream = NULL;
 }
 
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client, Stream& stream) {
