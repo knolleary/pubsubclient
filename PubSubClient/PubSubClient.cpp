@@ -8,42 +8,46 @@
 #include <string.h>
 
 PubSubClient::PubSubClient() {
-   this->_client = NULL;
-   this->stream = NULL;
+   this->_client = 0;
+   setCallback(NULL);
+   setBrokerIP(ip);
+   setPort(1883);
+   setBrokerDomain(NULL);
+   this->stream = 0;
 }
 
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client) {
-   this->_client = &client;
-   this->callback = callback;
-   this->ip = ip;
-   this->port = port;
-   this->domain = NULL;
-   this->stream = NULL;
+   setClient(client);
+   setCallback(callback);
+   setBrokerIP(ip);
+   setPort(port);
+   setBrokerDomain(NULL);
+   this->stream = 0;
 }
 
 PubSubClient::PubSubClient(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client) {
-   this->_client = &client;
-   this->callback = callback;
-   this->domain = domain;
-   this->port = port;
-   this->stream = NULL;
+   setClient(client);
+   setCallback(callback);
+   setBrokerDomain(domain);
+   setPort(port);
+   this->stream = 0;
 }
 
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client, Stream& stream) {
-   this->_client = &client;
-   this->callback = callback;
-   this->ip = ip;
-   this->port = port;
-   this->domain = NULL;
-   this->stream = &stream;
+   setClient(client);  
+   setCallback(callback);
+   setBrokerIP(ip);
+   setPort(port);
+   setBrokerDomain(NULL);
+   setStream(stream);
 }
 
 PubSubClient::PubSubClient(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client, Stream& stream) {
-   this->_client = &client;
-   this->callback = callback;
-   this->domain = domain;
-   this->port = port;
-   this->stream = &stream;
+   setClient(client);
+   setCallback(callback);
+   setBrokerDomain(domain);
+   setPort(port);
+   setStream(stream);
 }
 
 boolean PubSubClient::connect(char *id) {
@@ -425,3 +429,27 @@ boolean PubSubClient::connected() {
    return rc;
 }
 
+void PubSubClient::setBrokerIP(uint8_t * ip){
+  this->domain = NULL;
+  this->ip = ip;
+}
+
+void PubSubClient::setBrokerDomain(char * domain){
+  this->domain = domain;
+}
+
+void PubSubClient::setCallback(void(*callback)(char*,uint8_t*,unsigned int)){
+  this->callback = callback;
+}
+
+void PubSubClient::setPort(uint16_t port){
+  this->port = port;
+}
+
+void PubSubClient::setClient(Client& client){
+  this->_client = &client;
+}
+
+void PubSubClient::setStream(Stream& stream){
+  this->stream = &stream;
+}
