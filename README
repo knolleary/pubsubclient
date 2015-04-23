@@ -1,4 +1,7 @@
-A client library for the Arduino Ethernet Shield that provides support for MQTT.  
-Nicholas O'Leary
+A client library for the ESP8266 (using the Arduino environment) that provides support for MQTT.
+
+Modified from Nicholas O'Leary's original for the Arduino + Ethernet shield:
 http://knolleary.net/arduino-client-for-mqtt/
 
+See here for the ESP8266-Arduino work:
+https://github.com/esp8266/Arduino
