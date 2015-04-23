@@ -70,10 +70,8 @@ boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic,
          uint8_t d[9] = {0x00,0x06,'M','Q','I','s','d','p',MQTTPROTOCOLVERSION};
          // Leave room in the buffer for header and variable length field
          uint16_t length = 5;
-         unsigned int j;
-         for (j = 0;j<9;j++) {
-            buffer[length++] = d[j];
-         }
+	 memcpy(buffer + length, d, 9);
+	 length += 9;
 
          uint8_t v;
          if (willTopic) {
@@ -212,10 +210,8 @@ boolean PubSubClient::loop() {
             if (type == MQTTPUBLISH) {
                if (_callback) {
                   uint16_t tl = (buffer[llen+1]<<8)+buffer[llen+2];
-                  char topic[tl+1];
-                  for (uint16_t i=0;i<tl;i++) {
-                     topic[i] = buffer[llen+3+i];
-                  }
+                  char topic[tl + 1];
+		  memcpy(topic, buffer + llen + 3, tl);
                   topic[tl] = 0;
                   // msgId only present for QOS>0
                   if ((buffer[0]&0x06) == MQTTQOS1) {
@@ -261,11 +257,11 @@ boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plengt
    if (connected()) {
       // Leave room in the buffer for header and variable length field
       uint16_t length = 5;
-      length = writeString(topic,buffer,length);
-      uint16_t i;
-      for (i=0;i<plength;i++) {
-         buffer[length++] = payload[i];
-      }
+      length = writeString(topic, buffer, length);
+
+      memcpy(buffer + length, payload, plength);
+      length += plength;
+
       uint8_t header = MQTTPUBLISH;
       if (retained) {
          header |= 1;
@@ -338,9 +334,7 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
    } while(len>0);
 
    buf[4-llen] = header;
-   for (int i=0;i<llen;i++) {
-      buf[5-llen+i] = lenBuf[i];
-   }
+   memcpy(buf + 5 - llen, lenBuf, llen);
    rc = _client.write(buf + 4 - llen, length + 1 + llen);
    
    lastOutActivity = millis();
