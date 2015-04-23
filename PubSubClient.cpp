@@ -8,42 +8,42 @@
 #include <string.h>
 
 PubSubClient::PubSubClient() {
-   this->_client = NULL;
-   this->stream = NULL;
+   _client = NULL;
+   stream = NULL;
 }
 
-PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client) {
-   this->_client = &client;
-   this->callback = callback;
-   this->ip = ip;
-   this->port = port;
-   this->domain = NULL;
-   this->stream = NULL;
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, callback cb, Client& client) {
+   _client = &client;
+   _callback = cb;
+   ip = ip;
+   port = port;
+   domain = NULL;
+   stream = NULL;
 }
 
-PubSubClient::PubSubClient(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client) {
-   this->_client = &client;
-   this->callback = callback;
-   this->domain = domain;
-   this->port = port;
-   this->stream = NULL;
+PubSubClient::PubSubClient(char* domain, uint16_t port, callback cb, Client& client) {
+   _client = &client;
+   _callback = cb;
+   domain = domain;
+   port = port;
+   stream = NULL;
 }
 
-PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client, Stream& stream) {
-   this->_client = &client;
-   this->callback = callback;
-   this->ip = ip;
-   this->port = port;
-   this->domain = NULL;
-   this->stream = &stream;
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, callback cb, Client& client, Stream& s) {
+   _client = &client;
+   _callback = cb;
+   ip = ip;
+   port = port;
+   domain = NULL;
+   stream = &s;
 }
 
-PubSubClient::PubSubClient(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client, Stream& stream) {
-   this->_client = &client;
-   this->callback = callback;
-   this->domain = domain;
-   this->port = port;
-   this->stream = &stream;
+PubSubClient::PubSubClient(char* domain, uint16_t port, callback cb, Client& client, Stream& s) {
+   _client = &client;
+   _callback = cb;
+   domain = domain;
+   port = port;
+   stream = &s;
 }
 
 boolean PubSubClient::connect(char *id) {
@@ -64,9 +64,9 @@ boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic,
       int result = 0;
       
       if (domain != NULL) {
-        result = _client->connect(this->domain, this->port);
+        result = _client->connect(domain, port);
       } else {
-        result = _client->connect(this->ip, this->port);
+        result = _client->connect(ip, port);
       }
       
       if (result) {
@@ -173,9 +173,9 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
 
    for (uint16_t i = start;i<length;i++) {
       digit = readByte();
-      if (this->stream) {
+      if (stream) {
          if (isPublish && len-*lengthLength-2>skip) {
-             this->stream->write(digit);
+             stream->write(digit);
          }
       }
       if (len < MQTT_MAX_PACKET_SIZE) {
@@ -184,7 +184,7 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
       len++;
    }
    
-   if (!this->stream && len > MQTT_MAX_PACKET_SIZE) {
+   if (!stream && len > MQTT_MAX_PACKET_SIZE) {
        len = 0; // This will cause the packet to be ignored.
    }
 
@@ -216,7 +216,7 @@ boolean PubSubClient::loop() {
             lastInActivity = t;
             uint8_t type = buffer[0]&0xF0;
             if (type == MQTTPUBLISH) {
-               if (callback) {
+               if (_callback) {
                   uint16_t tl = (buffer[llen+1]<<8)+buffer[llen+2];
                   char topic[tl+1];
                   for (uint16_t i=0;i<tl;i++) {
@@ -227,7 +227,7 @@ boolean PubSubClient::loop() {
                   if ((buffer[0]&0x06) == MQTTQOS1) {
                     msgId = (buffer[llen+3+tl]<<8)+buffer[llen+3+tl+1];
                     payload = buffer+llen+3+tl+2;
-                    callback(topic,payload,len-llen-3-tl-2);
+                    _callback(topic,payload,len-llen-3-tl-2);
                     
                     buffer[0] = MQTTPUBACK;
                     buffer[1] = 2;
@@ -238,7 +238,7 @@ boolean PubSubClient::loop() {
 
                   } else {
                     payload = buffer+llen+3+tl;
-                    callback(topic,payload,len-llen-3-tl);
+                    _callback(topic,payload,len-llen-3-tl);
                   }
                }
             } else if (type == MQTTPINGREQ) {

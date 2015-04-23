@@ -39,6 +39,9 @@
 #define MQTTQOS2        (2 << 1)
 
 class PubSubClient {
+public:
+  typedef void(*callback)(char*,uint8_t*,unsigned int);
+
 private:
    Client* _client;
    uint8_t buffer[MQTT_MAX_PACKET_SIZE];
@@ -46,7 +49,7 @@ private:
    unsigned long lastOutActivity;
    unsigned long lastInActivity;
    bool pingOutstanding;
-   void (*callback)(char*,uint8_t*,unsigned int);
+   callback _callback;
    uint16_t readPacket(uint8_t*);
    uint8_t readByte();
    boolean write(uint8_t header, uint8_t* buf, uint16_t length);
@@ -55,12 +58,13 @@ private:
    char* domain;
    uint16_t port;
    Stream* stream;
+
 public:
    PubSubClient();
-   PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client);
-   PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client, Stream&);
-   PubSubClient(char*, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client);
-   PubSubClient(char*, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client, Stream&);
+   PubSubClient(uint8_t* , uint16_t , callback cb, Client& client);
+   PubSubClient(uint8_t* , uint16_t , callback cb, Client& client, Stream&);
+   PubSubClient(char* , uint16_t , callback cb, Client& client);
+   PubSubClient(char* , uint16_t , callback cb, Client& client, Stream&);
    boolean connect(char *);
    boolean connect(char *, char *, char *);
    boolean connect(char *, char *, uint8_t, uint8_t, char *);
