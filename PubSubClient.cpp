@@ -9,41 +9,39 @@
 
 PubSubClient::PubSubClient() {
    _client = NULL;
-   stream = NULL;
+   _stream = NULL;
 }
 
-PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, callback cb, Client& client) {
+PubSubClient::PubSubClient(IPAddress &ip, uint16_t port, callback cb, WiFiClient& client) {
    _client = &client;
    _callback = cb;
-   ip = ip;
-   port = port;
-   domain = NULL;
-   stream = NULL;
+   server_ip = ip;
+   server_port = port;
+   server_hostname = NULL;
 }
 
-PubSubClient::PubSubClient(char* domain, uint16_t port, callback cb, Client& client) {
+PubSubClient::PubSubClient(char* hostname, uint16_t port, callback cb, WiFiClient& client) {
    _client = &client;
    _callback = cb;
-   domain = domain;
-   port = port;
-   stream = NULL;
+   server_hostname = hostname;
+   server_port = port;
 }
 
-PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, callback cb, Client& client, Stream& s) {
+PubSubClient::PubSubClient(IPAddress &ip, uint16_t port, callback cb, WiFiClient& client, Stream &s) {
    _client = &client;
    _callback = cb;
-   ip = ip;
-   port = port;
-   domain = NULL;
-   stream = &s;
+   server_ip = ip;
+   server_port = port;
+   server_hostname = NULL;
+   _stream = &s;
 }
 
-PubSubClient::PubSubClient(char* domain, uint16_t port, callback cb, Client& client, Stream& s) {
+PubSubClient::PubSubClient(char* hostname, uint16_t port, callback cb, WiFiClient& client, Stream &s) {
    _client = &client;
    _callback = cb;
-   domain = domain;
-   port = port;
-   stream = &s;
+   server_hostname = hostname;
+   server_port = port;
+   _stream = &s;
 }
 
 boolean PubSubClient::connect(char *id) {
@@ -63,10 +61,10 @@ boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic,
    if (!connected()) {
       int result = 0;
       
-      if (domain != NULL) {
-        result = _client->connect(domain, port);
+      if (server_hostname != NULL) {
+        result = _client->connect(server_hostname, server_port);
       } else {
-        result = _client->connect(ip, port);
+        result = _client->connect(server_ip, server_port);
       }
       
       if (result) {
@@ -173,18 +171,16 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
 
    for (uint16_t i = start;i<length;i++) {
       digit = readByte();
-      if (stream) {
-         if (isPublish && len-*lengthLength-2>skip) {
-             stream->write(digit);
-         }
-      }
+      if (_stream)
+	if (isPublish && len-*lengthLength-2>skip)
+	_client->write(digit);
       if (len < MQTT_MAX_PACKET_SIZE) {
          buffer[len] = digit;
       }
       len++;
    }
    
-   if (!stream && len > MQTT_MAX_PACKET_SIZE) {
+   if ((!_stream) && (len > MQTT_MAX_PACKET_SIZE)) {
        len = 0; // This will cause the packet to be ignored.
    }
 

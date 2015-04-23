@@ -8,8 +8,8 @@
 #define PubSubClient_h
 
 #include <Arduino.h>
-#include "Client.h"
-#include "Stream.h"
+#include <Stream.h>
+#include <ESP8266WiFi.h>
 
 // MQTT_MAX_PACKET_SIZE : Maximum packet size
 #define MQTT_MAX_PACKET_SIZE 128
@@ -43,7 +43,7 @@ public:
   typedef void(*callback)(char*,uint8_t*,unsigned int);
 
 private:
-   Client* _client;
+   WiFiClient* _client;
    uint8_t buffer[MQTT_MAX_PACKET_SIZE];
    uint16_t nextMsgId;
    unsigned long lastOutActivity;
@@ -54,17 +54,17 @@ private:
    uint8_t readByte();
    boolean write(uint8_t header, uint8_t* buf, uint16_t length);
    uint16_t writeString(char* string, uint8_t* buf, uint16_t pos);
-   uint8_t *ip;
-   char* domain;
-   uint16_t port;
-   Stream* stream;
+   IPAddress server_ip;
+   char *server_hostname;
+   uint16_t server_port;
+   Stream *_stream;
 
 public:
    PubSubClient();
-   PubSubClient(uint8_t* , uint16_t , callback cb, Client& client);
-   PubSubClient(uint8_t* , uint16_t , callback cb, Client& client, Stream&);
-   PubSubClient(char* , uint16_t , callback cb, Client& client);
-   PubSubClient(char* , uint16_t , callback cb, Client& client, Stream&);
+   PubSubClient(IPAddress &, uint16_t , callback cb, WiFiClient& client);
+   PubSubClient(IPAddress &, uint16_t , callback cb, WiFiClient& client, Stream &s);
+   PubSubClient(char* , uint16_t , callback cb, WiFiClient& client);
+   PubSubClient(char* , uint16_t , callback cb, WiFiClient& client, Stream &s);
    boolean connect(char *);
    boolean connect(char *, char *, char *);
    boolean connect(char *, char *, uint8_t, uint8_t, char *);

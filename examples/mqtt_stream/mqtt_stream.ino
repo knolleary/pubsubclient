@@ -9,15 +9,15 @@
   - subscribes to the topic "inTopic"
 */
 
-#include <SPI.h>
-#include <Ethernet.h>
+#include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <SRAM.h>
 
+const char *ssid =	"xxxxxxxx";		// cannot be longer than 32 characters!
+const char *pass =	"yyyyyyyy";		//
+
 // Update these with values suitable for your network.
-byte mac[]    = {  0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
-byte server[] = { 172, 16, 0, 2 };
-byte ip[]     = { 172, 16, 0, 100 };
+IPAddress server(172, 16, 0, 2);
 
 SRAM sram(4, SRAM_1024);
 
@@ -34,12 +34,24 @@ void callback(char* topic, byte* payload, unsigned int length) {
   sram.seek(1);
 }
 
-EthernetClient ethClient;
-PubSubClient client(server, 1883, callback, ethClient, sram);
+WiFiClient Wclient;
+PubSubClient client(server, 1883, callback, Wclient, sram);
 
 void setup()
 {
-  Ethernet.begin(mac, ip);
+  WiFi.begin(ssid, pass);
+
+  int retries = 0;
+  while ((WiFi.status() != WL_CONNECTED) && (retries < 10)) {
+    retries++;
+    delay(500);
+    Serial.print(".");
+  }
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("");
+    Serial.println("WiFi connected");
+  }
+
   if (client.connect("arduinoClient")) {
     client.publish("outTopic","hello world");
     client.subscribe("inTopic");
