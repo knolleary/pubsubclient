@@ -139,7 +139,7 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
    uint16_t len = 0;
    buffer[len++] = readByte();
    bool isPublish = (buffer[0]&0xF0) == MQTTPUBLISH;
-   uint32_t multiplier = 1;
+   uint8_t shifter = 0;
    uint16_t length = 0;
    uint8_t digit = 0;
    uint16_t skip = 0;
@@ -148,9 +148,9 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
    do {
       digit = readByte();
       buffer[len++] = digit;
-      length += (digit & 127) * multiplier;
-      multiplier *= 128;
-   } while ((digit & 128) != 0);
+      length += (digit & 0x7f) << shifter;
+      shifter += 7;
+   } while (digit & 0x80);
    *lengthLength = len-1;
 
    if (isPublish) {
@@ -294,14 +294,13 @@ boolean PubSubClient::publish_P(char* topic, uint8_t* PROGMEM payload, unsigned 
    buffer[pos++] = header;
    len = plength + 2 + tlen;
    do {
-      digit = len % 128;
-      len = len / 128;
-      if (len > 0) {
+      digit = len & 0x7f;
+      len >>= 7;
+      if (len)
          digit |= 0x80;
-      }
       buffer[pos++] = digit;
       llen++;
-   } while(len>0);
+   } while (len);
    
    pos = writeString(topic,buffer,pos);
    
@@ -324,14 +323,13 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
    uint8_t rc;
    uint8_t len = length;
    do {
-      digit = len % 128;
-      len = len / 128;
-      if (len > 0) {
+      digit = len & 0x7f;
+      len >>= 7;
+      if (len)
          digit |= 0x80;
-      }
       lenBuf[pos++] = digit;
       llen++;
-   } while(len>0);
+   } while (len);
 
    buf[4-llen] = header;
    memcpy(buf + 5 - llen, lenBuf, llen);
