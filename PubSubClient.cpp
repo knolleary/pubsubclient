@@ -157,7 +157,7 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
       // Read in topic length to calculate bytes to skip over for Stream writing
       buffer[len++] = readByte();
       buffer[len++] = readByte();
-      skip = (buffer[*lengthLength+1]<<8)+buffer[*lengthLength+2];
+      skip = (buffer[*lengthLength+1] << 8) | buffer[*lengthLength + 2];
       start = 2;
       if (buffer[0]&MQTTQOS1) {
          // skip message id
@@ -209,13 +209,13 @@ boolean PubSubClient::loop() {
             uint8_t type = buffer[0]&0xF0;
             if (type == MQTTPUBLISH) {
                if (_callback) {
-                  uint16_t tl = (buffer[llen+1]<<8)+buffer[llen+2];
+                  uint16_t tl = (buffer[llen + 1] << 8) | buffer[llen + 2];
                   char topic[tl + 1];
 		  memcpy(topic, buffer + llen + 3, tl);
                   topic[tl] = 0;
                   // msgId only present for QOS>0
                   if ((buffer[0]&0x06) == MQTTQOS1) {
-                    msgId = (buffer[llen+3+tl]<<8)+buffer[llen+3+tl+1];
+                    msgId = (buffer[llen + 3 + tl] << 8) | buffer[llen + 3 + tl + 1];
                     payload = buffer+llen+3+tl+2;
                     _callback(topic,payload,len-llen-3-tl-2);
                     
