@@ -34,11 +34,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
   sram.seek(1);
 }
 
-WiFiClient Wclient;
-PubSubClient client(server, 1883, callback, Wclient, sram);
+PubSubClient client(server);
 
 void setup()
 {
+  client
+    .set_callback(callback)
+    .set_stream(sram);
+
   WiFi.begin(ssid, pass);
 
   int retries = 0;

@@ -20,11 +20,12 @@ void callback(char* topic, byte* payload, unsigned int length) {
   // handle message arrived
 }
 
-WiFiClient Wclient;
-PubSubClient client(server, 1883, callback, Wclient);
+PubSubClient client(server);
 
 void setup()
 {
+  client.set_callback(callback);
+
   WiFi.begin(ssid, pass);
 
   int retries = 0;

@@ -26,8 +26,7 @@ IPAddress server(172, 16, 0, 2);
 // Callback function header
 void callback(char* topic, byte* payload, unsigned int length);
 
-WiFiClient Wclient;
-PubSubClient client(server, 1883, callback, Wclient);
+PubSubClient client(server);
 
 // Callback function
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -46,6 +45,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void setup()
 {
+  client.set_callback(callback);
+
   WiFi.begin(ssid, pass);
 
   int retries = 0;
