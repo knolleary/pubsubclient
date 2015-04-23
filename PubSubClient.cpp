@@ -43,19 +43,19 @@ PubSubClient& PubSubClient::unset_stream(void) {
 }
 
 boolean PubSubClient::connect(char *id) {
-   return connect(id,NULL,NULL,0,0,0,0);
+   return connect(id, NULL, NULL, NULL, 0, false, NULL);
 }
 
 boolean PubSubClient::connect(char *id, char *user, char *pass) {
-   return connect(id,user,pass,0,0,0,0);
+   return connect(id, user, pass, NULL, 0, false, NULL);
 }
 
-boolean PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t willRetain, char* willMessage)
+boolean PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, boolean willRetain, char* willMessage)
 {
-   return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage);
+   return connect(id, NULL, NULL, willTopic, willQos, willRetain, willMessage);
 }
 
-boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic, uint8_t willQos, uint8_t willRetain, char* willMessage) {
+boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic, uint8_t willQos, boolean willRetain, char* willMessage) {
    if (!connected()) {
       int result = 0;
       
@@ -77,10 +77,11 @@ boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic,
 
          uint8_t v;
          if (willTopic) {
-            v = 0x06|(willQos<<3)|(willRetain<<5);
-         } else {
+	   if (willQos > 2)
+	     willQos = 2;
+	   v = 0x06 | (willQos << 3) | (willRetain << 5);
+	 } else
             v = 0x02;
-         }
 
          if(user != NULL) {
             v = v|0x80;

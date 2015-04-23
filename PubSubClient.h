@@ -76,8 +76,8 @@ public:
 
    boolean connect(char *);
    boolean connect(char *, char *, char *);
-   boolean connect(char *, char *, uint8_t, uint8_t, char *);
-   boolean connect(char *, char *, char *, char *, uint8_t, uint8_t, char*);
+   boolean connect(char *, char *, uint8_t, boolean, char *);
+   boolean connect(char *, char *, char *, char *, uint8_t, boolean, char*);
    void disconnect();
    boolean publish(char *, char *);
    boolean publish(char *, uint8_t *, unsigned int);
