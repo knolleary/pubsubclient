@@ -39,7 +39,8 @@ void setup()
     Serial.println("WiFi connected");
   }
 
-  if (client.connect("arduinoClient", "testuser", "testpass")) {
+  client.set_auth("testeruser", "testpass");
+  if (client.connect("arduinoClient")) {
     client.publish("outTopic","hello world");
     client.subscribe("inTopic");
   }

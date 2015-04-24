@@ -11,16 +11,27 @@ PubSubClient::PubSubClient(IPAddress &ip, uint16_t port) :
   _callback(NULL),
   _stream(NULL),
   server_ip(ip),
-  server_port(port),
-  server_hostname(NULL)
+  server_port(port)
 {}
 
-PubSubClient::PubSubClient(char* hostname, uint16_t port) :
+PubSubClient::PubSubClient(String hostname, uint16_t port) :
   _callback(NULL),
   _stream(NULL),
   server_port(port),
   server_hostname(hostname)
 {}
+
+PubSubClient& PubSubClient::set_auth(String u, String p) {
+  username = u;
+  password = p;
+  return *this;
+}
+
+PubSubClient& PubSubClient::unset_auth(void) {
+  username = "";
+  password = "";
+  return *this;
+}
 
 PubSubClient& PubSubClient::set_callback(callback_t cb) {
   _callback = cb;
@@ -42,29 +53,19 @@ PubSubClient& PubSubClient::unset_stream(void) {
   return *this;
 }
 
-boolean PubSubClient::connect(char *id) {
-   return connect(id, NULL, NULL, NULL, 0, false, NULL);
+boolean PubSubClient::connect(String id) {
+  return connect(id, "", 0, false, "");
 }
 
-boolean PubSubClient::connect(char *id, char *user, char *pass) {
-   return connect(id, user, pass, NULL, 0, false, NULL);
-}
-
-boolean PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, boolean willRetain, char* willMessage)
-{
-   return connect(id, NULL, NULL, willTopic, willQos, willRetain, willMessage);
-}
-
-boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic, uint8_t willQos, boolean willRetain, char* willMessage) {
+boolean PubSubClient::connect(String id, String willTopic, uint8_t willQos, boolean willRetain, String willMessage) {
    if (!connected()) {
       int result = 0;
       
-      if (server_hostname != NULL) {
-        result = _client.connect(server_hostname, server_port);
-      } else {
+      if (server_hostname.length() > 0)
+        result = _client.connect(server_hostname.c_str(), server_port);
+      else
         result = _client.connect(server_ip, server_port);
-      }
-      
+
       if (result) {
          nextMsgId = 1;
          uint8_t d[9] = {0x00,0x06,'M','Q','I','s','d','p',MQTTPROTOCOLVERSION};
@@ -74,35 +75,33 @@ boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic,
 	 length += 9;
 
          uint8_t v;
-         if (willTopic) {
+         if (willTopic.length()) {
 	   if (willQos > 2)
 	     willQos = 2;
 	   v = 0x06 | (willQos << 3) | (willRetain << 5);
 	 } else
             v = 0x02;
 
-         if(user != NULL) {
-            v = v|0x80;
-
-            if(pass != NULL) {
-               v = v|(0x80>>1);
-            }
+         if (username.length()) {
+            v = v | 0x80;
+            if (password.length())
+               v = v | 0x40;
          }
 
          buffer[length++] = v;
 
          buffer[length++] = ((MQTT_KEEPALIVE) >> 8);
          buffer[length++] = ((MQTT_KEEPALIVE) & 0xFF);
-         length = writeString(id,buffer,length);
-         if (willTopic) {
-            length = writeString(willTopic,buffer,length);
-            length = writeString(willMessage,buffer,length);
+         length = writeString(id, buffer, length);
+         if (willTopic.length()) {
+            length = writeString(willTopic, buffer, length);
+            length = writeString(willMessage, buffer, length);
          }
 
-         if(user != NULL) {
-            length = writeString(user,buffer,length);
-            if(pass != NULL) {
-            }
+         if (username.length()) {
+            length = writeString(username, buffer, length);
+            if (password.length())
+	      length = writeString(password, buffer, length);
          }
          
          write(MQTTCONNECT,buffer,length-5);
@@ -245,15 +244,11 @@ boolean PubSubClient::loop() {
    return false;
 }
 
-boolean PubSubClient::publish(char* topic, char* payload) {
-   return publish(topic,(uint8_t*)payload,strlen(payload),false);
+boolean PubSubClient::publish(String topic, String payload) {
+  return publish(topic, (const uint8_t*)payload.c_str(), payload.length(), false);
 }
 
-boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plength) {
-   return publish(topic, payload, plength, false);
-}
-
-boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plength, boolean retained) {
+boolean PubSubClient::publish(String topic, const uint8_t* payload, unsigned int plength, boolean retained) {
    if (connected()) {
       // Leave room in the buffer for header and variable length field
       uint16_t length = 5;
@@ -271,7 +266,7 @@ boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plengt
    return false;
 }
 
-boolean PubSubClient::publish_P(char* topic, uint8_t* PROGMEM payload, unsigned int plength, boolean retained) {
+boolean PubSubClient::publish_P(String topic, const uint8_t* PROGMEM payload, unsigned int plength, boolean retained) {
    uint8_t llen = 0;
    uint8_t digit;
    unsigned int rc = 0;
@@ -285,7 +280,7 @@ boolean PubSubClient::publish_P(char* topic, uint8_t* PROGMEM payload, unsigned 
       return false;
    }
    
-   tlen = strlen(topic);
+   tlen = topic.length();
    
    header = MQTTPUBLISH;
    if (retained) {
@@ -339,11 +334,7 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
    return (rc == 1+llen+length);
 }
 
-boolean PubSubClient::subscribe(char* topic) {
-  return subscribe(topic, 0);
-}
-
-boolean PubSubClient::subscribe(char* topic, uint8_t qos) {
+boolean PubSubClient::subscribe(String topic, uint8_t qos) {
    if (qos < 0 || qos > 1)
      return false;
 
@@ -363,7 +354,7 @@ boolean PubSubClient::subscribe(char* topic, uint8_t qos) {
    return false;
 }
 
-boolean PubSubClient::unsubscribe(char* topic) {
+boolean PubSubClient::unsubscribe(String topic) {
    if (connected()) {
       uint16_t length = 5;
       nextMsgId++;
@@ -386,8 +377,8 @@ void PubSubClient::disconnect() {
    lastInActivity = lastOutActivity = millis();
 }
 
-uint16_t PubSubClient::writeString(char* string, uint8_t* buf, uint16_t pos) {
-   char* idp = string;
+uint16_t PubSubClient::writeString(String string, uint8_t* buf, uint16_t pos) {
+   const char* idp = string.c_str();
    uint16_t i = 0;
    pos += 2;
    while (*idp) {

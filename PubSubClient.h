@@ -44,8 +44,9 @@ public:
 
 private:
    IPAddress server_ip;
-   char *server_hostname;
+   String server_hostname;
    uint16_t server_port;
+   String username, password;
    callback_t _callback;
    Stream *_stream;
 
@@ -59,12 +60,15 @@ private:
    uint16_t readPacket(uint8_t*);
    uint8_t readByte();
    boolean write(uint8_t header, uint8_t* buf, uint16_t length);
-   uint16_t writeString(char* string, uint8_t* buf, uint16_t pos);
+   uint16_t writeString(String string, uint8_t* buf, uint16_t pos);
 
 
 public:
    PubSubClient(IPAddress &ip, uint16_t port = 1883);
-   PubSubClient(char* hostname, uint16_t port = 1883);
+   PubSubClient(String hostname, uint16_t port = 1883);
+
+   PubSubClient& set_auth(String u, String p);
+   PubSubClient& unset_auth(void);
 
    callback_t callback(void) const { return _callback; }
    PubSubClient& set_callback(callback_t cb);
@@ -74,18 +78,14 @@ public:
    PubSubClient& set_stream(Stream &s);
    PubSubClient& unset_stream(void);
 
-   boolean connect(char *);
-   boolean connect(char *, char *, char *);
-   boolean connect(char *, char *, uint8_t, boolean, char *);
-   boolean connect(char *, char *, char *, char *, uint8_t, boolean, char*);
-   void disconnect();
-   boolean publish(char *, char *);
-   boolean publish(char *, uint8_t *, unsigned int);
-   boolean publish(char *, uint8_t *, unsigned int, boolean);
-   boolean publish_P(char *, uint8_t PROGMEM *, unsigned int, boolean);
-   boolean subscribe(char *);
-   boolean subscribe(char *, uint8_t qos);
-   boolean unsubscribe(char *);
+   boolean connect(String id);
+   boolean connect(String id, String willTopic, uint8_t willQos, boolean willRetain, String willMessage);
+   void disconnect(void);
+   boolean publish(String topic, String payload);
+   boolean publish(String topic, const uint8_t *payload, unsigned int plength, boolean retained = false);
+   boolean publish_P(String topic, const uint8_t PROGMEM *payload, unsigned int, boolean retained = false);
+   boolean subscribe(String topic, uint8_t qos = 0);
+   boolean unsubscribe(String topic);
 
    boolean loop();
    boolean connected();
