@@ -59,7 +59,7 @@ private:
 
    uint16_t readPacket(uint8_t*);
    uint8_t readByte();
-   boolean write(uint8_t header, uint8_t* buf, uint16_t length);
+   bool write(uint8_t header, uint8_t* buf, uint16_t length);
    uint16_t writeString(String string, uint8_t* buf, uint16_t pos);
 
 
@@ -78,17 +78,17 @@ public:
    PubSubClient& set_stream(Stream &s);
    PubSubClient& unset_stream(void);
 
-   boolean connect(String id);
-   boolean connect(String id, String willTopic, uint8_t willQos, boolean willRetain, String willMessage);
+   bool connect(String id);
+   bool connect(String id, String willTopic, uint8_t willQos, bool willRetain, String willMessage);
    void disconnect(void);
-   boolean publish(String topic, String payload);
-   boolean publish(String topic, const uint8_t *payload, unsigned int plength, boolean retained = false);
-   boolean publish_P(String topic, const uint8_t PROGMEM *payload, unsigned int, boolean retained = false);
-   boolean subscribe(String topic, uint8_t qos = 0);
-   boolean unsubscribe(String topic);
+   bool publish(String topic, String payload);
+   bool publish(String topic, const uint8_t *payload, unsigned int plength, bool retained = false);
+   bool publish_P(String topic, const uint8_t PROGMEM *payload, unsigned int, bool retained = false);
+   bool subscribe(String topic, uint8_t qos = 0);
+   bool unsubscribe(String topic);
 
-   boolean loop();
-   boolean connected();
+   bool loop();
+   bool connected();
 };
 
 

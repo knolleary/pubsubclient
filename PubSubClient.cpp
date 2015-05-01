@@ -53,11 +53,11 @@ PubSubClient& PubSubClient::unset_stream(void) {
   return *this;
 }
 
-boolean PubSubClient::connect(String id) {
+bool PubSubClient::connect(String id) {
   return connect(id, "", 0, false, "");
 }
 
-boolean PubSubClient::connect(String id, String willTopic, uint8_t willQos, boolean willRetain, String willMessage) {
+bool PubSubClient::connect(String id, String willTopic, uint8_t willQos, bool willRetain, String willMessage) {
    if (!connected()) {
       int result = 0;
       
@@ -182,7 +182,7 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
    return len;
 }
 
-boolean PubSubClient::loop() {
+bool PubSubClient::loop() {
    if (connected()) {
       unsigned long t = millis();
       if ((t - lastInActivity > MQTT_KEEPALIVE*1000UL) || (t - lastOutActivity > MQTT_KEEPALIVE*1000UL)) {
@@ -244,11 +244,11 @@ boolean PubSubClient::loop() {
    return false;
 }
 
-boolean PubSubClient::publish(String topic, String payload) {
+bool PubSubClient::publish(String topic, String payload) {
   return publish(topic, (const uint8_t*)payload.c_str(), payload.length(), false);
 }
 
-boolean PubSubClient::publish(String topic, const uint8_t* payload, unsigned int plength, boolean retained) {
+bool PubSubClient::publish(String topic, const uint8_t* payload, unsigned int plength, bool retained) {
    if (connected()) {
       // Leave room in the buffer for header and variable length field
       uint16_t length = 5;
@@ -266,7 +266,7 @@ boolean PubSubClient::publish(String topic, const uint8_t* payload, unsigned int
    return false;
 }
 
-boolean PubSubClient::publish_P(String topic, const uint8_t* PROGMEM payload, unsigned int plength, boolean retained) {
+bool PubSubClient::publish_P(String topic, const uint8_t* PROGMEM payload, unsigned int plength, bool retained) {
    uint8_t llen = 0;
    uint8_t digit;
    unsigned int rc = 0;
@@ -310,7 +310,7 @@ boolean PubSubClient::publish_P(String topic, const uint8_t* PROGMEM payload, un
    return rc == tlen + 4 + plength;
 }
 
-boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
+bool PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
    uint8_t lenBuf[4];
    uint8_t llen = 0;
    uint8_t digit;
@@ -334,7 +334,7 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
    return (rc == 1+llen+length);
 }
 
-boolean PubSubClient::subscribe(String topic, uint8_t qos) {
+bool PubSubClient::subscribe(String topic, uint8_t qos) {
    if (qos < 0 || qos > 1)
      return false;
 
@@ -354,7 +354,7 @@ boolean PubSubClient::subscribe(String topic, uint8_t qos) {
    return false;
 }
 
-boolean PubSubClient::unsubscribe(String topic) {
+bool PubSubClient::unsubscribe(String topic) {
    if (connected()) {
       uint16_t length = 5;
       nextMsgId++;
@@ -391,8 +391,8 @@ uint16_t PubSubClient::writeString(String string, uint8_t* buf, uint16_t pos) {
 }
 
 
-boolean PubSubClient::connected() {
-   boolean rc = (int)_client.connected();
+bool PubSubClient::connected() {
+   bool rc = _client.connected();
    if (!rc)
      _client.stop();
 
