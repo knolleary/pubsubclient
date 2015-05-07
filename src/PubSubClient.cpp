@@ -212,13 +212,9 @@ bool PubSubClient::subscribe(String topic, uint8_t qos) {
 }
 
 bool PubSubClient::subscribe(MQTT::Subscribe &sub) {
-   if (connected()) {
-      nextMsgId++;
-      if (nextMsgId == 0)
-	nextMsgId = 1;
-
+   if (connected())
       return sub.send(_client);
-   }
+
    return false;
 }
 
@@ -235,13 +231,9 @@ bool PubSubClient::unsubscribe(String topic) {
 }
 
 bool PubSubClient::unsubscribe(MQTT::Unsubscribe &unsub) {
-   if (connected()) {
-      nextMsgId++;
-      if (nextMsgId == 0)
-         nextMsgId = 1;
-
+   if (connected())
       return unsub.send(_client);
-   }
+
    return false;
 }
 

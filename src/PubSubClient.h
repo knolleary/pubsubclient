@@ -56,7 +56,11 @@ public:
    bool loop();
    bool connected();
 
-   uint16_t next_packet_id(void) { return nextMsgId++; }
+   uint16_t next_packet_id(void) {
+     nextMsgId++;
+     if (nextMsgId == 0) nextMsgId = 1;
+     return nextMsgId;
+   }
 
    // New methods that take pre-constructed MQTT message objects
    bool connect(MQTT::Connect &conn);
