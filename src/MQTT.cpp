@@ -483,21 +483,21 @@ namespace MQTT {
   Subscribe::Subscribe(uint16_t pid, String topic, uint8_t qos) :
     Message(MQTTSUBSCRIBE),
     with_packet_id(pid),
-    _topics((topic_entry*)malloc(sizeof(topic_entry))),
-    _num_topics(1)
+    _buffer(NULL), _buflen(0)
   {
-    _topics[0] = { topic, qos };
+    _buffer = (uint8_t*)malloc(2 + topic.length() + 1);
+    write(_buffer, _buflen, topic);
+    _buffer[_buflen++] = qos;
   }
 
   Subscribe::~Subscribe() {
-    free(_topics);
+    free(_buffer);
   }
 
   Subscribe& Subscribe::add_topic(String topic, uint8_t qos) {
-    _topics = (topic_entry*)realloc(_topics, (_num_topics + 1) * sizeof(topic_entry));
-    _topics[_num_topics] = { topic, qos };
-    _num_topics++;
-
+    _buffer = (uint8_t*)realloc(_buffer, _buflen + 2 + topic.length() + 1);
+    write(_buffer, _buflen, topic);
+    _buffer[_buflen++] = qos;
     return *this;
   }
 
@@ -506,10 +506,7 @@ namespace MQTT {
   }
 
   bool Subscribe::write_payload(uint8_t *buf, uint8_t& len) {
-    for (uint8_t i = 0; i < _num_topics; i++) {
-      write(buf, len, _topics[i].topic_filter);
-      write(buf, len, _topics[i].qos);
-    }
+    write(buf, len, _buffer, _buflen);
   }
 
 
@@ -536,20 +533,19 @@ namespace MQTT {
   Unsubscribe::Unsubscribe(uint16_t pid, String topic) :
     Message(MQTTSUBSCRIBE),
     with_packet_id(pid),
-    _topics((String*)malloc(sizeof(String))),
-    _num_topics(1)
+    _buffer(NULL), _buflen(0)
   {
-    _topics[0] = topic;
+    _buffer = (uint8_t*)malloc(2 + topic.length());
+    write(_buffer, _buflen, topic);
   }
 
   Unsubscribe::~Unsubscribe() {
-    free(_topics);
+    free(_buffer);
   }
 
   Unsubscribe& Unsubscribe::add_topic(String topic) {
-    _topics = (String*)realloc(_topics, (_num_topics + 1) * sizeof(String));
-    _topics[_num_topics] = topic;
-    _num_topics++;
+    _buffer = (uint8_t*)realloc(_buffer, _buflen + 2 + topic.length());
+    write(_buffer, _buflen, topic);
 
     return *this;
   }
@@ -559,8 +555,7 @@ namespace MQTT {
   }
 
   bool Unsubscribe::write_payload(uint8_t *buf, uint8_t& len) {
-    for (uint8_t i = 0; i < _num_topics; i++)
-      write(buf, len, _topics[i]);
+    write(buf, len, _buffer, _buflen);
   }
 
 

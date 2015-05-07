@@ -240,12 +240,7 @@ namespace MQTT {
   // Subscribe to one or more topics
   class Subscribe : public Message, public with_packet_id, public with_payload {
   private:
-    struct topic_entry {
-      String topic_filter;
-      uint8_t qos;
-    };
-    topic_entry *_topics;
-    uint8_t _num_topics;
+    uint8_t *_buffer, _buflen;
 
     bool write_variable_header(uint8_t *buf, uint8_t& len);
     bool write_payload(uint8_t *buf, uint8_t& len);
@@ -280,8 +275,7 @@ namespace MQTT {
   // Unsubscribe from one or more topics
   class Unsubscribe : public Message, public with_packet_id, public with_payload {
   private:
-    String *_topics;
-    uint8_t _num_topics;
+    uint8_t *_buffer, _buflen;
 
     bool write_variable_header(uint8_t *buf, uint8_t& len);
     bool write_payload(uint8_t *buf, uint8_t& len);
