@@ -45,8 +45,8 @@ void setup()
     Serial.println("WiFi connected");
   }
 
-  client.set_auth("testeruser", "testpass");
-  if (client.connect("arduinoClient")) {
+  if (client.connect(MQTT::Connect("arduinoClient")
+	             .set_auth("testeruser", "testpass"))) {
     client.publish("outTopic","hello world");
     client.subscribe("inTopic");
   }
