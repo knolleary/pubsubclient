@@ -16,7 +16,7 @@ const char *pass =	"yyyyyyyy";		//
 // Update these with values suitable for your network.
 IPAddress server(172, 16, 0, 2);
 
-void callback(char* topic, byte* payload, unsigned int length) {
+void callback(String topic, byte* payload, unsigned int length) {
   // handle message arrived
 }
 

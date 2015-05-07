@@ -23,13 +23,10 @@ const char *pass =	"yyyyyyyy";		//
 // Update these with values suitable for your network.
 IPAddress server(172, 16, 0, 2);
 
-// Callback function header
-void callback(char* topic, byte* payload, unsigned int length);
-
 PubSubClient client(server);
 
 // Callback function
-void callback(char* topic, byte* payload, unsigned int length) {
+void callback(String topic, byte* payload, unsigned int length) {
   // In order to republish this payload, a copy must be made
   // as the orignal payload buffer will be overwritten whilst
   // constructing the PUBLISH packet.
