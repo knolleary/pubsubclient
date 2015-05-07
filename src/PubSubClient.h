@@ -15,7 +15,7 @@
 
 class PubSubClient {
 public:
-  typedef void(*callback_t)(String, uint8_t*, unsigned int);
+  typedef void(*callback_t)(const MQTT::Publish&);
 
 private:
    IPAddress server_ip;

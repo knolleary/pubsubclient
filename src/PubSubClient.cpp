@@ -118,14 +118,14 @@ bool PubSubClient::loop() {
 	      if (_callback) {
 		auto pub = (MQTT::Publish*)msg;
 		if (pub->qos()) {
-		  _callback(pub->topic(), pub->payload(), pub->payload_len());
+		  _callback(*pub);
                     
 		  MQTT::PublishAck puback(pub->packet_id());
 		  puback.send(_client);
 		  lastOutActivity = t;
 
 		} else {
-		  _callback(pub->topic(), pub->payload(), pub->payload_len());
+		  _callback(*pub);
 		}
 	      }
 	      free(msg);

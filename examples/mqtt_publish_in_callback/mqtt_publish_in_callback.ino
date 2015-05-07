@@ -26,18 +26,14 @@ IPAddress server(172, 16, 0, 2);
 PubSubClient client(server);
 
 // Callback function
-void callback(String topic, byte* payload, unsigned int length) {
+void callback(const MQTT::Publish& pub) {
   // In order to republish this payload, a copy must be made
   // as the orignal payload buffer will be overwritten whilst
   // constructing the PUBLISH packet.
-  
-  // Allocate the correct amount of memory for the payload copy
-  byte* p = (byte*)malloc(length);
-  // Copy the payload to the new buffer
-  memcpy(p,payload,length);
-  client.publish("outTopic", p, length);
-  // Free the memory
-  free(p);
+
+  // Copy the payload to a new message
+  MQTT::Publish newpub("outTopic", pub.payload(), pub.payload_len());
+  client.publish(newpub);
 }
 
 void setup()

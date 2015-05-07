@@ -21,7 +21,7 @@ IPAddress server(172, 16, 0, 2);
 
 SRAM sram(4, SRAM_1024);
 
-void callback(String topic, byte* payload, unsigned int length) {
+void callback(const MQTT::Publish& pub) {
   sram.seek(1);
 
   // do something with the message
