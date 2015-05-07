@@ -38,6 +38,12 @@ PubSubClient client(server);
 
 void setup()
 {
+  // Setup console
+  Serial.begin(115200);
+  delay(10);
+  Serial.println();
+  Serial.println();
+
   client
     .set_callback(callback)
     .set_stream(sram);

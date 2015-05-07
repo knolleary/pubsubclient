@@ -45,6 +45,12 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void setup()
 {
+  // Setup console
+  Serial.begin(115200);
+  delay(10);
+  Serial.println();
+  Serial.println();
+
   client.set_callback(callback);
 
   WiFi.begin(ssid, pass);
