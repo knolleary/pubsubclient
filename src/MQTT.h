@@ -205,7 +205,7 @@ namespace MQTT {
   // First response to Publish when qos > 0
   class PublishRec : public Message, public with_packet_id {
   private:
-    bool write_variable_header(uint8_t *buf, uint8_t& len) {}
+    bool write_variable_header(uint8_t *buf, uint8_t& len);
 
   public:
     PublishRec(uint16_t pid);
@@ -217,7 +217,7 @@ namespace MQTT {
   // Response to PublishRec
   class PublishRel : public Message, public with_packet_id {
   private:
-    bool write_variable_header(uint8_t *buf, uint8_t& len) {}
+    bool write_variable_header(uint8_t *buf, uint8_t& len);
 
   public:
     PublishRel(uint16_t pid);
@@ -229,7 +229,7 @@ namespace MQTT {
   // Response to PublishRec
   class PublishComp : public Message, public with_packet_id {
   private:
-    bool write_variable_header(uint8_t *buf, uint8_t& len) {}
+    bool write_variable_header(uint8_t *buf, uint8_t& len);
 
   public:
     PublishComp(uint16_t pid);

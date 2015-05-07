@@ -436,6 +436,10 @@ namespace MQTT {
     _packet_id = read<uint16_t>(data, pos);
   }
 
+  bool PublishRec::write_variable_header(uint8_t *buf, uint8_t& len) {
+    write_packet_id(buf, len);
+  }
+
 
   // PublishRel class
   PublishRel::PublishRel(uint16_t pid) :
@@ -451,6 +455,10 @@ namespace MQTT {
     _packet_id = read<uint16_t>(data, pos);
   }
 
+  bool PublishRel::write_variable_header(uint8_t *buf, uint8_t& len) {
+    write_packet_id(buf, len);
+  }
+
 
   // PublishComp class
   PublishComp::PublishComp(uint16_t pid) :
@@ -464,6 +472,10 @@ namespace MQTT {
   {
     uint8_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
+  }
+
+  bool PublishComp::write_variable_header(uint8_t *buf, uint8_t& len) {
+    write_packet_id(buf, len);
   }
 
 
