@@ -331,7 +331,7 @@ namespace MQTT {
   {
     uint8_t pos = 0;
     _topic = read<String>(data, pos);
-    if (_qos > 0)
+    if (qos() > 0)
       _packet_id = read<uint16_t>(data, pos);
 
     _payload_len = length - pos;
@@ -398,7 +398,7 @@ namespace MQTT {
 
   bool Publish::write_variable_header(uint8_t *buf, uint8_t& len) {
     write(buf, len, _topic);
-    if (_qos)
+    if (qos())
       write_packet_id(buf, len);
   }
 

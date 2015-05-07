@@ -155,7 +155,6 @@ namespace MQTT {
     String _topic;
     uint8_t *_payload, _payload_len;
     bool _payload_mine;
-    uint8_t _qos;
 
     bool write_variable_header(uint8_t *buf, uint8_t& len);
     bool write_payload(uint8_t *buf, uint8_t& len);
