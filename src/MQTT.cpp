@@ -63,8 +63,8 @@ namespace MQTT {
     uint16_t len = read<uint16_t>(buf, pos);
     String val;
     val.reserve(len);
-    for (uint16_t i = 0; i < len; i++)
-      val[i] = read<uint8_t>(buf, pos);
+    for (uint8_t i = 0; i < len; i++)
+      val += (char)read<uint8_t>(buf, pos);
 
     return val;
   }
@@ -392,7 +392,8 @@ namespace MQTT {
     String str;
     str.reserve(_payload_len);
     for (uint8_t i = 0; i < _payload_len; i++)
-      str[i] = _payload[i];
+      str += (char)_payload[i];
+
     return str;
   }
 
