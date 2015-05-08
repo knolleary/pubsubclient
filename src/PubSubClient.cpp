@@ -182,7 +182,7 @@ bool PubSubClient::publish(String topic, String payload) {
     return false;
 
   MQTT::Publish pub(topic, payload);
-  return pub.send(_client);
+  return publish(pub);
 }
 
 bool PubSubClient::publish(String topic, const uint8_t* payload, unsigned int plength, bool retained) {
@@ -209,7 +209,7 @@ bool PubSubClient::subscribe(String topic, uint8_t qos) {
     return false;
 
   MQTT::Subscribe sub(next_packet_id(), topic, qos);
-  return sub.send(_client);
+  return subscribe(sub);
 }
 
 bool PubSubClient::subscribe(MQTT::Subscribe &sub) {
@@ -224,7 +224,7 @@ bool PubSubClient::unsubscribe(String topic) {
     return false;
 
   MQTT::Unsubscribe unsub(next_packet_id(), topic);
-  return unsub.send(_client);
+  return unsubscribe(unsub);
 }
 
 bool PubSubClient::unsubscribe(MQTT::Unsubscribe &unsub) {
