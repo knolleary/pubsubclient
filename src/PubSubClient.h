@@ -36,6 +36,8 @@ private:
    // Wait for a certain type of packet to come back, optionally check its packet id
    bool wait_for(uint8_t wait_type, uint16_t wait_pid = 0);
 
+   bool send_reliably(MQTT::Message* msg);
+
 public:
    PubSubClient(IPAddress &ip, uint16_t port = 1883);
    PubSubClient(String hostname, uint16_t port = 1883);

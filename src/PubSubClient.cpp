@@ -120,6 +120,25 @@ bool PubSubClient::wait_for(uint8_t match_type, uint16_t match_pid) {
   return false;
 }
 
+bool PubSubClient::send_reliably(MQTT::Message* msg) {
+  uint8_t retries = 0;
+ send:
+  msg->send(_client);
+  lastOutActivity = millis();
+
+  if (msg->response_type() == 0)
+    return true;
+
+  if (!wait_for(msg->response_type(), msg->packet_id())) {
+    if (retries < 10) {
+      retries++;
+      goto send;
+    }
+    return false;
+  }
+  return true;
+}
+
 bool PubSubClient::connect(String id) {
   if (connected())
     return false;
@@ -153,26 +172,15 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
     return false;
   }
 
-  nextMsgId = 1;
-
-  uint8_t retries = 0;
- send:
-  conn.send(_client);
-
-  lastInActivity = lastOutActivity = millis();
-
+  nextMsgId = 1;		// Init the next packet id
+  lastInActivity = millis();	// Init this so that wait_for() doesn't think we've already timed-out
   keepalive = conn.keepalive();	// Store the keepalive period from this connection
 
-  if (!wait_for(MQTTCONNACK)) {
-    if (retries < 10) {
-      retries++;
-      goto send;
-    }
+  bool ret = send_reliably(&conn);
+  if (!ret)
     _client.stop();
-    return false;
-  }
 
-  return true;
+  return ret;
 }
 
 bool PubSubClient::loop() {
@@ -223,44 +231,28 @@ bool PubSubClient::publish(MQTT::Publish &pub) {
   if (!connected())
     return false;
 
-  uint8_t retries = 0;
- send:
-  pub.send(_client);
-  lastOutActivity = millis();
+  switch (pub.qos()) {
+  case 0:
+    pub.send(_client);
+    lastOutActivity = millis();
+    break;
 
-  if (pub.qos() == 1) {
-    if (!wait_for(MQTTPUBACK, pub.packet_id())) {
-      if (retries < 10) {
-	retries++;
-	goto send;
-      }
+  case 1:
+    if (!send_reliably(&pub))
       return false;
+    break;
+
+  case 2:
+    {
+      if (!send_reliably(&pub))
+	return false;
+
+      MQTT::PublishRel pubrel(pub.packet_id());
+      if (!send_reliably(&pubrel))
+	return false;
     }
-
-  } else if (pub.qos() == 2) {
-    if (!wait_for(MQTTPUBREC, pub.packet_id())) {
-      if (retries < 10) {
-	retries++;
-	goto send;
-      }
-      return false;
-    }
-
-    MQTT::PublishRel pubrel(pub.packet_id());
-    retries = 0;
-  sendrel:
-    pubrel.send(_client);
-
-    if (!wait_for(MQTTPUBCOMP, pub.packet_id())) {
-      if (retries < 10) {
-	retries++;
-	goto sendrel;
-      }
-      return false;
-    }
-
+    break;
   }
-
   return true;
 }
 
@@ -279,18 +271,8 @@ bool PubSubClient::subscribe(MQTT::Subscribe &sub) {
   if (!connected())
     return false;
 
-  uint8_t retries = 0;
- send:
-  sub.send(_client);
-  lastOutActivity = millis();
-
-  if (!wait_for(MQTTSUBACK, sub.packet_id())) {
-    if (retries < 10) {
-      retries++;
-      goto send;
-    }
+  if (!send_reliably(&sub))
     return false;
-  }
 
   return true;
 }
@@ -307,18 +289,8 @@ bool PubSubClient::unsubscribe(MQTT::Unsubscribe &unsub) {
   if (!connected())
     return false;
 
-  uint8_t retries = 0;
- send:
-  unsub.send(_client);
-  lastOutActivity = millis();
-
-  if (!wait_for(MQTTUNSUBACK, unsub.packet_id())) {
-    if (retries < 10) {
-      retries++;
-      goto send;
-    }
+  if (!send_reliably(&unsub))
     return false;
-  }
 
   return true;
 }
