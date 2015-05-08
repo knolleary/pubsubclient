@@ -74,10 +74,11 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
     conn.send(_client);
          
     lastInActivity = lastOutActivity = millis();
-         
+
+    keepalive = conn.keepalive();	// Store the keepalive period from this connection
     while (!_client.available()) {
       unsigned long t = millis();
-      if (t - lastInActivity > MQTT_KEEPALIVE * 1000UL) {
+      if (t - lastInActivity > keepalive * 1000UL) {
 	_client.stop();
 	return false;
       }
@@ -97,7 +98,7 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
 bool PubSubClient::loop() {
    if (connected()) {
       unsigned long t = millis();
-      if ((t - lastInActivity > MQTT_KEEPALIVE * 1000UL) || (t - lastOutActivity > MQTT_KEEPALIVE * 1000UL)) {
+      if ((t - lastInActivity > keepalive * 1000UL) || (t - lastOutActivity > keepalive * 1000UL)) {
          if (pingOutstanding) {
             _client.stop();
             return false;

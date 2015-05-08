@@ -25,7 +25,7 @@ private:
   //   Stream *_stream;
 
    WiFiClient _client;
-   uint16_t nextMsgId;
+   uint16_t nextMsgId, keepalive;
    unsigned long lastOutActivity;
    unsigned long lastInActivity;
    bool pingOutstanding;

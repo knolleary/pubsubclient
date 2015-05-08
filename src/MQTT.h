@@ -131,6 +131,7 @@ namespace MQTT {
     Connect& set_auth(String u, String p);
     Connect& unset_auth(void);
 
+    uint16_t keepalive(void) const { return _keepalive; }
     // Set the keepalive period
     Connect& set_keepalive(uint16_t k);
   };
