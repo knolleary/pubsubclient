@@ -14,7 +14,7 @@ const char *pass =	"yyyyyyyy";		//
 // Update these with values suitable for your network.
 IPAddress server(172, 16, 0, 2);
 
-void callback(MQTT::Publish& pub) {
+void callback(const MQTT::Publish& pub) {
   Serial.print(pub.topic());
   Serial.print(" => ");
   Serial.print(pub.payload_string());
