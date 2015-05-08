@@ -84,16 +84,8 @@ namespace MQTT {
   Message* readPacket(WiFiClient &client);
 
 
-  // Abstract role class
-  class with_payload {
-  private:
-    virtual bool write_payload(uint8_t *buf, uint8_t& len) = 0;
-  public:
-  };
-
-
   // Message sent when connecting to a broker
-  class Connect : public Message, public with_payload {
+  class Connect : public Message {
   private:
     bool _clean_session;
     uint8_t _will_qos;
@@ -145,7 +137,7 @@ namespace MQTT {
 
 
   // Publish a payload to a topic
-  class Publish : public Message, public with_payload {
+  class Publish : public Message {
   private:
     String _topic;
     uint8_t *_payload, _payload_len;
@@ -233,7 +225,7 @@ namespace MQTT {
 
 
   // Subscribe to one or more topics
-  class Subscribe : public Message, public with_payload {
+  class Subscribe : public Message {
   private:
     uint8_t *_buffer, _buflen;
 
@@ -268,7 +260,7 @@ namespace MQTT {
 
 
   // Unsubscribe from one or more topics
-  class Unsubscribe : public Message, public with_payload {
+  class Unsubscribe : public Message {
   private:
     uint8_t *_buffer, _buflen;
 
