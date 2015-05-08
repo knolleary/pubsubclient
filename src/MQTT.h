@@ -50,7 +50,7 @@ namespace MQTT {
   protected:
     uint8_t _type, _flags;
 
-    Message(uint8_t t, uint16_t f = 0) :
+    Message(uint8_t t, uint8_t f = 0) :
       _type(t), _flags(f)
     {}
 
