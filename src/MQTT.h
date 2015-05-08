@@ -176,7 +176,7 @@ namespace MQTT {
   };
 
 
-  // Response to Publish when qos == 0
+  // Response to Publish when qos == 1
   class PublishAck : public Message {
   private:
     bool write_variable_header(uint8_t *buf, uint8_t& len) {}
@@ -188,7 +188,7 @@ namespace MQTT {
   };
 
 
-  // First response to Publish when qos > 0
+  // First response to Publish when qos == 2
   class PublishRec : public Message {
   private:
     bool write_variable_header(uint8_t *buf, uint8_t& len);
@@ -212,7 +212,7 @@ namespace MQTT {
   };
 
 
-  // Response to PublishRec
+  // Response to PublishRel
   class PublishComp : public Message {
   private:
     bool write_variable_header(uint8_t *buf, uint8_t& len);
