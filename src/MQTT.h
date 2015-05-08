@@ -49,15 +49,23 @@ namespace MQTT {
   class Message {
   protected:
     uint8_t _type, _flags;
+    uint16_t _packet_id;	// Not all message types use a packet id, but most do
 
     Message(uint8_t t, uint8_t f = 0) :
-      _type(t), _flags(f)
+      _type(t), _flags(f),
+      _packet_id(0)
+    {}
+
+    Message(uint8_t t, uint16_t pid) :
+      _type(t), _flags(0),
+      _packet_id(pid)
     {}
 
     // Write the fixed header to a buffer
     virtual bool write_fixed_header(uint8_t *buf, uint8_t& len, uint8_t rlength);
 
     // Abstract methods to be implemented by derived classes
+    bool write_packet_id(uint8_t *buf, uint8_t& len);
     virtual bool write_variable_header(uint8_t *buf, uint8_t& len) = 0;
     virtual bool write_payload(uint8_t *buf, uint8_t& len) {}
 
@@ -67,27 +75,13 @@ namespace MQTT {
 
     // Get message type
     uint8_t type(void) const { return _type; }
+
+    uint16_t packet_id(void) const { return _packet_id; }
   };
 
   // Parser
   // remember to free the object once you're finished with it
   Message* readPacket(WiFiClient &client);
-
-
-  // Role class
-  class with_packet_id {
-  protected:
-    uint16_t _packet_id;
-
-    with_packet_id(uint16_t pid) :
-      _packet_id(pid)
-    {}
-
-    bool write_packet_id(uint8_t *buf, uint8_t& len);
-
-  public:
-    uint16_t packet_id(void) const { return _packet_id; }
-  };
 
 
   // Abstract role class
@@ -151,7 +145,7 @@ namespace MQTT {
 
 
   // Publish a payload to a topic
-  class Publish : public Message, public with_packet_id, public with_payload {
+  class Publish : public Message, public with_payload {
   private:
     String _topic;
     uint8_t *_payload, _payload_len;
@@ -191,7 +185,7 @@ namespace MQTT {
 
 
   // Response to Publish when qos == 0
-  class PublishAck : public Message, public with_packet_id {
+  class PublishAck : public Message {
   private:
     bool write_variable_header(uint8_t *buf, uint8_t& len) {}
 
@@ -203,7 +197,7 @@ namespace MQTT {
 
 
   // First response to Publish when qos > 0
-  class PublishRec : public Message, public with_packet_id {
+  class PublishRec : public Message {
   private:
     bool write_variable_header(uint8_t *buf, uint8_t& len);
 
@@ -215,7 +209,7 @@ namespace MQTT {
 
 
   // Response to PublishRec
-  class PublishRel : public Message, public with_packet_id {
+  class PublishRel : public Message {
   private:
     bool write_variable_header(uint8_t *buf, uint8_t& len);
 
@@ -227,7 +221,7 @@ namespace MQTT {
 
 
   // Response to PublishRec
-  class PublishComp : public Message, public with_packet_id {
+  class PublishComp : public Message {
   private:
     bool write_variable_header(uint8_t *buf, uint8_t& len);
 
@@ -239,7 +233,7 @@ namespace MQTT {
 
 
   // Subscribe to one or more topics
-  class Subscribe : public Message, public with_packet_id, public with_payload {
+  class Subscribe : public Message, public with_payload {
   private:
     uint8_t *_buffer, _buflen;
 
@@ -258,7 +252,7 @@ namespace MQTT {
 
 
   // Response to Subscribe
-  class SubscribeAck : public Message, public with_packet_id {
+  class SubscribeAck : public Message {
   private:
     uint8_t *_rcs, _num_rcs;
 
@@ -274,7 +268,7 @@ namespace MQTT {
 
 
   // Unsubscribe from one or more topics
-  class Unsubscribe : public Message, public with_packet_id, public with_payload {
+  class Unsubscribe : public Message, public with_payload {
   private:
     uint8_t *_buffer, _buflen;
 
@@ -293,7 +287,7 @@ namespace MQTT {
 
 
   // Response to Unsubscribe
-  class UnsubscribeAck : public Message, public with_packet_id {
+  class UnsubscribeAck : public Message {
   private:
     bool write_variable_header(uint8_t *buf, uint8_t& len) {}
 

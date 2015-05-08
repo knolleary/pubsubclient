@@ -97,6 +97,10 @@ namespace MQTT {
     return true;
   }
 
+  bool Message::write_packet_id(uint8_t *buf, uint8_t& len) {
+    write(buf, len, _packet_id);
+  }
+
   bool Message::send(WiFiClient& wclient) {
     uint8_t packet[MQTT_MAX_PACKET_SIZE];
     uint8_t remaining_length = 0;
@@ -195,10 +199,6 @@ namespace MQTT {
     free(remaining_data);
 
     return obj;
-  }
-
-  bool with_packet_id::write_packet_id(uint8_t *buf, uint8_t& len) {
-    write(buf, len, _packet_id);
   }
 
 
@@ -306,7 +306,6 @@ namespace MQTT {
   // Publish class
   Publish::Publish(String topic, String payload) :
     Message(MQTTPUBLISH),
-    with_packet_id(0),
     _topic(topic),
     _payload_mine(false)
   {
@@ -318,7 +317,6 @@ namespace MQTT {
 
   Publish::Publish(String topic, uint8_t* payload, uint8_t length) :
     Message(MQTTPUBLISH),
-    with_packet_id(0),
     _topic(topic),
     _payload(payload), _payload_len(length),
     _payload_mine(false)
@@ -326,7 +324,6 @@ namespace MQTT {
 
   Publish::Publish(uint8_t flags, uint8_t* data, uint8_t length) :
     Message(MQTTPUBLISH, flags),
-    with_packet_id(0),
     _payload_mine(false)
   {
     uint8_t pos = 0;
@@ -410,13 +407,11 @@ namespace MQTT {
 
   // PublishAck class
   PublishAck::PublishAck(uint16_t pid) :
-    Message(MQTTPUBACK),
-    with_packet_id(pid)
+    Message(MQTTPUBACK, pid)
   {}
 
   PublishAck::PublishAck(uint8_t* data, uint8_t length) :
-    Message(MQTTPUBACK),
-    with_packet_id(0)
+    Message(MQTTPUBACK)
   {
     uint8_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
@@ -425,13 +420,11 @@ namespace MQTT {
 
   // PublishRec class
   PublishRec::PublishRec(uint16_t pid) :
-    Message(MQTTPUBREC),
-    with_packet_id(pid)
+    Message(MQTTPUBREC, pid)
   {}
 
   PublishRec::PublishRec(uint8_t* data, uint8_t length) :
-    Message(MQTTPUBREC),
-    with_packet_id(0)
+    Message(MQTTPUBREC)
   {
     uint8_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
@@ -444,13 +437,11 @@ namespace MQTT {
 
   // PublishRel class
   PublishRel::PublishRel(uint16_t pid) :
-    Message(MQTTPUBREL),
-    with_packet_id(pid)
+    Message(MQTTPUBREL, pid)
   {}
 
   PublishRel::PublishRel(uint8_t* data, uint8_t length) :
-    Message(MQTTPUBREL),
-    with_packet_id(0)
+    Message(MQTTPUBREL)
   {
     uint8_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
@@ -463,13 +454,11 @@ namespace MQTT {
 
   // PublishComp class
   PublishComp::PublishComp(uint16_t pid) :
-    Message(MQTTPUBREC),
-    with_packet_id(pid)
+    Message(MQTTPUBREC, pid)
   {}
 
   PublishComp::PublishComp(uint8_t* data, uint8_t length) :
-    Message(MQTTPUBCOMP),
-    with_packet_id(0)
+    Message(MQTTPUBCOMP)
   {
     uint8_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
@@ -482,8 +471,7 @@ namespace MQTT {
 
   // Subscribe class
   Subscribe::Subscribe(uint16_t pid, String topic, uint8_t qos) :
-    Message(MQTTSUBSCRIBE),
-    with_packet_id(pid),
+    Message(MQTTSUBSCRIBE, pid),
     _buffer(NULL), _buflen(0)
   {
     _buffer = (uint8_t*)malloc(2 + topic.length() + 1);
@@ -513,8 +501,7 @@ namespace MQTT {
 
   // SubscribeAck class
   SubscribeAck::SubscribeAck(uint8_t* data, uint8_t length) :
-    Message(MQTTSUBACK),
-    with_packet_id(0)
+    Message(MQTTSUBACK)
   {
     uint8_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
@@ -532,8 +519,7 @@ namespace MQTT {
 
   // Unsubscribe class
   Unsubscribe::Unsubscribe(uint16_t pid, String topic) :
-    Message(MQTTSUBSCRIBE),
-    with_packet_id(pid),
+    Message(MQTTSUBSCRIBE, pid),
     _buffer(NULL), _buflen(0)
   {
     _buffer = (uint8_t*)malloc(2 + topic.length());
@@ -562,8 +548,7 @@ namespace MQTT {
 
   // SubscribeAck class
   UnsubscribeAck::UnsubscribeAck(uint8_t* data, uint8_t length) :
-    Message(MQTTUNSUBACK),
-    with_packet_id(0)
+    Message(MQTTUNSUBACK)
   {
     uint8_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
