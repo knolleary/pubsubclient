@@ -110,8 +110,7 @@ bool PubSubClient::loop() {
     } else {
       MQTT::Ping ping;
       ping.send(_client);
-      lastOutActivity = t;
-      lastInActivity = t;
+      lastInActivity = lastOutActivity = t;
       pingOutstanding = true;
     }
   }
@@ -198,7 +197,10 @@ bool PubSubClient::publish(MQTT::Publish &pub) {
   if (!connected())
     return false;
 
-  return pub.send(_client);
+  bool ret = pub.send(_client);
+  lastOutActivity = millis();
+
+  return ret;
 }
 
 bool PubSubClient::subscribe(String topic, uint8_t qos) {
@@ -216,7 +218,10 @@ bool PubSubClient::subscribe(MQTT::Subscribe &sub) {
   if (!connected())
     return false;
 
-  return sub.send(_client);
+  bool ret = sub.send(_client);
+  lastOutActivity = millis();
+
+  return ret;
 }
 
 bool PubSubClient::unsubscribe(String topic) {
@@ -231,7 +236,10 @@ bool PubSubClient::unsubscribe(MQTT::Unsubscribe &unsub) {
   if (!connected())
     return false;
 
-  return unsub.send(_client);
+  bool ret = unsub.send(_client);
+  lastOutActivity = millis();
+
+  return ret;
 }
 
 void PubSubClient::disconnect() {
