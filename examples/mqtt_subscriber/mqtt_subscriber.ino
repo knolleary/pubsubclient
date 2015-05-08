@@ -17,7 +17,7 @@ IPAddress server(172, 16, 0, 2);
 void callback(const MQTT::Publish& pub) {
   Serial.print(pub.topic());
   Serial.print(" => ");
-  Serial.print(pub.payload_string());
+  Serial.println(pub.payload_string());
 }
 
 PubSubClient client(server);
