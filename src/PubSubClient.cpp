@@ -44,6 +44,9 @@ PubSubClient& PubSubClient::unset_stream(void) {
 */
 
 bool PubSubClient::connect(String id) {
+  if (connected())
+    return false;
+
   return connect(id, "", 0, false, "");
 }
 
@@ -70,9 +73,9 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
 
   if (result) {
     nextMsgId = 1;
-         
+
     conn.send(_client);
-         
+
     lastInActivity = lastOutActivity = millis();
 
     keepalive = conn.keepalive();	// Store the keepalive period from this connection
@@ -96,146 +99,147 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
 }
 
 bool PubSubClient::loop() {
-   if (connected()) {
-      unsigned long t = millis();
-      if ((t - lastInActivity > keepalive * 1000UL) || (t - lastOutActivity > keepalive * 1000UL)) {
-         if (pingOutstanding) {
-            _client.stop();
-            return false;
-         } else {
-	    MQTT::Ping ping;
-	    ping.send(_client);
-            lastOutActivity = t;
-            lastInActivity = t;
-            pingOutstanding = true;
-         }
-      }
-      if (_client.available()) {
-	 MQTT::Message *msg = MQTT::readPacket(_client);
-	 if (msg != NULL) {
-            lastInActivity = t;
-            switch (msg->type()) {
-	    case MQTTPUBLISH:
-	      if (_callback) {
-		auto pub = (MQTT::Publish*)msg;
-		if (pub->qos()) {
-		  _callback(*pub);
+  if (!connected())
+    return false;
+
+  unsigned long t = millis();
+  if ((t - lastInActivity > keepalive * 1000UL) || (t - lastOutActivity > keepalive * 1000UL)) {
+    if (pingOutstanding) {
+      _client.stop();
+      return false;
+    } else {
+      MQTT::Ping ping;
+      ping.send(_client);
+      lastOutActivity = t;
+      lastInActivity = t;
+      pingOutstanding = true;
+    }
+  }
+  if (_client.available()) {
+    MQTT::Message *msg = MQTT::readPacket(_client);
+    if (msg != NULL) {
+      lastInActivity = t;
+      switch (msg->type()) {
+      case MQTTPUBLISH:
+	if (_callback) {
+	  auto pub = (MQTT::Publish*)msg;
+	  if (pub->qos()) {
+	    _callback(*pub);
                     
-		  MQTT::PublishAck puback(pub->packet_id());
-		  puback.send(_client);
-		  lastOutActivity = t;
+	    MQTT::PublishAck puback(pub->packet_id());
+	    puback.send(_client);
+	    lastOutActivity = t;
 
-		} else {
-		  _callback(*pub);
-		}
-	      }
-	      free(msg);
-	      return true;
+	  } else {
+	    _callback(*pub);
+	  }
+	}
+	free(msg);
+	return true;
 
-	    case MQTTPUBREC:
-	      {
-		auto pubrec = (MQTT::PublishRec*)msg;
-		MQTT::PublishRel pubrel(pubrec->packet_id());
-		pubrel.send(_client);
-		lastOutActivity = t;
-	      }
-	      free(msg);
-	      return true;
+      case MQTTPUBREC:
+	{
+	  auto pubrec = (MQTT::PublishRec*)msg;
+	  MQTT::PublishRel pubrel(pubrec->packet_id());
+	  pubrel.send(_client);
+	  lastOutActivity = t;
+	}
+	free(msg);
+	return true;
 
-	    case MQTTPUBREL:
-	      {
-		auto pubrel = (MQTT::PublishRel*)msg;
-		MQTT::PublishComp pubcomp(pubrel->packet_id());
-		pubcomp.send(_client);
-		lastOutActivity = t;
-	      }
-	      free(msg);
-	      return true;
+      case MQTTPUBREL:
+	{
+	  auto pubrel = (MQTT::PublishRel*)msg;
+	  MQTT::PublishComp pubcomp(pubrel->packet_id());
+	  pubcomp.send(_client);
+	  lastOutActivity = t;
+	}
+	free(msg);
+	return true;
 
-	    case MQTTPINGREQ:
-	      {
-		MQTT::PingResp pr;
-		pr.send(_client);
-		lastOutActivity = t;
-	      }
-	      free(msg);
-	      return true;
+      case MQTTPINGREQ:
+	{
+	  MQTT::PingResp pr;
+	  pr.send(_client);
+	  lastOutActivity = t;
+	}
+	free(msg);
+	return true;
 
-            case MQTTPINGRESP:
-	      pingOutstanding = false;
-	      free(msg);
-	      return true;
-	    }
-	    free(msg);
-	 }
+      case MQTTPINGRESP:
+	pingOutstanding = false;
+	free(msg);
+	return true;
       }
-      return true;
-   }
-   return false;
+      free(msg);
+    }
+  }
+  return true;
 }
 
 bool PubSubClient::publish(String topic, String payload) {
-   if (connected()) {
-     MQTT::Publish pub(topic, payload);
-     return pub.send(_client);
-   }
-   return false;
+  if (!connected())
+    return false;
+
+  MQTT::Publish pub(topic, payload);
+  return pub.send(_client);
 }
 
 bool PubSubClient::publish(String topic, const uint8_t* payload, unsigned int plength, bool retained) {
-   if (connected()) {
-     MQTT::Publish pub(topic, const_cast<uint8_t*>(payload), plength);
-     pub.set_retain(retained);
-     return pub.send(_client);
-   }
-   return false;
+  if (!connected())
+    return false;
+
+  MQTT::Publish pub(topic, const_cast<uint8_t*>(payload), plength);
+  pub.set_retain(retained);
+  return publish(pub);
 }
 
 bool PubSubClient::publish(MQTT::Publish &pub) {
-  if (connected())
-    return pub.send(_client);
-  return false;
+  if (!connected())
+    return false;
+
+  return pub.send(_client);
 }
 
 bool PubSubClient::subscribe(String topic, uint8_t qos) {
-   if (qos > 2)
-     return false;
+  if (!connected())
+    return false;
 
-   if (connected()) {
-      nextMsgId++;
-      if (nextMsgId == 0)
-	nextMsgId = 1;
+  if (qos > 2)
+    return false;
 
-      MQTT::Subscribe sub(nextMsgId, topic, qos);
-      return sub.send(_client);
-   }
-   return false;
+  nextMsgId++;
+  if (nextMsgId == 0)
+    nextMsgId = 1;
+
+  MQTT::Subscribe sub(nextMsgId, topic, qos);
+  return sub.send(_client);
 }
 
 bool PubSubClient::subscribe(MQTT::Subscribe &sub) {
-   if (connected())
-      return sub.send(_client);
+  if (!connected())
+    return false;
 
-   return false;
+  return sub.send(_client);
 }
 
 bool PubSubClient::unsubscribe(String topic) {
-   if (connected()) {
-      nextMsgId++;
-      if (nextMsgId == 0)
-         nextMsgId = 1;
+  if (!connected())
+    return false;
 
-      MQTT::Unsubscribe unsub(nextMsgId, topic);
-      return unsub.send(_client);
-   }
-   return false;
+  nextMsgId++;
+  if (nextMsgId == 0)
+    nextMsgId = 1;
+
+  MQTT::Unsubscribe unsub(nextMsgId, topic);
+  return unsub.send(_client);
 }
 
 bool PubSubClient::unsubscribe(MQTT::Unsubscribe &unsub) {
-   if (connected())
-      return unsub.send(_client);
+  if (!connected())
+    return false;
 
-   return false;
+  return unsub.send(_client);
 }
 
 void PubSubClient::disconnect() {
