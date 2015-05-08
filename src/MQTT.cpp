@@ -404,6 +404,17 @@ namespace MQTT {
     write(buf, len, _payload, _payload_len);
   }
 
+  uint8_t Publish::response_type(void) const {
+    switch (qos()) {
+    case 0:
+      return 0;
+    case 1:
+      return MQTTPUBACK;
+    case 2:
+      return MQTTPUBREC;
+    }
+  }
+
 
   // PublishAck class
   PublishAck::PublishAck(uint16_t pid) :

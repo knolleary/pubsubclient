@@ -69,6 +69,8 @@ namespace MQTT {
     virtual bool write_variable_header(uint8_t *buf, uint8_t& len) = 0;
     virtual bool write_payload(uint8_t *buf, uint8_t& len) {}
 
+    virtual uint8_t response_type(void) const { return 0; }
+
   public:
     // Send the message out
     bool send(WiFiClient& wclient);
@@ -101,6 +103,8 @@ namespace MQTT {
     bool write_variable_header(uint8_t *buf, uint8_t& len);
     bool write_payload(uint8_t *buf, uint8_t& len);
 
+    uint8_t response_type(void) const { return MQTTCONNACK; }
+
   public:
     // Connect with a client ID
     Connect(String cid);
@@ -120,6 +124,7 @@ namespace MQTT {
     uint16_t keepalive(void) const { return _keepalive; }
     // Set the keepalive period
     Connect& set_keepalive(uint16_t k);
+
   };
 
 
@@ -145,6 +150,8 @@ namespace MQTT {
 
     bool write_variable_header(uint8_t *buf, uint8_t& len);
     bool write_payload(uint8_t *buf, uint8_t& len);
+
+    uint8_t response_type(void) const;
 
   public:
     // Constructors for creating our own message to publish
@@ -173,6 +180,7 @@ namespace MQTT {
     String payload_string(void) const;
     uint8_t* payload(void) const { return _payload; }
     uint8_t payload_len(void) const { return _payload_len; }
+
   };
 
 
@@ -193,10 +201,13 @@ namespace MQTT {
   private:
     bool write_variable_header(uint8_t *buf, uint8_t& len);
 
+    uint8_t response_type(void) const { return MQTTPUBREL; }
+
   public:
     PublishRec(uint16_t pid);
 
     PublishRec(uint8_t* data, uint8_t length);
+
   };
 
 
@@ -205,10 +216,13 @@ namespace MQTT {
   private:
     bool write_variable_header(uint8_t *buf, uint8_t& len);
 
+    uint8_t response_type(void) const { return MQTTPUBCOMP; }
+
   public:
     PublishRel(uint16_t pid);
 
     PublishRel(uint8_t* data, uint8_t length);
+
   };
 
 
@@ -232,6 +246,8 @@ namespace MQTT {
     bool write_variable_header(uint8_t *buf, uint8_t& len);
     bool write_payload(uint8_t *buf, uint8_t& len);
 
+    uint8_t response_type(void) const { return MQTTSUBACK; }
+
   public:
     // Subscribe with a packet id, topic, and optional QoS level
     Subscribe(uint16_t pid, String topic, uint8_t qos = 0);
@@ -240,6 +256,7 @@ namespace MQTT {
 
     // Add another topic and optional QoS level
     Subscribe& add_topic(String topic, uint8_t qos = 0);
+
   };
 
 
@@ -267,6 +284,8 @@ namespace MQTT {
     bool write_variable_header(uint8_t *buf, uint8_t& len);
     bool write_payload(uint8_t *buf, uint8_t& len);
 
+    uint8_t response_type(void) const { return MQTTUNSUBACK; }
+
   public:
     // Unsubscribe from a topic, with a packet id
     Unsubscribe(uint16_t pid, String topic);
@@ -275,6 +294,7 @@ namespace MQTT {
 
     // Add another topic to unsubscribe from
     Unsubscribe& add_topic(String topic);
+
   };
 
 
@@ -293,6 +313,8 @@ namespace MQTT {
   private:
     bool write_variable_header(uint8_t *buf, uint8_t& len) {}
 
+    uint8_t response_type(void) const { return MQTTPINGRESP; }
+
   public:
     Ping() :
       Message(MQTTPINGREQ)
@@ -301,6 +323,7 @@ namespace MQTT {
     Ping(uint8_t* data, uint8_t length) :
       Message(MQTTPINGREQ)
     {}
+
   };
 
 
