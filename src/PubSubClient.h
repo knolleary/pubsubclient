@@ -8,7 +8,6 @@
 #define PubSubClient_h
 
 #include <Arduino.h>
-//#include <Stream.h>
 #include <ESP8266WiFi.h>
 
 #include "MQTT.h"
@@ -22,7 +21,6 @@ private:
    String server_hostname;
    uint16_t server_port;
    callback_t _callback;
-  //   Stream *_stream;
 
    WiFiClient _client;
    uint16_t nextMsgId, keepalive;
@@ -45,12 +43,6 @@ public:
    callback_t callback(void) const { return _callback; }
    PubSubClient& set_callback(callback_t cb);
    PubSubClient& unset_callback(void);
-
-  /*
-   Stream* stream(void) const { return _stream; }
-   PubSubClient& set_stream(Stream &s);
-   PubSubClient& unset_stream(void);
-  */
 
    bool connect(String id);
    bool connect(String id, String willTopic, uint8_t willQos, bool willRetain, String willMessage);

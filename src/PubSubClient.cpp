@@ -9,14 +9,12 @@
 
 PubSubClient::PubSubClient(IPAddress &ip, uint16_t port) :
   _callback(NULL),
-  //  _stream(NULL),
   server_ip(ip),
   server_port(port)
 {}
 
 PubSubClient::PubSubClient(String hostname, uint16_t port) :
   _callback(NULL),
-  //  _stream(NULL),
   server_port(port),
   server_hostname(hostname)
 {}
@@ -30,18 +28,6 @@ PubSubClient& PubSubClient::unset_callback(void) {
   _callback = NULL;
   return *this;
 }
-
-/*
-PubSubClient& PubSubClient::set_stream(Stream &s) {
-  _stream = &s;
-  return *this;
-}
-
-PubSubClient& PubSubClient::unset_stream(void) {
-  _stream = NULL;
-  return *this;
-}
-*/
 
 bool PubSubClient::_process_message(MQTT::Message* msg, uint8_t match_type, uint16_t match_pid) {
   lastInActivity = millis();
