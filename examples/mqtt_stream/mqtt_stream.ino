@@ -25,13 +25,12 @@ void callback(const MQTT::Publish& pub) {
   sram.seek(1);
 
   // do something with the message
-  for(uint8_t i=0; i<length; i++) {
-    Serial.write(sram.read());
+  for (uint8_t i = 0; i < pub.payload_len(); i++) {
+    sram.write(pub.payload()[i]);
+    Serial.write(pub.payload()[i]);
   }
+
   Serial.println();
-  
-  // Reset position for the next message to be stored
-  sram.seek(1);
 }
 
 PubSubClient client(server);
@@ -44,9 +43,7 @@ void setup()
   Serial.println();
   Serial.println();
 
-  client
-    .set_callback(callback)
-    .set_stream(sram);
+  client.set_callback(callback);
 
   WiFi.begin(ssid, pass);
 
