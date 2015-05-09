@@ -252,46 +252,6 @@ namespace MQTT {
     }
   }
 
-  Connect& Connect::set_clean_session(bool cs) {
-    _clean_session = cs;
-    return *this;
-  }
-
-  Connect& Connect::unset_clean_session(void) {
-    _clean_session = false;
-    return *this;
-  }
-
-  Connect& Connect::set_will(String willTopic, String willMessage, uint8_t willQos, bool willRetain) {
-    _will_topic = willTopic;
-    _will_message = willMessage;
-    _will_qos = willQos;
-    _will_retain = willRetain;
-    return *this;
-  }
-
-  Connect& Connect::unset_will(void) {
-    _will_topic = "";
-    return *this;
-  }
-
-  Connect& Connect::set_auth(String u, String p) {
-    _username = u;
-    _password = p;
-    return *this;
-  }
-
-  Connect& Connect::unset_auth(void) {
-    _username = "";
-    _password = "";
-    return *this;
-  }
-
-  Connect& Connect::set_keepalive(uint16_t k) {
-    _keepalive = k;
-    return *this;
-  }
-
 
   // ConnectAck class
   ConnectAck::ConnectAck(uint8_t* data, uint8_t length) :

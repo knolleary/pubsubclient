@@ -114,20 +114,23 @@ namespace MQTT {
     Connect(String cid);
 
     // Set or unset the "clear session" flag
-    Connect& set_clean_session(bool cs = true);
-    Connect& unset_clean_session(void);
+    Connect& set_clean_session(bool cs = true) { _clean_session = cs; return *this; }
+    Connect& unset_clean_session(void) { _clean_session = false; return *this; }
 
     // Set or unset the "will" flag and associated attributes
-    Connect& set_will(String willTopic, String willMessage, uint8_t willQos = 0, bool willRetain = false);
-    Connect& unset_will(void);
+    Connect& set_will(String willTopic, String willMessage, uint8_t willQos = 0, bool willRetain = false) {
+      _will_topic = willTopic; _will_message = willMessage; _will_qos = willQos; _will_retain = willRetain;
+      return *this;
+    }
+    Connect& unset_will(void) { _will_topic = ""; return *this; }
 
     // Set or unset the username and password for authentication
-    Connect& set_auth(String u, String p);
-    Connect& unset_auth(void);
+    Connect& set_auth(String u, String p) { _username = u; _password = p; return *this; }
+    Connect& unset_auth(void) { _username = ""; _password = ""; return *this; }
 
     uint16_t keepalive(void) const { return _keepalive; }
     // Set the keepalive period
-    Connect& set_keepalive(uint16_t k);
+    Connect& set_keepalive(uint16_t k) { _keepalive = k; return *this; }
 
   };
 
