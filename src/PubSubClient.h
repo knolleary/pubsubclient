@@ -42,8 +42,8 @@ public:
    PubSubClient(String hostname, uint16_t port = 1883);
 
    callback_t callback(void) const { return _callback; }
-   PubSubClient& set_callback(callback_t cb);
-   PubSubClient& unset_callback(void);
+   PubSubClient& set_callback(callback_t cb) { _callback = cb; return *this; }
+   PubSubClient& unset_callback(void) { _callback = NULL; return * this; }
 
    PubSubClient& set_max_retries(uint8_t mr) { _max_retries = mr; return *this; }
 

@@ -21,16 +21,6 @@ PubSubClient::PubSubClient(String hostname, uint16_t port) :
   server_hostname(hostname)
 {}
 
-PubSubClient& PubSubClient::set_callback(callback_t cb) {
-  _callback = cb;
-  return *this;
-}
-
-PubSubClient& PubSubClient::unset_callback(void) {
-  _callback = NULL;
-  return *this;
-}
-
 bool PubSubClient::_process_message(MQTT::Message* msg, uint8_t match_type, uint16_t match_pid) {
   lastInActivity = millis();
   if (msg->type() == match_type) {
