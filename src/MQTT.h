@@ -263,6 +263,9 @@ namespace MQTT {
     uint8_t response_type(void) const { return MQTTSUBACK; }
 
   public:
+    // Constructor that starts with a packet id and empty list of subscriptions
+    Subscribe(uint16_t pid);
+
     // Subscribe with a packet id, topic, and optional QoS level
     Subscribe(uint16_t pid, String topic, uint8_t qos = 0);
 
@@ -301,6 +304,9 @@ namespace MQTT {
     uint8_t response_type(void) const { return MQTTUNSUBACK; }
 
   public:
+    // Constructor that starts with a packet id and empty list of unsubscriptions
+    Unsubscribe(uint16_t pid);
+
     // Unsubscribe from a topic, with a packet id
     Unsubscribe(uint16_t pid, String topic);
 

@@ -410,6 +410,11 @@ namespace MQTT {
 
 
   // Subscribe class
+  Subscribe::Subscribe(uint16_t pid) :
+    Message(MQTTSUBSCRIBE, pid),
+    _buffer(NULL), _buflen(0)
+  {}
+
   Subscribe::Subscribe(uint16_t pid, String topic, uint8_t qos) :
     Message(MQTTSUBSCRIBE, pid),
     _buffer(NULL), _buflen(0)
@@ -458,6 +463,11 @@ namespace MQTT {
 
 
   // Unsubscribe class
+  Unsubscribe::Unsubscribe(uint16_t pid) :
+    Message(MQTTSUBSCRIBE, pid),
+    _buffer(NULL), _buflen(0)
+  {}
+
   Unsubscribe::Unsubscribe(uint16_t pid, String topic) :
     Message(MQTTSUBSCRIBE, pid),
     _buffer(NULL), _buflen(0)
