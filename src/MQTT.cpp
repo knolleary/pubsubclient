@@ -302,19 +302,6 @@ namespace MQTT {
       free(_payload);
   }
 
-  Publish& Publish::set_retain(bool r) {
-    if (r)
-      _flags |= 0x01;
-    else
-      _flags &= ~0x01;
-    return *this;
-  }
-
-  Publish& Publish::unset_retain(void) {
-    _flags &= ~0x01;
-    return *this;
-  }
-
   Publish& Publish::set_qos(uint8_t q, uint16_t pid) {
     if (q > 2)
       q = 2;
@@ -324,24 +311,6 @@ namespace MQTT {
       _flags |= q << 1;
       _packet_id = pid;
     }
-    return *this;
-  }
-
-  Publish& Publish::unset_qos(void) {
-    _flags &= ~0x06;
-    return *this;
-  }
-
-  Publish& Publish::set_dup(bool d) {
-    if (d)
-      _flags |= 0x08;
-    else
-      _flags &= ~0x08;
-    return *this;
-  }
-
-  Publish& Publish::unset_dup(void) {
-    _flags &= ~0x08;
     return *this;
   }
 

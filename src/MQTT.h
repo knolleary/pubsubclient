@@ -170,21 +170,28 @@ namespace MQTT {
 
     ~Publish();
 
-    bool retain(void) const { return _flags & 0x01; }
-    Publish& set_retain(bool r = true);
-    Publish& unset_retain(void);
+    // Get or set retain flag
+    bool retain(void) const		{ return _flags & 0x01; }
+    Publish& set_retain(bool r = true)	{ _flags = (_flags & ~0x01) | r; return *this; }
+    Publish& unset_retain(void)		{ _flags = _flags & ~0x01; return *this; }
 
-    uint8_t qos(void) const { return (_flags >> 1) & 0x03; }
+    // Get or set QoS value
+    uint8_t qos(void) const		{ return (_flags >> 1) & 0x03; }
     Publish& set_qos(uint8_t q, uint16_t pid = 0);
-    Publish& unset_qos(void);
+    Publish& unset_qos(void)		{ _flags &= ~0x06; return *this; }
 
-    bool dup(void) const { return (_flags >> 3) & 0x01; }
-    Publish& set_dup(bool d = true);
-    Publish& unset_dup(void);
+    // Get or set dup flag
+    bool dup(void) const		{ return (_flags >> 3) & 0x01; }
+    Publish& set_dup(bool d = true)	{ _flags = (_flags & ~0x08) | (d ? 0x08 : 0); return *this; }
+    Publish& unset_dup(void)		{ _flags = _flags & ~0x08; return *this; }
 
+    // Stopic string
     String topic(void) const { return _topic; }
 
+    // Payload as a string
     String payload_string(void) const;
+
+    // Get the payload pointer and length
     uint8_t* payload(void) const { return _payload; }
     uint8_t payload_len(void) const { return _payload_len; }
 
