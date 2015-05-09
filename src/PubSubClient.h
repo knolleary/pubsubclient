@@ -24,6 +24,7 @@ private:
 
    WiFiClient _client;
    uint16_t nextMsgId, keepalive;
+   uint8_t _max_retries;
    unsigned long lastOutActivity;
    unsigned long lastInActivity;
    bool pingOutstanding;
@@ -43,6 +44,8 @@ public:
    callback_t callback(void) const { return _callback; }
    PubSubClient& set_callback(callback_t cb);
    PubSubClient& unset_callback(void);
+
+   PubSubClient& set_max_retries(uint8_t mr) { _max_retries = mr; return *this; }
 
    bool connect(String id);
    bool connect(String id, String willTopic, uint8_t willQos, bool willRetain, String willMessage);

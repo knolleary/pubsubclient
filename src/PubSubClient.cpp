@@ -9,12 +9,14 @@
 
 PubSubClient::PubSubClient(IPAddress &ip, uint16_t port) :
   _callback(NULL),
+  _max_retries(10),
   server_ip(ip),
   server_port(port)
 {}
 
 PubSubClient::PubSubClient(String hostname, uint16_t port) :
   _callback(NULL),
+  _max_retries(10),
   server_port(port),
   server_hostname(hostname)
 {}
@@ -116,7 +118,7 @@ bool PubSubClient::send_reliably(MQTT::Message* msg) {
     return true;
 
   if (!wait_for(msg->response_type(), msg->packet_id())) {
-    if (retries < 10) {
+    if (retries < _max_retries) {
       retries++;
       goto send;
     }
