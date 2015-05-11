@@ -87,7 +87,7 @@ bool PubSubClient::wait_for(uint8_t match_type, uint16_t match_pid) {
     MQTT::Message *msg = MQTT::readPacket(_client);
     if (msg != NULL) {
       bool ret = _process_message(msg, match_type, match_pid);
-      free(msg);
+      delete msg;
       if (ret)
 	return true;
     }
@@ -182,7 +182,7 @@ bool PubSubClient::loop() {
     MQTT::Message *msg = MQTT::readPacket(_client);
     if (msg != NULL) {
       _process_message(msg);
-      free(msg);
+      delete msg;
     }
   }
   return true;

@@ -63,6 +63,8 @@ namespace MQTT {
       _packet_id(pid)
     {}
 
+    virtual ~Message() {}
+
     // Write the fixed header to a buffer
     virtual bool write_fixed_header(uint8_t *buf, uint8_t& len, uint8_t rlength);
 
