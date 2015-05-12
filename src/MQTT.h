@@ -82,9 +82,10 @@ namespace MQTT {
     // Send the message out
     bool send(WiFiClient& wclient);
 
-    // Get message type
+    // Get the message type
     uint8_t type(void) const { return _type; }
 
+    // Get the packet id
     uint16_t packet_id(void) const { return _packet_id; }
   };
 
@@ -117,23 +118,23 @@ namespace MQTT {
     Connect(String cid);
 
     // Set or unset the "clear session" flag
-    Connect& set_clean_session(bool cs = true) { _clean_session = cs; return *this; }
-    Connect& unset_clean_session(void) { _clean_session = false; return *this; }
+    Connect& set_clean_session(bool cs = true)	{ _clean_session = cs; return *this; }
+    Connect& unset_clean_session(void)		{ _clean_session = false; return *this; }
 
     // Set or unset the "will" flag and associated attributes
     Connect& set_will(String willTopic, String willMessage, uint8_t willQos = 0, bool willRetain = false) {
       _will_topic = willTopic; _will_message = willMessage; _will_qos = willQos; _will_retain = willRetain;
       return *this;
     }
-    Connect& unset_will(void) { _will_topic = ""; return *this; }
+    Connect& unset_will(void)			{ _will_topic = ""; return *this; }
 
     // Set or unset the username and password for authentication
-    Connect& set_auth(String u, String p) { _username = u; _password = p; return *this; }
-    Connect& unset_auth(void) { _username = ""; _password = ""; return *this; }
+    Connect& set_auth(String u, String p)	{ _username = u; _password = p; return *this; }
+    Connect& unset_auth(void)			{ _username = ""; _password = ""; return *this; }
 
-    uint16_t keepalive(void) const { return _keepalive; }
-    // Set the keepalive period
-    Connect& set_keepalive(uint16_t k) { _keepalive = k; return *this; }
+    // Get or set the keepalive period
+    uint16_t keepalive(void) const	{ return _keepalive; }
+    Connect& set_keepalive(uint16_t k)	{ _keepalive = k; return *this; }
 
   };
 
@@ -147,6 +148,7 @@ namespace MQTT {
     bool write_variable_header(uint8_t *buf, uint8_t& bufpos) {}
 
   public:
+    // Construct from a network buffer
     ConnectAck(uint8_t* data, uint8_t length);
   };
 
@@ -168,7 +170,7 @@ namespace MQTT {
     Publish(String topic, String payload);
     Publish(String topic, uint8_t* payload, uint8_t length);
 
-    // Constructor for incoming messages
+    // Construct from a network buffer
     Publish(uint8_t flags, uint8_t* data, uint8_t length);
 
     ~Publish();
@@ -207,8 +209,10 @@ namespace MQTT {
     bool write_variable_header(uint8_t *buf, uint8_t& bufpos) {}
 
   public:
+    // Construct with a packet id
     PublishAck(uint16_t pid);
 
+    // Construct from a network buffer
     PublishAck(uint8_t* data, uint8_t length);
   };
 
@@ -221,8 +225,10 @@ namespace MQTT {
     uint8_t response_type(void) const { return MQTTPUBREL; }
 
   public:
+    // Construct with a packet id
     PublishRec(uint16_t pid);
 
+    // Construct from a network buffer
     PublishRec(uint8_t* data, uint8_t length);
 
   };
@@ -236,8 +242,10 @@ namespace MQTT {
     uint8_t response_type(void) const { return MQTTPUBCOMP; }
 
   public:
+    // Construct with a packet id
     PublishRel(uint16_t pid);
 
+    // Construct from a network buffer
     PublishRel(uint8_t* data, uint8_t length);
 
   };
@@ -249,8 +257,10 @@ namespace MQTT {
     bool write_variable_header(uint8_t *buf, uint8_t& bufpos);
 
   public:
+    // Construct with a packet id
     PublishComp(uint16_t pid);
 
+    // Construct from a network buffer
     PublishComp(uint8_t* data, uint8_t length);
   };
 
@@ -288,11 +298,17 @@ namespace MQTT {
     bool write_variable_header(uint8_t *buf, uint8_t& bufpos) {}
 
   public:
+    // Construct from a network buffer
     SubscribeAck(uint8_t* data, uint8_t length);
+
     ~SubscribeAck();
 
+    // Get the number of return codes available
     uint8_t num_rcs(void) const { return _num_rcs; }
+
+    // Get a return code
     uint8_t rc(uint8_t i) const { return _rcs[i]; }
+
   };
 
 
@@ -327,7 +343,9 @@ namespace MQTT {
     bool write_variable_header(uint8_t *buf, uint8_t& bufpos) {}
 
   public:
+    // Construct from a network buffer
     UnsubscribeAck(uint8_t* data, uint8_t length);
+
   };
 
 
@@ -339,10 +357,12 @@ namespace MQTT {
     uint8_t response_type(void) const { return MQTTPINGRESP; }
 
   public:
+    // Constructor
     Ping() :
       Message(MQTTPINGREQ)
     {}
 
+    // Construct from a network buffer
     Ping(uint8_t* data, uint8_t length) :
       Message(MQTTPINGREQ)
     {}
@@ -356,13 +376,16 @@ namespace MQTT {
     bool write_variable_header(uint8_t *buf, uint8_t& bufpos) {}
 
   public:
+    // Constructor
     PingResp() :
       Message(MQTTPINGRESP)
     {}
 
+    // Construct from a network buffer
     PingResp(uint8_t* data, uint8_t length) :
       Message(MQTTPINGRESP)
     {}
+
   };
 
 
@@ -372,9 +395,11 @@ namespace MQTT {
     bool write_variable_header(uint8_t *buf, uint8_t& bufpos) {}
 
   public:
+    // Constructor
     Disconnect() :
       Message(MQTTDISCONNECT)
     {}
+
   };
 
 };
