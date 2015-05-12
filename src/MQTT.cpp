@@ -21,23 +21,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace MQTT {
   // First some convenience functions
-  void write(uint8_t *buf, uint8_t& len, uint16_t data) {
-    buf[len++] = data >> 8;
-    buf[len++] = data & 0xff;
+  void write(uint8_t *buf, uint8_t& bufpos, uint16_t data) {
+    buf[bufpos++] = data >> 8;
+    buf[bufpos++] = data & 0xff;
   }
 
-  void write(uint8_t *buf, uint8_t& len, uint8_t *data, uint8_t dlen) {
-    memcpy(buf + len, data, dlen);
-    len += dlen;
+  void write(uint8_t *buf, uint8_t& bufpos, uint8_t *data, uint8_t dlen) {
+    memcpy(buf + bufpos, data, dlen);
+    bufpos += dlen;
   }
 
-  void write(uint8_t *buf, uint8_t& len, String str) {
+  void write(uint8_t *buf, uint8_t& bufpos, String str) {
     const char* c = str.c_str();
-    uint8_t length_pos = len;
-    len += 2;
+    uint8_t length_pos = bufpos;
+    bufpos += 2;
     uint16_t count = 0;
     while (*c) {
-      buf[len++] = *c++;
+      buf[bufpos++] = *c++;
       count++;
     }
     write(buf, length_pos, count);
@@ -71,19 +71,19 @@ namespace MQTT {
 
 
   // Message class
-  bool Message::write_fixed_header(uint8_t *buf, uint8_t& len, uint8_t rlength) {
-    buf[len] = _type << 4;
+  bool Message::write_fixed_header(uint8_t *buf, uint8_t& bufpos, uint8_t rlength) {
+    buf[bufpos] = _type << 4;
 
     switch (_type) {
     case MQTTPUBLISH:
-      buf[len] |= _flags & 0x0f;
+      buf[bufpos] |= _flags & 0x0f;
       break;
     case MQTTPUBREL:
     case MQTTSUBSCRIBE:
     case MQTTUNSUBSCRIBE:
-      buf[len] |= 0x02;
+      buf[bufpos] |= 0x02;
     }
-    len++;
+    bufpos++;
 
     // Remaning length
     do {
@@ -91,14 +91,14 @@ namespace MQTT {
       rlength >>= 7;
       if (rlength)
 	digit |= 0x80;
-      buf[len++] = digit;
+      buf[bufpos++] = digit;
     } while (rlength);
 
     return true;
   }
 
-  bool Message::write_packet_id(uint8_t *buf, uint8_t& len) {
-    write(buf, len, _packet_id);
+  bool Message::write_packet_id(uint8_t *buf, uint8_t& bufpos) {
+    write(buf, bufpos, _packet_id);
   }
 
   bool Message::send(WiFiClient& wclient) {
@@ -210,45 +210,45 @@ namespace MQTT {
     _keepalive(MQTT_KEEPALIVE)
   {}
 
-  bool Connect::write_variable_header(uint8_t *buf, uint8_t& len) {
-    write(buf, len, "MQTT");	// Protocol name
-    buf[len++] = 4;		// Protocol level
+  bool Connect::write_variable_header(uint8_t *buf, uint8_t& bufpos) {
+    write(buf, bufpos, "MQTT");	// Protocol name
+    buf[bufpos++] = 4;		// Protocol level
 
-    buf[len] = 0;		// Connect flags
+    buf[bufpos] = 0;		// Connect flags
     if (_clean_session)
-      buf[len] |= 0x02;
+      buf[bufpos] |= 0x02;
 
     if (_will_topic.length()) {
-      buf[len] |= 0x04;
+      buf[bufpos] |= 0x04;
 
       if (_will_qos > 2)
 	_will_qos = 2;
-      buf[len] |= _will_qos << 3;
-      buf[len] |= _will_retain << 5;
+      buf[bufpos] |= _will_qos << 3;
+      buf[bufpos] |= _will_retain << 5;
     }
 
     if (_username.length()) {
-      buf[len] |= 0x80;
+      buf[bufpos] |= 0x80;
       if (_password.length())
-	buf[len] |= 0x40;
+	buf[bufpos] |= 0x40;
     }
-    len++;
+    bufpos++;
 
-    write(buf, len, _keepalive);	// Keepalive period
+    write(buf, bufpos, _keepalive);	// Keepalive period
   }
 
-  bool Connect::write_payload(uint8_t *buf, uint8_t& len) {
-    write(buf, len, _clientid);
+  bool Connect::write_payload(uint8_t *buf, uint8_t& bufpos) {
+    write(buf, bufpos, _clientid);
 
     if (_will_topic.length()) {
-      write(buf, len, _will_topic);
-      write(buf, len, _will_message);
+      write(buf, bufpos, _will_topic);
+      write(buf, bufpos, _will_message);
     }
 
     if (_username.length()) {
-      write(buf, len, _username);
+      write(buf, bufpos, _username);
       if (_password.length())
-	write(buf, len, _password);
+	write(buf, bufpos, _password);
     }
   }
 
@@ -323,14 +323,14 @@ namespace MQTT {
     return str;
   }
 
-  bool Publish::write_variable_header(uint8_t *buf, uint8_t& len) {
-    write(buf, len, _topic);
+  bool Publish::write_variable_header(uint8_t *buf, uint8_t& bufpos) {
+    write(buf, bufpos, _topic);
     if (qos())
-      write_packet_id(buf, len);
+      write_packet_id(buf, bufpos);
   }
 
-  bool Publish::write_payload(uint8_t *buf, uint8_t& len) {
-    write(buf, len, _payload, _payload_len);
+  bool Publish::write_payload(uint8_t *buf, uint8_t& bufpos) {
+    write(buf, bufpos, _payload, _payload_len);
   }
 
   uint8_t Publish::response_type(void) const {
@@ -370,8 +370,8 @@ namespace MQTT {
     _packet_id = read<uint16_t>(data, pos);
   }
 
-  bool PublishRec::write_variable_header(uint8_t *buf, uint8_t& len) {
-    write_packet_id(buf, len);
+  bool PublishRec::write_variable_header(uint8_t *buf, uint8_t& bufpos) {
+    write_packet_id(buf, bufpos);
   }
 
 
@@ -387,8 +387,8 @@ namespace MQTT {
     _packet_id = read<uint16_t>(data, pos);
   }
 
-  bool PublishRel::write_variable_header(uint8_t *buf, uint8_t& len) {
-    write_packet_id(buf, len);
+  bool PublishRel::write_variable_header(uint8_t *buf, uint8_t& bufpos) {
+    write_packet_id(buf, bufpos);
   }
 
 
@@ -404,8 +404,8 @@ namespace MQTT {
     _packet_id = read<uint16_t>(data, pos);
   }
 
-  bool PublishComp::write_variable_header(uint8_t *buf, uint8_t& len) {
-    write_packet_id(buf, len);
+  bool PublishComp::write_variable_header(uint8_t *buf, uint8_t& bufpos) {
+    write_packet_id(buf, bufpos);
   }
 
 
@@ -435,12 +435,12 @@ namespace MQTT {
     return *this;
   }
 
-  bool Subscribe::write_variable_header(uint8_t *buf, uint8_t& len) {
-    write_packet_id(buf, len);
+  bool Subscribe::write_variable_header(uint8_t *buf, uint8_t& bufpos) {
+    write_packet_id(buf, bufpos);
   }
 
-  bool Subscribe::write_payload(uint8_t *buf, uint8_t& len) {
-    write(buf, len, _buffer, _buflen);
+  bool Subscribe::write_payload(uint8_t *buf, uint8_t& bufpos) {
+    write(buf, bufpos, _buffer, _buflen);
   }
 
 
@@ -487,12 +487,12 @@ namespace MQTT {
     return *this;
   }
 
-  bool Unsubscribe::write_variable_header(uint8_t *buf, uint8_t& len) {
-    write_packet_id(buf, len);
+  bool Unsubscribe::write_variable_header(uint8_t *buf, uint8_t& bufpos) {
+    write_packet_id(buf, bufpos);
   }
 
-  bool Unsubscribe::write_payload(uint8_t *buf, uint8_t& len) {
-    write(buf, len, _buffer, _buflen);
+  bool Unsubscribe::write_payload(uint8_t *buf, uint8_t& bufpos) {
+    write(buf, bufpos, _buffer, _buflen);
   }
 
 
