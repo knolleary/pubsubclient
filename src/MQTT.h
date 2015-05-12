@@ -66,7 +66,7 @@ namespace MQTT {
     virtual ~Message() {}
 
     // Write the fixed header to a buffer
-    virtual bool write_fixed_header(uint8_t *buf, uint8_t& len, uint8_t rlength);
+    bool write_fixed_header(uint8_t *buf, uint8_t& len, uint8_t rlength);
 
     // Abstract methods to be implemented by derived classes
     bool write_packet_id(uint8_t *buf, uint8_t& len);
