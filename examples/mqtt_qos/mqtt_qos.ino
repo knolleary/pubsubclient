@@ -1,9 +1,9 @@
 /*
- Basic MQTT example 
- 
+ MQTT with QoS example
+
   - connects to an MQTT server
-  - publishes "hello world" to the topic "outTopic"
-  - subscribes to the topic "inTopic"
+  - publishes "hello world" to the topic "outTopic" with a variety of QoS values
+
 */
 
 #include <ESP8266WiFi.h>
@@ -45,8 +45,13 @@ void setup()
   }
 
   if (client.connect("arduinoClient")) {
-    client.publish("outTopic","hello world");
-    client.subscribe("inTopic");
+    client.publish("outTopic", "hello world qos=0");	// Simple publish with qos=0
+
+    client.publish(MQTT::Publish("outTopic", "hello world qos=1")
+                   .set_qos(1, client.next_packet_id()));
+
+    client.publish(MQTT::Publish("outTopic", "hello world qos=2")
+                   .set_qos(2, client.next_packet_id()));
   }
 }
 

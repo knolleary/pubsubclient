@@ -16,7 +16,7 @@ const char *pass =	"yyyyyyyy";		//
 // Update these with values suitable for your network.
 IPAddress server(172, 16, 0, 2);
 
-void callback(char* topic, byte* payload, unsigned int length) {
+void callback(const MQTT::Publish& pub) {
   // handle message arrived
 }
 
@@ -45,8 +45,8 @@ void setup()
     Serial.println("WiFi connected");
   }
 
-  client.set_auth("testeruser", "testpass");
-  if (client.connect("arduinoClient")) {
+  if (client.connect(MQTT::Connect("arduinoClient")
+	             .set_auth("testeruser", "testpass"))) {
     client.publish("outTopic","hello world");
     client.subscribe("inTopic");
   }

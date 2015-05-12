@@ -1,17 +1,8 @@
 /*
- Publishing in the callback 
- 
+ MQTT subscriber example
+
   - connects to an MQTT server
   - subscribes to the topic "inTopic"
-  - when a message is received, republishes it to "outTopic"
-  
-  This example shows how to publish messages within the
-  callback function. The callback function header needs to
-  be declared before the PubSubClient constructor and the 
-  actual callback defined afterwards.
-  This ensures the client reference in the callback function
-  is valid.
-  
 */
 
 #include <ESP8266WiFi.h>
@@ -23,18 +14,13 @@ const char *pass =	"yyyyyyyy";		//
 // Update these with values suitable for your network.
 IPAddress server(172, 16, 0, 2);
 
-PubSubClient client(server);
-
-// Callback function
 void callback(const MQTT::Publish& pub) {
-  // In order to republish this payload, a copy must be made
-  // as the orignal payload buffer will be overwritten whilst
-  // constructing the PUBLISH packet.
-
-  // Copy the payload to a new message
-  MQTT::Publish newpub("outTopic", pub.payload(), pub.payload_len());
-  client.publish(newpub);
+  Serial.print(pub.topic());
+  Serial.print(" => ");
+  Serial.println(pub.payload_string());
 }
+
+PubSubClient client(server);
 
 void setup()
 {
@@ -60,7 +46,6 @@ void setup()
   }
 
   if (client.connect("arduinoClient")) {
-    client.publish("outTopic","hello world");
     client.subscribe("inTopic");
   }
 }
@@ -69,4 +54,3 @@ void loop()
 {
   client.loop();
 }
-
