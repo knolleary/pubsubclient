@@ -114,7 +114,7 @@ namespace MQTT {
     uint8_t real_len = remaining_length + fixed_len;
     memcpy(real_packet, fixed_header, fixed_len);
 
-    uint8_t sent = wclient.write(real_packet, real_len);
+    uint8_t sent = wclient.write(const_cast<const uint8_t*>(real_packet), real_len);
     return (sent == real_len);
   }
 
