@@ -9,7 +9,6 @@
 
 #include <Arduino.h>
 #include <pgmspace.h>
-#include <ESP8266WiFi.h>
 
 #include "MQTT.h"
 
