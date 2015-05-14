@@ -275,12 +275,20 @@ namespace MQTT {
     _payload_mine = true;
   }
 
-  Publish::Publish(String topic, uint8_t* payload, uint8_t length) :
+  Publish::Publish(String topic, const __FlashStringHelper* payload) :
     Message(MQTTPUBLISH),
     _topic(topic),
-    _payload(payload), _payload_len(length),
-    _payload_mine(false)
-  {}
+    _payload_len(strlen_P((PGM_P)payload)), _payload((uint8_t*)malloc(_payload_len + 1)),
+    _payload_mine(true)
+  {
+    strncpy((char*)_payload, (PGM_P)payload, _payload_len);
+  }
+
+  Publish Publish_P(String topic, uint8_t* payload, uint8_t length) {
+    uint8_t *p = (uint8_t*)malloc(length);
+    memcpy_P(p, payload, length);
+    return Publish(topic, p, length, true);
+  }
 
   Publish::Publish(uint8_t flags, uint8_t* data, uint8_t length) :
     Message(MQTTPUBLISH, flags),

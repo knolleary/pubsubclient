@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <stdint.h>
+#include <pgmspace.h>
 #include <ESP8266WiFi.h>
 
 // MQTT_MAX_PACKET_SIZE : Maximum packet size
@@ -165,10 +166,24 @@ namespace MQTT {
 
     uint8_t response_type(void) const;
 
+    Publish(String topic, uint8_t* payload, uint8_t length, bool mine) :
+      Message(MQTTPUBLISH),
+      _topic(topic),
+      _payload(payload), _payload_len(length),
+      _payload_mine(mine)
+    {}
+
   public:
     // Constructors for creating our own message to publish
     Publish(String topic, String payload);
-    Publish(String topic, uint8_t* payload, uint8_t length);
+    Publish(String topic, uint8_t* payload, uint8_t length) :
+      Publish(topic, payload, length, false)
+    {}
+
+    // Constructor using a string stored in flash using the F() macro
+    Publish(String topic, const __FlashStringHelper* payload);
+    // A function made to look like a constructor, reading the payload from flash
+    friend Publish Publish_P(String topic, uint8_t* payload, uint8_t length);
 
     // Construct from a network buffer
     Publish(uint8_t flags, uint8_t* data, uint8_t length);

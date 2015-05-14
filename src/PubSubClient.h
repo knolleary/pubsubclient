@@ -8,6 +8,7 @@
 #define PubSubClient_h
 
 #include <Arduino.h>
+#include <pgmspace.h>
 #include <ESP8266WiFi.h>
 
 #include "MQTT.h"
@@ -52,7 +53,7 @@ public:
    void disconnect(void);
    bool publish(String topic, String payload);
    bool publish(String topic, const uint8_t *payload, unsigned int plength, bool retained = false);
-   bool publish_P(String topic, const uint8_t PROGMEM *payload, unsigned int, bool retained = false);
+   bool publish_P(String topic, PGM_P payload, unsigned int, bool retained = false);
    bool subscribe(String topic, uint8_t qos = 0);
    bool unsubscribe(String topic);
 
