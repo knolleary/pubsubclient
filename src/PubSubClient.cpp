@@ -209,7 +209,7 @@ bool PubSubClient::publish_P(String topic, PGM_P payload, unsigned int plength, 
   if (!connected())
     return false;
 
-  MQTT::Publish pub(topic, (uint8_t*)payload, plength);
+  MQTT::Publish pub = MQTT::Publish_P(topic, payload, plength);
   pub.set_retain(retained);
   return publish(pub);
 }

@@ -284,7 +284,7 @@ namespace MQTT {
     strncpy((char*)_payload, (PGM_P)payload, _payload_len);
   }
 
-  Publish Publish_P(String topic, uint8_t* payload, uint8_t length) {
+  Publish Publish_P(String topic, PGM_P payload, uint8_t length) {
     uint8_t *p = (uint8_t*)malloc(length);
     memcpy_P(p, payload, length);
     return Publish(topic, p, length, true);

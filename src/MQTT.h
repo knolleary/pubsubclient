@@ -183,7 +183,7 @@ namespace MQTT {
     // Constructor using a string stored in flash using the F() macro
     Publish(String topic, const __FlashStringHelper* payload);
     // A function made to look like a constructor, reading the payload from flash
-    friend Publish Publish_P(String topic, uint8_t* payload, uint8_t length);
+    friend Publish Publish_P(String topic, PGM_P payload, uint8_t length);
 
     // Construct from a network buffer
     Publish(uint8_t flags, uint8_t* data, uint8_t length);
@@ -216,6 +216,8 @@ namespace MQTT {
     uint8_t payload_len(void) const { return _payload_len; }
 
   };
+
+  Publish Publish_P(String topic, PGM_P payload, uint8_t length);
 
 
   // Response to Publish when qos == 1
