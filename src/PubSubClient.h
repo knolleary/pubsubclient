@@ -38,8 +38,16 @@ private:
    bool send_reliably(MQTT::Message* msg);
 
 public:
+   // Empty constructor - use set_server() later, before connect()
+   PubSubClient();
+
+   // Constructors with the server ip address or host name
    PubSubClient(IPAddress &ip, uint16_t port = 1883);
    PubSubClient(String hostname, uint16_t port = 1883);
+
+   // Set the server ip address or host name
+   PubSubClient& set_server(IPAddress &ip, uint16_t port = 1883);
+   PubSubClient& set_server(String hostname, uint16_t port = 1883);
 
    callback_t callback(void) const { return _callback; }
    PubSubClient& set_callback(callback_t cb) { _callback = cb; return *this; }

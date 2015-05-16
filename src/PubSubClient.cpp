@@ -7,6 +7,11 @@
 #include "PubSubClient.h"
 #include <string.h>
 
+PubSubClient::PubSubClient() :
+  _callback(NULL),
+  _max_retries(10)
+{}
+
 PubSubClient::PubSubClient(IPAddress &ip, uint16_t port) :
   _callback(NULL),
   _max_retries(10),
@@ -20,6 +25,19 @@ PubSubClient::PubSubClient(String hostname, uint16_t port) :
   server_port(port),
   server_hostname(hostname)
 {}
+
+PubSubClient& PubSubClient::set_server(IPAddress &ip, uint16_t port) {
+  server_hostname = "";
+  server_ip = ip;
+  server_port = port;
+  return *this;
+}
+
+PubSubClient& PubSubClient::set_server(String hostname, uint16_t port) {
+  server_hostname = hostname;
+  server_port = port;
+  return *this;
+}
 
 bool PubSubClient::_process_message(MQTT::Message* msg, uint8_t match_type, uint16_t match_pid) {
   lastInActivity = millis();
