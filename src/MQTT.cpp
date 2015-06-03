@@ -144,8 +144,9 @@ namespace MQTT {
     } while (digit & 0x80);
 
     // Read variable header and/or payload
-    uint8_t *remaining_data = (uint8_t*)malloc(remaining_length);
-    {
+    uint8_t *remaining_data = NULL;
+    if (remaining_length > 0) {
+      remaining_data = (uint8_t*)malloc(remaining_length);
       uint16_t r = remaining_length;
       while (client.available() && r) {
 	r -= client.read(remaining_data, r);
@@ -196,7 +197,8 @@ namespace MQTT {
       break;
 
     }
-    free(remaining_data);
+    if (remaining_data != NULL)
+      free(remaining_data);
 
     return obj;
   }
@@ -267,12 +269,15 @@ namespace MQTT {
   Publish::Publish(String topic, String payload) :
     Message(MQTTPUBLISH),
     _topic(topic),
+    _payload(NULL), _payload_len(0),
     _payload_mine(false)
   {
-    _payload = (uint8_t*)malloc(payload.length());
-    memcpy(_payload, payload.c_str(), payload.length());
-    _payload_len = payload.length();
-    _payload_mine = true;
+    if (payload.length() > 0) {
+      _payload = (uint8_t*)malloc(payload.length());
+      memcpy(_payload, payload.c_str(), payload.length());
+      _payload_len = payload.length();
+      _payload_mine = true;
+    }
   }
 
   Publish::Publish(String topic, const __FlashStringHelper* payload) :
@@ -292,6 +297,7 @@ namespace MQTT {
 
   Publish::Publish(uint8_t flags, uint8_t* data, uint8_t length) :
     Message(MQTTPUBLISH, flags),
+    _payload(NULL), _payload_len(0),
     _payload_mine(false)
   {
     uint8_t pos = 0;
@@ -300,9 +306,11 @@ namespace MQTT {
       _packet_id = read<uint16_t>(data, pos);
 
     _payload_len = length - pos;
-    _payload = (uint8_t*)malloc(_payload_len);
-    memcpy(_payload, data + pos, _payload_len);
-    _payload_mine = true;
+    if (_payload_len > 0) {
+      _payload = (uint8_t*)malloc(_payload_len);
+      memcpy(_payload, data + pos, _payload_len);
+      _payload_mine = true;
+    }
   }
 
   Publish::~Publish() {
@@ -454,19 +462,23 @@ namespace MQTT {
 
   // SubscribeAck class
   SubscribeAck::SubscribeAck(uint8_t* data, uint8_t length) :
-    Message(MQTTSUBACK)
+    Message(MQTTSUBACK),
+    _rcs(NULL)
   {
     uint8_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
 
     _num_rcs = length - pos;
-    _rcs = (uint8_t*)malloc(_num_rcs);
-    for (uint8_t i = 0; i < _num_rcs; i++)
-      _rcs[i] = read<uint8_t>(data, pos);
+    if (_num_rcs > 0) {
+      _rcs = (uint8_t*)malloc(_num_rcs);
+      for (uint8_t i = 0; i < _num_rcs; i++)
+	_rcs[i] = read<uint8_t>(data, pos);
+    }
   }
 
   SubscribeAck::~SubscribeAck() {
-    free(_rcs);
+    if (_rcs != NULL)
+      free(_rcs);
   }
 
 
