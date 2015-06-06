@@ -146,7 +146,7 @@ namespace MQTT {
     // Read variable header and/or payload
     uint8_t *remaining_data = NULL;
     if (remaining_length > 0) {
-      remaining_data = (uint8_t*)malloc(remaining_length);
+      remaining_data = new uint8_t[remaining_length];
       uint16_t r = remaining_length;
       while (client.available() && r) {
 	r -= client.read(remaining_data, r);
@@ -198,7 +198,7 @@ namespace MQTT {
 
     }
     if (remaining_data != NULL)
-      free(remaining_data);
+      delete [] remaining_data;
 
     return obj;
   }
@@ -273,7 +273,7 @@ namespace MQTT {
     _payload_mine(false)
   {
     if (payload.length() > 0) {
-      _payload = (uint8_t*)malloc(payload.length());
+      _payload = new uint8_t[payload.length()];
       memcpy(_payload, payload.c_str(), payload.length());
       _payload_len = payload.length();
       _payload_mine = true;
@@ -283,14 +283,14 @@ namespace MQTT {
   Publish::Publish(String topic, const __FlashStringHelper* payload) :
     Message(MQTTPUBLISH),
     _topic(topic),
-    _payload_len(strlen_P((PGM_P)payload)), _payload((uint8_t*)malloc(_payload_len + 1)),
+    _payload_len(strlen_P((PGM_P)payload)), _payload(new uint8_t[_payload_len + 1]),
     _payload_mine(true)
   {
     strncpy((char*)_payload, (PGM_P)payload, _payload_len);
   }
 
   Publish Publish_P(String topic, PGM_P payload, uint8_t length) {
-    uint8_t *p = (uint8_t*)malloc(length);
+    uint8_t *p = new uint8_t[length];
     memcpy_P(p, payload, length);
     return Publish(topic, p, length, true);
   }
@@ -307,7 +307,7 @@ namespace MQTT {
 
     _payload_len = length - pos;
     if (_payload_len > 0) {
-      _payload = (uint8_t*)malloc(_payload_len);
+      _payload = new uint8_t[_payload_len];
       memcpy(_payload, data + pos, _payload_len);
       _payload_mine = true;
     }
@@ -315,7 +315,7 @@ namespace MQTT {
 
   Publish::~Publish() {
     if (_payload_mine)
-      free(_payload);
+      delete [] _payload;
   }
 
   Publish& Publish::set_qos(uint8_t q, uint16_t pid) {
@@ -435,13 +435,13 @@ namespace MQTT {
     Message(MQTTSUBSCRIBE, pid),
     _buffer(NULL), _buflen(0)
   {
-    _buffer = (uint8_t*)malloc(2 + topic.length() + 1);
+    _buffer = new uint8_t[2 + topic.length() + 1];
     write(_buffer, _buflen, topic);
     _buffer[_buflen++] = qos;
   }
 
   Subscribe::~Subscribe() {
-    free(_buffer);
+    delete [] _buffer;
   }
 
   Subscribe& Subscribe::add_topic(String topic, uint8_t qos) {
@@ -470,7 +470,7 @@ namespace MQTT {
 
     _num_rcs = length - pos;
     if (_num_rcs > 0) {
-      _rcs = (uint8_t*)malloc(_num_rcs);
+      _rcs = new uint8_t[_num_rcs];
       for (uint8_t i = 0; i < _num_rcs; i++)
 	_rcs[i] = read<uint8_t>(data, pos);
     }
@@ -478,7 +478,7 @@ namespace MQTT {
 
   SubscribeAck::~SubscribeAck() {
     if (_rcs != NULL)
-      free(_rcs);
+      delete [] _rcs;
   }
 
 
