@@ -17,5 +17,30 @@ data into and out of the messages.
 The PubSubClient class operates mostly as it did before. However, the
 connect(), publish(), subscribe(), and unsubscribe() methods can now take an
 appropriate MQTT object. This allows extra options to be set e.g QoS on
-publish, or multiple topics with one (un)subscribe message. See the mqtt_qos
-example for how this is done with the chainable setter methods.
+publish, or multiple topics with one (un)subscribe message.
+
+You can use the MQTT classes and their chainable setter methods like this:
+
+client.connect(MQTT::Connect("clientId")
+               .set_clean_session()
+               .set_will("status", "down")
+               .set_auth("username", "password)
+               .set_keepalive(30)
+              );
+
+client.publish(MQTT::Publish("topic", "payload")
+               .set_retain()
+               .set_qos(1, client.next_packet_id())
+               .set_dup()
+              );
+
+client.subscribe(MQTT::Subscribe(client.next_packet_id())
+                 .add_topic("topic1")
+                 .add_topic("topic2", 1)	// optional qos value
+                );
+
+client.unsubscribe(MQTT::Unsubscribe(client.next_packet_id())
+                   .add_topic("topic")
+                  );
+
+See also the mqtt_auth or mqtt_qos example sketches for how this is used.
