@@ -50,7 +50,7 @@ bool PubSubClient::_process_message(MQTT::Message* msg, uint8_t match_type, uint
   switch (msg->type()) {
   case MQTTPUBLISH:
     {
-      auto pub = (MQTT::Publish*)msg;
+      auto pub = static_cast<MQTT::Publish*>(msg);	// RTTI is disabled on ESP8266, so no dynamic_cast<>()
 
       if (_callback)
 	_callback(*pub);
