@@ -7,6 +7,7 @@
 #ifndef PubSubClient_h
 #define PubSubClient_h
 
+#include <functional>
 #include <Arduino.h>
 #include <pgmspace.h>
 
@@ -14,7 +15,7 @@
 
 class PubSubClient {
 public:
-  typedef void(*callback_t)(const MQTT::Publish&);
+  typedef std::function<void(const MQTT::Publish&)> callback_t;
 
 private:
    IPAddress server_ip;
