@@ -525,4 +525,4 @@ namespace MQTT {
   }
 
 
-}; // namespace MQTT
+} // namespace MQTT

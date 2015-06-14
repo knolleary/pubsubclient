@@ -419,5 +419,5 @@ namespace MQTT {
 
   };
 
-};
+}
 
