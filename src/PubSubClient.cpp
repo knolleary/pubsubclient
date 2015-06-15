@@ -168,6 +168,7 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
     return false;
   }
 
+  pingOutstanding = false;
   nextMsgId = 1;		// Init the next packet id
   lastInActivity = millis();	// Init this so that wait_for() doesn't think we've already timed-out
   keepalive = conn.keepalive();	// Store the keepalive period from this connection
