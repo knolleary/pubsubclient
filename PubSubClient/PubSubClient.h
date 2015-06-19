@@ -69,6 +69,7 @@ public:
    boolean publish(const char *, const char *);
    boolean publish(const char *, uint8_t *, unsigned int);
    boolean publish(const char *, uint8_t *, unsigned int, boolean);
+   //boolean publish_P(const char *, uint8_t PROGMEM *, unsigned int, boolean);
    boolean subscribe(const char *);
    boolean subscribe(const char *, uint8_t qos);
    boolean unsubscribe(const char *);
