@@ -71,6 +71,17 @@ namespace MQTT {
 
 
   // Message class
+  uint8_t Message::fixed_header_length(uint32_t rlength) const {
+    if (rlength < 128)
+      return 2;
+    else if (rlength < 16384)
+      return 3;
+    else if (rlength < 2097152)
+      return 4;
+    else
+      return 5;
+  }
+
   void Message::write_fixed_header(uint8_t *buf, uint32_t& bufpos, uint32_t rlength) const {
     buf[bufpos] = _type << 4;
 
@@ -85,7 +96,7 @@ namespace MQTT {
     }
     bufpos++;
 
-    // Remaning length
+    // Remaining length
     do {
       uint8_t digit = rlength & 0x7f;
       rlength >>= 7;
@@ -100,21 +111,18 @@ namespace MQTT {
   }
 
   bool Message::send(WiFiClient& wclient) {
-    uint8_t packet[MQTT_MAX_PACKET_SIZE];
-    uint32_t remaining_length = 0;
-    write_variable_header(packet + 5, remaining_length);
-    write_payload(packet + 5, remaining_length);
+    uint32_t remaining_length = variable_header_length() + payload_length();
+    uint32_t packet_length = fixed_header_length(remaining_length) + remaining_length;
+    uint8_t *packet = new uint8_t[packet_length];
 
-    uint8_t fixed_header[5];
-    uint32_t fixed_len = 0;
-    write_fixed_header(fixed_header, fixed_len, remaining_length);
+    uint32_t pos = 0;
+    write_fixed_header(packet, pos, remaining_length);
+    write_variable_header(packet, pos);
+    write_payload(packet, pos);
 
-    uint8_t *real_packet = packet + 5 - fixed_len;
-    uint32_t real_len = remaining_length + fixed_len;
-    memcpy(real_packet, fixed_header, fixed_len);
-
-    uint32_t sent = wclient.write(const_cast<const uint8_t*>(real_packet), real_len);
-    return (sent == real_len);
+    uint32_t sent = wclient.write(const_cast<const uint8_t*>(packet), packet_length);
+    delete [] packet;
+    return (sent == packet_length);
   }
 
 
@@ -211,6 +219,10 @@ namespace MQTT {
     _keepalive(MQTT_KEEPALIVE)
   {}
 
+  uint32_t Connect::variable_header_length(void) const {
+    return 10;
+  }
+
   void Connect::write_variable_header(uint8_t *buf, uint32_t& bufpos) const {
     write(buf, bufpos, "MQTT");	// Protocol name
     buf[bufpos++] = 4;		// Protocol level
@@ -237,6 +249,20 @@ namespace MQTT {
     bufpos++;
 
     write(buf, bufpos, _keepalive);	// Keepalive period
+  }
+
+  uint32_t Connect::payload_length(void) const {
+    uint32_t len = 2 + _clientid.length();
+    if (_will_topic.length()) {
+      len += 2 + _will_topic.length();
+      len += 2 + _will_message.length();
+    }
+    if (_username.length()) {
+      len += 2 + _username.length();
+      if (_password.length())
+	len += 2 + _password.length();
+    }
+    return len;
   }
 
   void Connect::write_payload(uint8_t *buf, uint32_t& bufpos) const {
@@ -339,10 +365,18 @@ namespace MQTT {
     return str;
   }
 
+  uint32_t Publish::variable_header_length(void) const {
+    return 2 + _topic.length() + (qos() ? 2 : 0);
+  }
+
   void Publish::write_variable_header(uint8_t *buf, uint32_t& bufpos) const {
     write(buf, bufpos, _topic);
     if (qos())
       write_packet_id(buf, bufpos);
+  }
+
+  uint32_t Publish::payload_length(void) const {
+    return _payload_len;
   }
 
   void Publish::write_payload(uint8_t *buf, uint32_t& bufpos) const {
@@ -386,6 +420,10 @@ namespace MQTT {
     _packet_id = read<uint16_t>(data, pos);
   }
 
+  uint32_t PublishRec::variable_header_length(void) const {
+    return 2;
+  }
+
   void PublishRec::write_variable_header(uint8_t *buf, uint32_t& bufpos) const {
     write_packet_id(buf, bufpos);
   }
@@ -403,6 +441,10 @@ namespace MQTT {
     _packet_id = read<uint16_t>(data, pos);
   }
 
+  uint32_t PublishRel::variable_header_length(void) const {
+    return 2;
+  }
+
   void PublishRel::write_variable_header(uint8_t *buf, uint32_t& bufpos) const {
     write_packet_id(buf, bufpos);
   }
@@ -418,6 +460,10 @@ namespace MQTT {
   {
     uint32_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
+  }
+
+  uint32_t PublishComp::variable_header_length(void) const {
+    return 2;
   }
 
   void PublishComp::write_variable_header(uint8_t *buf, uint32_t& bufpos) const {
@@ -451,8 +497,16 @@ namespace MQTT {
     return *this;
   }
 
+  uint32_t Subscribe::variable_header_length(void) const {
+    return 2;
+  }
+
   void Subscribe::write_variable_header(uint8_t *buf, uint32_t& bufpos) const {
     write_packet_id(buf, bufpos);
+  }
+
+  uint32_t Subscribe::payload_length(void) const {
+    return _buflen;
   }
 
   void Subscribe::write_payload(uint8_t *buf, uint32_t& bufpos) const {
@@ -507,8 +561,16 @@ namespace MQTT {
     return *this;
   }
 
+  uint32_t Unsubscribe::variable_header_length(void) const {
+    return 2;
+  }
+
   void Unsubscribe::write_variable_header(uint8_t *buf, uint32_t& bufpos) const {
     write_packet_id(buf, bufpos);
+  }
+
+  uint32_t Unsubscribe::payload_length(void) const {
+    return _buflen;
   }
 
   void Unsubscribe::write_payload(uint8_t *buf, uint32_t& bufpos) const {

@@ -23,9 +23,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <pgmspace.h>
 #include <WiFiClient.h>
 
-// MQTT_MAX_PACKET_SIZE : Maximum packet size
-#define MQTT_MAX_PACKET_SIZE 128
-
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
 #define MQTT_KEEPALIVE 15
 
@@ -67,12 +64,15 @@ namespace MQTT {
     virtual ~Message() {}
 
     // Write the fixed header to a buffer
+    uint8_t fixed_header_length(uint32_t rlength) const;
     void write_fixed_header(uint8_t *buf, uint32_t& bufpos, uint32_t rlength) const;
 
     void write_packet_id(uint8_t *buf, uint32_t& bufpos) const;
 
     // Abstract methods to be implemented by derived classes
+    virtual uint32_t variable_header_length(void) const { return 0; }
     virtual void write_variable_header(uint8_t *buf, uint32_t& bufpos) const { }
+    virtual uint32_t payload_length(void) const { return 0; }
     virtual void write_payload(uint8_t *buf, uint32_t& bufpos) const { }
 
     virtual uint8_t response_type(void) const { return 0; }
@@ -109,7 +109,9 @@ namespace MQTT {
 
     uint16_t _keepalive;
 
+    uint32_t variable_header_length(void) const;
     void write_variable_header(uint8_t *buf, uint32_t& bufpos) const;
+    uint32_t payload_length(void) const;
     void write_payload(uint8_t *buf, uint32_t& bufpos) const;
 
     uint8_t response_type(void) const { return MQTTCONNACK; }
@@ -160,7 +162,9 @@ namespace MQTT {
     uint32_t _payload_len;
     bool _payload_mine;
 
+    uint32_t variable_header_length(void) const;
     void write_variable_header(uint8_t *buf, uint32_t& bufpos) const;
+    uint32_t payload_length(void) const;
     void write_payload(uint8_t *buf, uint32_t& bufpos) const;
 
     uint8_t response_type(void) const;
@@ -233,6 +237,7 @@ namespace MQTT {
   // First response to Publish when qos == 2
   class PublishRec : public Message {
   private:
+    uint32_t variable_header_length(void) const;
     void write_variable_header(uint8_t *buf, uint32_t& bufpos) const;
 
     uint8_t response_type(void) const { return MQTTPUBREL; }
@@ -250,6 +255,7 @@ namespace MQTT {
   // Response to PublishRec
   class PublishRel : public Message {
   private:
+    uint32_t variable_header_length(void) const;
     void write_variable_header(uint8_t *buf, uint32_t& bufpos) const;
 
     uint8_t response_type(void) const { return MQTTPUBCOMP; }
@@ -267,6 +273,7 @@ namespace MQTT {
   // Response to PublishRel
   class PublishComp : public Message {
   private:
+    uint32_t variable_header_length(void) const;
     void write_variable_header(uint8_t *buf, uint32_t& bufpos) const;
 
   public:
@@ -284,7 +291,9 @@ namespace MQTT {
     uint8_t *_buffer;
     uint32_t _buflen;
 
+    uint32_t variable_header_length(void) const;
     void write_variable_header(uint8_t *buf, uint32_t& bufpos) const;
+    uint32_t payload_length(void) const;
     void write_payload(uint8_t *buf, uint32_t& bufpos) const;
 
     uint8_t response_type(void) const { return MQTTSUBACK; }
@@ -331,7 +340,9 @@ namespace MQTT {
     uint8_t *_buffer;
     uint32_t _buflen;
 
+    uint32_t variable_header_length(void) const;
     void write_variable_header(uint8_t *buf, uint32_t& bufpos) const;
+    uint32_t payload_length(void) const;
     void write_payload(uint8_t *buf, uint32_t& bufpos) const;
 
     uint8_t response_type(void) const { return MQTTUNSUBACK; }
