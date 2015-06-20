@@ -21,19 +21,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace MQTT {
   // First some convenience functions
-  void write(uint8_t *buf, uint8_t& bufpos, uint16_t data) {
+  void write(uint8_t *buf, uint32_t& bufpos, uint16_t data) {
     buf[bufpos++] = data >> 8;
     buf[bufpos++] = data & 0xff;
   }
 
-  void write(uint8_t *buf, uint8_t& bufpos, uint8_t *data, uint8_t dlen) {
+  void write(uint8_t *buf, uint32_t& bufpos, uint8_t *data, uint32_t dlen) {
     memcpy(buf + bufpos, data, dlen);
     bufpos += dlen;
   }
 
-  void write(uint8_t *buf, uint8_t& bufpos, String str) {
+  void write(uint8_t *buf, uint32_t& bufpos, String str) {
     const char* c = str.c_str();
-    uint8_t length_pos = bufpos;
+    uint32_t length_pos = bufpos;
     bufpos += 2;
     uint16_t count = 0;
     while (*c) {
@@ -44,26 +44,26 @@ namespace MQTT {
   }
 
   template <typename T>
-  T read(uint8_t *buf, uint8_t& pos);
+  T read(uint8_t *buf, uint32_t& pos);
 
   template <>
-  uint8_t read<uint8_t>(uint8_t *buf, uint8_t& pos) {
+  uint8_t read<uint8_t>(uint8_t *buf, uint32_t& pos) {
     return buf[pos++];
   }
 
   template <>
-  uint16_t read<uint16_t>(uint8_t *buf, uint8_t& pos) {
+  uint16_t read<uint16_t>(uint8_t *buf, uint32_t& pos) {
     uint16_t val = buf[pos++] << 8;
     val |= buf[pos++];
     return val;
   }
 
   template <>
-  String read<String>(uint8_t *buf, uint8_t& pos) {
+  String read<String>(uint8_t *buf, uint32_t& pos) {
     uint16_t len = read<uint16_t>(buf, pos);
     String val;
     val.reserve(len);
-    for (uint8_t i = 0; i < len; i++)
+    for (uint16_t i = 0; i < len; i++)
       val += (char)read<uint8_t>(buf, pos);
 
     return val;
@@ -71,7 +71,7 @@ namespace MQTT {
 
 
   // Message class
-  bool Message::write_fixed_header(uint8_t *buf, uint8_t& bufpos, uint8_t rlength) {
+  bool Message::write_fixed_header(uint8_t *buf, uint32_t& bufpos, uint32_t rlength) {
     buf[bufpos] = _type << 4;
 
     switch (_type) {
@@ -97,24 +97,25 @@ namespace MQTT {
     return true;
   }
 
-  bool Message::write_packet_id(uint8_t *buf, uint8_t& bufpos) {
+  bool Message::write_packet_id(uint8_t *buf, uint32_t& bufpos) {
     write(buf, bufpos, _packet_id);
   }
 
   bool Message::send(WiFiClient& wclient) {
     uint8_t packet[MQTT_MAX_PACKET_SIZE];
-    uint8_t remaining_length = 0;
+    uint32_t remaining_length = 0;
     write_variable_header(packet + 5, remaining_length);
     write_payload(packet + 5, remaining_length);
 
-    uint8_t fixed_header[5], fixed_len = 0;
+    uint8_t fixed_header[5];
+    uint32_t fixed_len = 0;
     write_fixed_header(fixed_header, fixed_len, remaining_length);
 
     uint8_t *real_packet = packet + 5 - fixed_len;
-    uint8_t real_len = remaining_length + fixed_len;
+    uint32_t real_len = remaining_length + fixed_len;
     memcpy(real_packet, fixed_header, fixed_len);
 
-    uint8_t sent = wclient.write(const_cast<const uint8_t*>(real_packet), real_len);
+    uint32_t sent = wclient.write(const_cast<const uint8_t*>(real_packet), real_len);
     return (sent == real_len);
   }
 
@@ -133,7 +134,7 @@ namespace MQTT {
 
     // Read the remaining length
     uint8_t lenbuf[4], lenlen = 0;
-    uint16_t remaining_length = 0;
+    uint32_t remaining_length = 0;
     uint8_t shifter = 0;
     uint8_t digit;
     do {
@@ -147,7 +148,7 @@ namespace MQTT {
     uint8_t *remaining_data = NULL;
     if (remaining_length > 0) {
       remaining_data = new uint8_t[remaining_length];
-      uint16_t r = remaining_length;
+      uint32_t r = remaining_length;
       while (client.available() && r) {
 	r -= client.read(remaining_data, r);
       }
@@ -212,7 +213,7 @@ namespace MQTT {
     _keepalive(MQTT_KEEPALIVE)
   {}
 
-  bool Connect::write_variable_header(uint8_t *buf, uint8_t& bufpos) {
+  bool Connect::write_variable_header(uint8_t *buf, uint32_t& bufpos) {
     write(buf, bufpos, "MQTT");	// Protocol name
     buf[bufpos++] = 4;		// Protocol level
 
@@ -239,7 +240,7 @@ namespace MQTT {
     write(buf, bufpos, _keepalive);	// Keepalive period
   }
 
-  bool Connect::write_payload(uint8_t *buf, uint8_t& bufpos) {
+  bool Connect::write_payload(uint8_t *buf, uint32_t& bufpos) {
     write(buf, bufpos, _clientid);
 
     if (_will_topic.length()) {
@@ -256,11 +257,11 @@ namespace MQTT {
 
 
   // ConnectAck class
-  ConnectAck::ConnectAck(uint8_t* data, uint8_t length) :
+  ConnectAck::ConnectAck(uint8_t* data, uint32_t length) :
     Message(MQTTCONNACK)
   {
-    uint8_t pos = 0;
-    _session_present = read<uint8_t>(data, pos) & 0x01;
+    uint32_t pos = 0;
+    uint8_t reserved = read<uint8_t>(data, pos);
     _rc = read<uint8_t>(data, pos);
   }
 
@@ -289,18 +290,18 @@ namespace MQTT {
     strncpy((char*)_payload, (PGM_P)payload, _payload_len);
   }
 
-  Publish Publish_P(String topic, PGM_P payload, uint8_t length) {
+  Publish Publish_P(String topic, PGM_P payload, uint32_t length) {
     uint8_t *p = new uint8_t[length];
     memcpy_P(p, payload, length);
     return Publish(topic, p, length, true);
   }
 
-  Publish::Publish(uint8_t flags, uint8_t* data, uint8_t length) :
+  Publish::Publish(uint8_t flags, uint8_t* data, uint32_t length) :
     Message(MQTTPUBLISH, flags),
     _payload(NULL), _payload_len(0),
     _payload_mine(false)
   {
-    uint8_t pos = 0;
+    uint32_t pos = 0;
     _topic = read<String>(data, pos);
     if (qos() > 0)
       _packet_id = read<uint16_t>(data, pos);
@@ -333,19 +334,19 @@ namespace MQTT {
   String Publish::payload_string(void) const {
     String str;
     str.reserve(_payload_len);
-    for (uint8_t i = 0; i < _payload_len; i++)
+    for (uint32_t i = 0; i < _payload_len; i++)
       str += (char)_payload[i];
 
     return str;
   }
 
-  bool Publish::write_variable_header(uint8_t *buf, uint8_t& bufpos) {
+  bool Publish::write_variable_header(uint8_t *buf, uint32_t& bufpos) {
     write(buf, bufpos, _topic);
     if (qos())
       write_packet_id(buf, bufpos);
   }
 
-  bool Publish::write_payload(uint8_t *buf, uint8_t& bufpos) {
+  bool Publish::write_payload(uint8_t *buf, uint32_t& bufpos) {
     write(buf, bufpos, _payload, _payload_len);
   }
 
@@ -366,10 +367,10 @@ namespace MQTT {
     Message(MQTTPUBACK, pid)
   {}
 
-  PublishAck::PublishAck(uint8_t* data, uint8_t length) :
+  PublishAck::PublishAck(uint8_t* data, uint32_t length) :
     Message(MQTTPUBACK)
   {
-    uint8_t pos = 0;
+    uint32_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
   }
 
@@ -379,14 +380,14 @@ namespace MQTT {
     Message(MQTTPUBREC, pid)
   {}
 
-  PublishRec::PublishRec(uint8_t* data, uint8_t length) :
+  PublishRec::PublishRec(uint8_t* data, uint32_t length) :
     Message(MQTTPUBREC)
   {
-    uint8_t pos = 0;
+    uint32_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
   }
 
-  bool PublishRec::write_variable_header(uint8_t *buf, uint8_t& bufpos) {
+  bool PublishRec::write_variable_header(uint8_t *buf, uint32_t& bufpos) {
     write_packet_id(buf, bufpos);
   }
 
@@ -396,14 +397,14 @@ namespace MQTT {
     Message(MQTTPUBREL, pid)
   {}
 
-  PublishRel::PublishRel(uint8_t* data, uint8_t length) :
+  PublishRel::PublishRel(uint8_t* data, uint32_t length) :
     Message(MQTTPUBREL)
   {
-    uint8_t pos = 0;
+    uint32_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
   }
 
-  bool PublishRel::write_variable_header(uint8_t *buf, uint8_t& bufpos) {
+  bool PublishRel::write_variable_header(uint8_t *buf, uint32_t& bufpos) {
     write_packet_id(buf, bufpos);
   }
 
@@ -413,14 +414,14 @@ namespace MQTT {
     Message(MQTTPUBREC, pid)
   {}
 
-  PublishComp::PublishComp(uint8_t* data, uint8_t length) :
+  PublishComp::PublishComp(uint8_t* data, uint32_t length) :
     Message(MQTTPUBCOMP)
   {
-    uint8_t pos = 0;
+    uint32_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
   }
 
-  bool PublishComp::write_variable_header(uint8_t *buf, uint8_t& bufpos) {
+  bool PublishComp::write_variable_header(uint8_t *buf, uint32_t& bufpos) {
     write_packet_id(buf, bufpos);
   }
 
@@ -451,27 +452,27 @@ namespace MQTT {
     return *this;
   }
 
-  bool Subscribe::write_variable_header(uint8_t *buf, uint8_t& bufpos) {
+  bool Subscribe::write_variable_header(uint8_t *buf, uint32_t& bufpos) {
     write_packet_id(buf, bufpos);
   }
 
-  bool Subscribe::write_payload(uint8_t *buf, uint8_t& bufpos) {
+  bool Subscribe::write_payload(uint8_t *buf, uint32_t& bufpos) {
     write(buf, bufpos, _buffer, _buflen);
   }
 
 
   // SubscribeAck class
-  SubscribeAck::SubscribeAck(uint8_t* data, uint8_t length) :
+  SubscribeAck::SubscribeAck(uint8_t* data, uint32_t length) :
     Message(MQTTSUBACK),
     _rcs(NULL)
   {
-    uint8_t pos = 0;
+    uint32_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
 
     _num_rcs = length - pos;
     if (_num_rcs > 0) {
       _rcs = new uint8_t[_num_rcs];
-      for (uint8_t i = 0; i < _num_rcs; i++)
+      for (uint32_t i = 0; i < _num_rcs; i++)
 	_rcs[i] = read<uint8_t>(data, pos);
     }
   }
@@ -507,20 +508,20 @@ namespace MQTT {
     return *this;
   }
 
-  bool Unsubscribe::write_variable_header(uint8_t *buf, uint8_t& bufpos) {
+  bool Unsubscribe::write_variable_header(uint8_t *buf, uint32_t& bufpos) {
     write_packet_id(buf, bufpos);
   }
 
-  bool Unsubscribe::write_payload(uint8_t *buf, uint8_t& bufpos) {
+  bool Unsubscribe::write_payload(uint8_t *buf, uint32_t& bufpos) {
     write(buf, bufpos, _buffer, _buflen);
   }
 
 
   // SubscribeAck class
-  UnsubscribeAck::UnsubscribeAck(uint8_t* data, uint8_t length) :
+  UnsubscribeAck::UnsubscribeAck(uint8_t* data, uint32_t length) :
     Message(MQTTUNSUBACK)
   {
-    uint8_t pos = 0;
+    uint32_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
   }
 
