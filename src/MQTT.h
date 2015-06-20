@@ -72,7 +72,7 @@ namespace MQTT {
     void write_packet_id(uint8_t *buf, uint32_t& bufpos) const;
 
     // Abstract methods to be implemented by derived classes
-    virtual void write_variable_header(uint8_t *buf, uint32_t& bufpos) const = 0;
+    virtual void write_variable_header(uint8_t *buf, uint32_t& bufpos) const { }
     virtual void write_payload(uint8_t *buf, uint32_t& bufpos) const { }
 
     virtual uint8_t response_type(void) const { return 0; }
@@ -145,8 +145,6 @@ namespace MQTT {
   private:
     bool _session_present;
     uint8_t _rc;
-
-    void write_variable_header(uint8_t *buf, uint32_t& bufpos) const {}
 
   public:
     // Construct from a network buffer
@@ -223,9 +221,6 @@ namespace MQTT {
 
   // Response to Publish when qos == 1
   class PublishAck : public Message {
-  private:
-    void write_variable_header(uint8_t *buf, uint32_t& bufpos) const {}
-
   public:
     // Construct with a packet id
     PublishAck(uint16_t pid);
@@ -315,8 +310,6 @@ namespace MQTT {
     uint8_t *_rcs;
     uint32_t _num_rcs;
 
-    void write_variable_header(uint8_t *buf, uint32_t& bufpos) const {}
-
   public:
     // Construct from a network buffer
     SubscribeAck(uint8_t* data, uint32_t length);
@@ -360,9 +353,6 @@ namespace MQTT {
 
   // Response to Unsubscribe
   class UnsubscribeAck : public Message {
-  private:
-    void write_variable_header(uint8_t *buf, uint32_t& bufpos) const {}
-
   public:
     // Construct from a network buffer
     UnsubscribeAck(uint8_t* data, uint32_t length);
@@ -373,8 +363,6 @@ namespace MQTT {
   // Ping the broker
   class Ping : public Message {
   private:
-    void write_variable_header(uint8_t *buf, uint32_t& bufpos) const {}
-
     uint8_t response_type(void) const { return MQTTPINGRESP; }
 
   public:
@@ -393,9 +381,6 @@ namespace MQTT {
 
   // Response to Ping
   class PingResp : public Message {
-  private:
-    void write_variable_header(uint8_t *buf, uint32_t& bufpos) const {}
-
   public:
     // Constructor
     PingResp() :
@@ -412,9 +397,6 @@ namespace MQTT {
 
   // Disconnect from the broker
   class Disconnect : public Message {
-  private:
-    void write_variable_header(uint8_t *buf, uint32_t& bufpos) const {}
-
   public:
     // Constructor
     Disconnect() :
