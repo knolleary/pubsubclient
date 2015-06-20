@@ -67,13 +67,13 @@ namespace MQTT {
     virtual ~Message() {}
 
     // Write the fixed header to a buffer
-    bool write_fixed_header(uint8_t *buf, uint32_t& bufpos, uint32_t rlength);
+    void write_fixed_header(uint8_t *buf, uint32_t& bufpos, uint32_t rlength);
 
-    bool write_packet_id(uint8_t *buf, uint32_t& bufpos);
+    void write_packet_id(uint8_t *buf, uint32_t& bufpos);
 
     // Abstract methods to be implemented by derived classes
-    virtual bool write_variable_header(uint8_t *buf, uint32_t& bufpos) = 0;
-    virtual bool write_payload(uint8_t *buf, uint32_t& bufpos) {}
+    virtual void write_variable_header(uint8_t *buf, uint32_t& bufpos) = 0;
+    virtual void write_payload(uint8_t *buf, uint32_t& bufpos) { }
 
     virtual uint8_t response_type(void) const { return 0; }
 
@@ -109,8 +109,8 @@ namespace MQTT {
 
     uint16_t _keepalive;
 
-    bool write_variable_header(uint8_t *buf, uint32_t& bufpos);
-    bool write_payload(uint8_t *buf, uint32_t& bufpos);
+    void write_variable_header(uint8_t *buf, uint32_t& bufpos);
+    void write_payload(uint8_t *buf, uint32_t& bufpos);
 
     uint8_t response_type(void) const { return MQTTCONNACK; }
 
@@ -146,7 +146,7 @@ namespace MQTT {
     bool _session_present;
     uint8_t _rc;
 
-    bool write_variable_header(uint8_t *buf, uint32_t& bufpos) {}
+    void write_variable_header(uint8_t *buf, uint32_t& bufpos) {}
 
   public:
     // Construct from a network buffer
@@ -162,8 +162,8 @@ namespace MQTT {
     uint32_t _payload_len;
     bool _payload_mine;
 
-    bool write_variable_header(uint8_t *buf, uint32_t& bufpos);
-    bool write_payload(uint8_t *buf, uint32_t& bufpos);
+    void write_variable_header(uint8_t *buf, uint32_t& bufpos);
+    void write_payload(uint8_t *buf, uint32_t& bufpos);
 
     uint8_t response_type(void) const;
 
@@ -224,7 +224,7 @@ namespace MQTT {
   // Response to Publish when qos == 1
   class PublishAck : public Message {
   private:
-    bool write_variable_header(uint8_t *buf, uint32_t& bufpos) {}
+    void write_variable_header(uint8_t *buf, uint32_t& bufpos) {}
 
   public:
     // Construct with a packet id
@@ -238,7 +238,7 @@ namespace MQTT {
   // First response to Publish when qos == 2
   class PublishRec : public Message {
   private:
-    bool write_variable_header(uint8_t *buf, uint32_t& bufpos);
+    void write_variable_header(uint8_t *buf, uint32_t& bufpos);
 
     uint8_t response_type(void) const { return MQTTPUBREL; }
 
@@ -255,7 +255,7 @@ namespace MQTT {
   // Response to PublishRec
   class PublishRel : public Message {
   private:
-    bool write_variable_header(uint8_t *buf, uint32_t& bufpos);
+    void write_variable_header(uint8_t *buf, uint32_t& bufpos);
 
     uint8_t response_type(void) const { return MQTTPUBCOMP; }
 
@@ -272,7 +272,7 @@ namespace MQTT {
   // Response to PublishRel
   class PublishComp : public Message {
   private:
-    bool write_variable_header(uint8_t *buf, uint32_t& bufpos);
+    void write_variable_header(uint8_t *buf, uint32_t& bufpos);
 
   public:
     // Construct with a packet id
@@ -289,8 +289,8 @@ namespace MQTT {
     uint8_t *_buffer;
     uint32_t _buflen;
 
-    bool write_variable_header(uint8_t *buf, uint32_t& bufpos);
-    bool write_payload(uint8_t *buf, uint32_t& bufpos);
+    void write_variable_header(uint8_t *buf, uint32_t& bufpos);
+    void write_payload(uint8_t *buf, uint32_t& bufpos);
 
     uint8_t response_type(void) const { return MQTTSUBACK; }
 
@@ -315,7 +315,7 @@ namespace MQTT {
     uint8_t *_rcs;
     uint32_t _num_rcs;
 
-    bool write_variable_header(uint8_t *buf, uint32_t& bufpos) {}
+    void write_variable_header(uint8_t *buf, uint32_t& bufpos) {}
 
   public:
     // Construct from a network buffer
@@ -338,8 +338,8 @@ namespace MQTT {
     uint8_t *_buffer;
     uint32_t _buflen;
 
-    bool write_variable_header(uint8_t *buf, uint32_t& bufpos);
-    bool write_payload(uint8_t *buf, uint32_t& bufpos);
+    void write_variable_header(uint8_t *buf, uint32_t& bufpos);
+    void write_payload(uint8_t *buf, uint32_t& bufpos);
 
     uint8_t response_type(void) const { return MQTTUNSUBACK; }
 
@@ -361,7 +361,7 @@ namespace MQTT {
   // Response to Unsubscribe
   class UnsubscribeAck : public Message {
   private:
-    bool write_variable_header(uint8_t *buf, uint32_t& bufpos) {}
+    void write_variable_header(uint8_t *buf, uint32_t& bufpos) {}
 
   public:
     // Construct from a network buffer
@@ -373,7 +373,7 @@ namespace MQTT {
   // Ping the broker
   class Ping : public Message {
   private:
-    bool write_variable_header(uint8_t *buf, uint32_t& bufpos) {}
+    void write_variable_header(uint8_t *buf, uint32_t& bufpos) {}
 
     uint8_t response_type(void) const { return MQTTPINGRESP; }
 
@@ -394,7 +394,7 @@ namespace MQTT {
   // Response to Ping
   class PingResp : public Message {
   private:
-    bool write_variable_header(uint8_t *buf, uint32_t& bufpos) {}
+    void write_variable_header(uint8_t *buf, uint32_t& bufpos) {}
 
   public:
     // Constructor
@@ -413,7 +413,7 @@ namespace MQTT {
   // Disconnect from the broker
   class Disconnect : public Message {
   private:
-    bool write_variable_header(uint8_t *buf, uint32_t& bufpos) {}
+    void write_variable_header(uint8_t *buf, uint32_t& bufpos) {}
 
   public:
     // Constructor
