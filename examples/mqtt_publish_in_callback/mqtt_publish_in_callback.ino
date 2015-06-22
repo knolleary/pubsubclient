@@ -23,7 +23,8 @@ const char *pass =	"yyyyyyyy";		//
 // Update these with values suitable for your network.
 IPAddress server(172, 16, 0, 2);
 
-PubSubClient client(server);
+WiFiClient wclient;
+PubSubClient client(wclient, server);
 
 // Callback function
 void callback(const MQTT::Publish& pub) {

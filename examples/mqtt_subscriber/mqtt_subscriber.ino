@@ -20,7 +20,8 @@ void callback(const MQTT::Publish& pub) {
   Serial.println(pub.payload_string());
 }
 
-PubSubClient client(server);
+WiFiClient wclient;
+PubSubClient client(wclient, server);
 
 void setup()
 {

@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef ESP8266
 #include <pgmspace.h>
 #endif
-#include <WiFiClient.h>
+#include <Client.h>
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
 #define MQTT_KEEPALIVE 15
@@ -118,7 +118,7 @@ namespace MQTT {
 
   public:
     //! Send the message out
-    bool send(WiFiClient& wclient);
+    bool send(Client& client);
 
     //! Get the message type
     uint8_t type(void) const { return _type; }
@@ -131,7 +131,7 @@ namespace MQTT {
   /*!
     remember to free the object once you're finished with it
   */
-  Message* readPacket(WiFiClient &client);
+  Message* readPacket(Client& client);
 
 
   //! Message sent when connecting to a broker

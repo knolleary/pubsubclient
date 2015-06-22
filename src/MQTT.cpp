@@ -110,7 +110,7 @@ namespace MQTT {
     write(buf, bufpos, _packet_id);
   }
 
-  bool Message::send(WiFiClient& wclient) {
+  bool Message::send(Client& client) {
     uint32_t remaining_length = variable_header_length() + payload_length();
     uint32_t packet_length = fixed_header_length(remaining_length) + remaining_length;
     uint8_t *packet = new uint8_t[packet_length];
@@ -120,19 +120,19 @@ namespace MQTT {
     write_variable_header(packet, pos);
     write_payload(packet, pos);
 
-    uint32_t sent = wclient.write(const_cast<const uint8_t*>(packet), packet_length);
+    sent = client.write(const_cast<const uint8_t*>(packet), packet_length);
     delete [] packet;
     return (sent == packet_length);
   }
 
 
-  uint8_t readByte(WiFiClient& client) {
+  uint8_t readByte(Client& client) {
     while(!client.available()) {}
     return client.read();
   }
 
   // Parser
-  Message* readPacket(WiFiClient& client) {
+  Message* readPacket(Client& client) {
     // Read type and flags
     uint8_t type = readByte(client);
     uint8_t flags = type & 0x0f;

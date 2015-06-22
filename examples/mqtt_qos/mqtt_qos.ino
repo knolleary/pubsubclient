@@ -19,7 +19,8 @@ void callback(const MQTT::Publish& pub) {
   // handle message arrived
 }
 
-PubSubClient client(server);
+WiFiClient wclient;
+PubSubClient client(wclient, server);
 
 void setup()
 {

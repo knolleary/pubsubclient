@@ -7,20 +7,23 @@
 #include "PubSubClient.h"
 #include <string.h>
 
-PubSubClient::PubSubClient() :
+PubSubClient::PubSubClient(Client& c) :
   _callback(NULL),
+  _client(&c),
   _max_retries(10)
 {}
 
-PubSubClient::PubSubClient(IPAddress &ip, uint16_t port) :
+PubSubClient::PubSubClient(Client& c, IPAddress &ip, uint16_t port) :
   _callback(NULL),
+  _client(&c),
   _max_retries(10),
   server_ip(ip),
   server_port(port)
 {}
 
-PubSubClient::PubSubClient(String hostname, uint16_t port) :
+PubSubClient::PubSubClient(Client& c, String hostname, uint16_t port) :
   _callback(NULL),
+  _client(&c),
   _max_retries(10),
   server_port(port),
   server_hostname(hostname)
@@ -50,14 +53,14 @@ bool PubSubClient::_process_message(MQTT::Message* msg, uint8_t match_type, uint
   switch (msg->type()) {
   case MQTTPUBLISH:
     {
-      auto pub = static_cast<MQTT::Publish*>(msg);	// RTTI is disabled on ESP8266, so no dynamic_cast<>()
+      MQTT::Publish *pub = static_cast<MQTT::Publish*>(msg);	// RTTI is disabled on embedded, so no dynamic_cast<>()
 
       if (_callback)
 	_callback(*pub);
 
       if (pub->qos() == 1) {
 	MQTT::PublishAck puback(pub->packet_id());
-	puback.send(_client);
+	puback.send(*_client);
 	lastOutActivity = millis();
 
       } else if (pub->qos() == 2) {
@@ -71,7 +74,7 @@ bool PubSubClient::_process_message(MQTT::Message* msg, uint8_t match_type, uint
 
 	{
 	  MQTT::PublishComp pubcomp(pub->packet_id());
-	  pubcomp.send(_client);
+	  pubcomp.send(*_client);
 	  lastOutActivity = millis();
 	}
       }
@@ -81,7 +84,7 @@ bool PubSubClient::_process_message(MQTT::Message* msg, uint8_t match_type, uint
   case MQTTPINGREQ:
     {
       MQTT::PingResp pr;
-      pr.send(_client);
+      pr.send(*_client);
       lastOutActivity = millis();
     }
     break;
@@ -94,7 +97,7 @@ bool PubSubClient::_process_message(MQTT::Message* msg, uint8_t match_type, uint
 }
 
 bool PubSubClient::wait_for(uint8_t match_type, uint16_t match_pid) {
-  while (!_client.available()) {
+  while (!_client->available()) {
     if (millis() - lastInActivity > keepalive * 1000UL)
       return false;
     yield();
@@ -102,7 +105,7 @@ bool PubSubClient::wait_for(uint8_t match_type, uint16_t match_pid) {
 
   while (millis() < lastInActivity + (keepalive * 1000)) {
     // Read the packet and check it
-    MQTT::Message *msg = MQTT::readPacket(_client);
+    MQTT::Message *msg = MQTT::readPacket(*_client);
     if (msg != NULL) {
       bool ret = _process_message(msg, match_type, match_pid);
       delete msg;
@@ -119,7 +122,7 @@ bool PubSubClient::wait_for(uint8_t match_type, uint16_t match_pid) {
 bool PubSubClient::send_reliably(MQTT::Message* msg) {
   uint8_t retries = 0;
  send:
-  msg->send(_client);
+  msg->send(*_client);
   lastOutActivity = millis();
 
   if (msg->response_type() == 0)
@@ -159,12 +162,12 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
   int result = 0;
 
   if (server_hostname.length() > 0)
-    result = _client.connect(server_hostname.c_str(), server_port);
+    result = _client->connect(server_hostname.c_str(), server_port);
   else
-    result = _client.connect(server_ip, server_port);
+    result = _client->connect(server_ip, server_port);
 
   if (!result) {
-    _client.stop();
+    _client->stop();
     return false;
   }
 
@@ -175,7 +178,7 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
 
   bool ret = send_reliably(&conn);
   if (!ret)
-    _client.stop();
+    _client->stop();
 
   return ret;
 }
@@ -187,18 +190,18 @@ bool PubSubClient::loop() {
   unsigned long t = millis();
   if ((t - lastInActivity > keepalive * 1000UL) || (t - lastOutActivity > keepalive * 1000UL)) {
     if (pingOutstanding) {
-      _client.stop();
+      _client->stop();
       return false;
     } else {
       MQTT::Ping ping;
-      ping.send(_client);
+      ping.send(*_client);
       lastInActivity = lastOutActivity = t;
       pingOutstanding = true;
     }
   }
-  if (_client.available()) {
+  if (_client->available()) {
     // Read the packet and check it
-    MQTT::Message *msg = MQTT::readPacket(_client);
+    MQTT::Message *msg = MQTT::readPacket(*_client);
     if (msg != NULL) {
       _process_message(msg);
       delete msg;
@@ -239,7 +242,7 @@ bool PubSubClient::publish(MQTT::Publish &pub) {
 
   switch (pub.qos()) {
   case 0:
-    pub.send(_client);
+    pub.send(*_client);
     lastOutActivity = millis();
     break;
 
@@ -303,15 +306,18 @@ bool PubSubClient::unsubscribe(MQTT::Unsubscribe &unsub) {
 
 void PubSubClient::disconnect() {
    MQTT::Disconnect discon;
-   discon.send(_client);
-   _client.stop();
+   discon.send(*_client);
+   _client->stop();
    lastInActivity = lastOutActivity = millis();
 }
 
 bool PubSubClient::connected() {
-   bool rc = _client.connected();
+   if (_client == NULL)
+     return false;
+
+   bool rc = _client->connected();
    if (!rc)
-     _client.stop();
+     _client->stop();
 
    return rc;
 }

@@ -13,6 +13,7 @@
 #endif
 
 #include <Arduino.h>
+
 #include "MQTT.h"
 
 //! Main do-everything class that sketches will use
@@ -30,7 +31,7 @@ private:
    uint16_t server_port;
    callback_t _callback;
 
-   WiFiClient _client;
+   Client *_client;
    uint16_t nextMsgId, keepalive;
    uint8_t _max_retries;
    unsigned long lastOutActivity;
@@ -47,13 +48,16 @@ private:
    bool send_reliably(MQTT::Message* msg);
 
 public:
-   //! Empty constructor - use set_server() later, before connect()
-   PubSubClient();
+   //! Simple constructor
+   /*!
+     Use set_server() before connect()
+   */
+   PubSubClient(Client& c);
 
    //! Constructor with the server ip address
-   PubSubClient(IPAddress &ip, uint16_t port = 1883);
+   PubSubClient(Client& c, IPAddress &ip, uint16_t port = 1883);
    //! Constructors with the host name
-   PubSubClient(String hostname, uint16_t port = 1883);
+   PubSubClient(Client& c, String hostname, uint16_t port = 1883);
 
    //! Set the server ip address
    PubSubClient& set_server(IPAddress &ip, uint16_t port = 1883);
