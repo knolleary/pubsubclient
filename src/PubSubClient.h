@@ -7,16 +7,22 @@
 #ifndef PubSubClient_h
 #define PubSubClient_h
 
+#ifdef ESP8266
 #include <functional>
-#include <Arduino.h>
 #include <pgmspace.h>
+#endif
 
+#include <Arduino.h>
 #include "MQTT.h"
 
 //! Main do-everything class that sketches will use
 class PubSubClient {
 public:
+#ifdef _GLIBCXX_FUNCTIONAL
   typedef std::function<void(const MQTT::Publish&)> callback_t;
+#else
+  typedef void(*callback_t)(const MQTT::Publish&);
+#endif
 
 private:
    IPAddress server_ip;

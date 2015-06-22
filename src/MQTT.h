@@ -20,7 +20,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <stdint.h>
+#ifdef ESP8266
 #include <pgmspace.h>
+#endif
 #include <WiFiClient.h>
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
