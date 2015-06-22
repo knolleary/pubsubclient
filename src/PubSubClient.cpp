@@ -97,7 +97,7 @@ bool PubSubClient::wait_for(uint8_t match_type, uint16_t match_pid) {
   while (!_client.available()) {
     if (millis() - lastInActivity > keepalive * 1000UL)
       return false;
-    delayMicroseconds(100);
+    yield();
   }
 
   while (millis() < lastInActivity + (keepalive * 1000)) {
@@ -110,7 +110,7 @@ bool PubSubClient::wait_for(uint8_t match_type, uint16_t match_pid) {
 	return true;
     }
 
-    delayMicroseconds(100);
+    yield();
   }
 
   return false;
