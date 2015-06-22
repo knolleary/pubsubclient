@@ -46,4 +46,10 @@ You can use the MQTT classes and their chainable setter methods like this:
                     .add_topic("topic")
                    );
 
+For details see the [http://imroy.github.io/pubsubclient/classMQTT_1_1Connect.html MQTT::Connect],
+[http://imroy.github.io/pubsubclient/classMQTT_1_1Publish.html MQTT::Publish],
+[http://imroy.github.io/pubsubclient/classMQTT_1_1Subscribe.html MQTT::Subscribe], and
+[http://imroy.github.io/pubsubclient/classMQTT_1_1Unsubscribe.html MQTT::Unsubscribe]
+classes in the Doxygen-generated documentation.
+
 See also the mqtt_auth or mqtt_qos example sketches for how this is used.
