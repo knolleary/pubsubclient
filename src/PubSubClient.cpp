@@ -215,7 +215,7 @@ bool PubSubClient::publish(String topic, String payload) {
   return publish(pub);
 }
 
-bool PubSubClient::publish(String topic, const uint8_t* payload, unsigned int plength, bool retained) {
+bool PubSubClient::publish(String topic, const uint8_t* payload, uint32_t plength, bool retained) {
   if (!connected())
     return false;
 
@@ -224,7 +224,7 @@ bool PubSubClient::publish(String topic, const uint8_t* payload, unsigned int pl
   return publish(pub);
 }
 
-bool PubSubClient::publish_P(String topic, PGM_P payload, unsigned int plength, bool retained) {
+bool PubSubClient::publish_P(String topic, PGM_P payload, uint32_t plength, bool retained) {
   if (!connected())
     return false;
 

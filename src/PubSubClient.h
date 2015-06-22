@@ -71,10 +71,10 @@ public:
    bool publish(String topic, String payload);
 
    // Publish an arbitrary data payload
-   bool publish(String topic, const uint8_t *payload, unsigned int plength, bool retained = false);
+   bool publish(String topic, const uint8_t *payload, uint32_t plength, bool retained = false);
 
    // Publish an arbitrary data payload stored in "program memory"
-   bool publish_P(String topic, PGM_P payload, unsigned int, bool retained = false);
+   bool publish_P(String topic, PGM_P payload, uint32_t plength, bool retained = false);
 
    // Subscribe to a topic
    bool subscribe(String topic, uint8_t qos = 0);
