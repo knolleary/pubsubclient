@@ -120,7 +120,7 @@ namespace MQTT {
     write_variable_header(packet, pos);
     write_payload(packet, pos);
 
-    sent = client.write(const_cast<const uint8_t*>(packet), packet_length);
+    uint32_t sent = client.write(const_cast<const uint8_t*>(packet), packet_length);
     delete [] packet;
     return (sent == packet_length);
   }
