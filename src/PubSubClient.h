@@ -39,7 +39,7 @@ private:
    bool pingOutstanding;
 
    //! Internal function used by wait_for() and loop()
-   bool _process_message(MQTT::Message* msg, uint8_t wait_type = 0, uint16_t wait_pid = 0);
+   void _process_message(MQTT::Message* msg);
 
    //! Wait for a certain type of packet to come back, optionally check its packet id
    bool wait_for(uint8_t wait_type, uint16_t wait_pid = 0);

@@ -42,14 +42,7 @@ PubSubClient& PubSubClient::set_server(String hostname, uint16_t port) {
   return *this;
 }
 
-bool PubSubClient::_process_message(MQTT::Message* msg, uint8_t match_type, uint16_t match_pid) {
-  lastInActivity = millis();
-  if (msg->type() == match_type) {
-    if (match_pid)
-      return msg->packet_id() == match_pid;
-    return true;
-  }
-
+void PubSubClient::_process_message(MQTT::Message* msg) {
   switch (msg->type()) {
   case MQTTPUBLISH:
     {
@@ -69,7 +62,7 @@ bool PubSubClient::_process_message(MQTT::Message* msg, uint8_t match_type, uint
 	{
 	  MQTT::PublishRec pubrec(pub->packet_id());
 	  if (!send_reliably(&pubrec))
-	    return false;
+	    return;
 	}
 
 	{
@@ -92,8 +85,6 @@ bool PubSubClient::_process_message(MQTT::Message* msg, uint8_t match_type, uint
   case MQTTPINGRESP:
     pingOutstanding = false;
   }
-
-  return false;
 }
 
 bool PubSubClient::wait_for(uint8_t match_type, uint16_t match_pid) {
@@ -107,10 +98,18 @@ bool PubSubClient::wait_for(uint8_t match_type, uint16_t match_pid) {
     // Read the packet and check it
     MQTT::Message *msg = MQTT::readPacket(*_client);
     if (msg != NULL) {
-      bool ret = _process_message(msg, match_type, match_pid);
-      delete msg;
-      if (ret)
+      lastInActivity = millis();
+
+      if (msg->type() == match_type) {
+	uint8_t pid = msg->packet_id();
+	delete msg;
+	if (match_pid)
+	  return pid == match_pid;
 	return true;
+      }
+
+      _process_message(msg);
+      delete msg;
     }
 
     yield();
