@@ -287,6 +287,7 @@ namespace MQTT {
   {
     uint32_t pos = 0;
     uint8_t reserved = read<uint8_t>(data, pos);
+    _session_present = reserved & 0x01;
     _rc = read<uint8_t>(data, pos);
   }
 
