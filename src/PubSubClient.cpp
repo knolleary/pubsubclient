@@ -205,6 +205,7 @@ bool PubSubClient::loop() {
     // Read the packet and check it
     MQTT::Message *msg = MQTT::readPacket(*_client);
     if (msg != NULL) {
+      lastInActivity = millis();
       _process_message(msg);
       delete msg;
     }
