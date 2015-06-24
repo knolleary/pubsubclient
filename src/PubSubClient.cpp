@@ -44,7 +44,7 @@ PubSubClient& PubSubClient::set_server(String hostname, uint16_t port) {
 
 void PubSubClient::_process_message(MQTT::Message* msg) {
   switch (msg->type()) {
-  case MQTTPUBLISH:
+  case MQTT::PUBLISH:
     {
       MQTT::Publish *pub = static_cast<MQTT::Publish*>(msg);	// RTTI is disabled on embedded, so no dynamic_cast<>()
 
@@ -74,7 +74,7 @@ void PubSubClient::_process_message(MQTT::Message* msg) {
     }
     break;
 
-  case MQTTPINGREQ:
+  case MQTT::PINGREQ:
     {
       MQTT::PingResp pr;
       pr.send(*_client);
@@ -82,12 +82,12 @@ void PubSubClient::_process_message(MQTT::Message* msg) {
     }
     break;
 
-  case MQTTPINGRESP:
+  case MQTT::PINGRESP:
     pingOutstanding = false;
   }
 }
 
-bool PubSubClient::wait_for(uint8_t match_type, uint16_t match_pid) {
+bool PubSubClient::wait_for(MQTT::message_type match_type, uint16_t match_pid) {
   while (!_client->available()) {
     if (millis() - lastInActivity > keepalive * 1000UL)
       return false;
@@ -119,15 +119,18 @@ bool PubSubClient::wait_for(uint8_t match_type, uint16_t match_pid) {
 }
 
 bool PubSubClient::send_reliably(MQTT::Message* msg) {
+  MQTT::message_type r_type = msg->response_type();
+  uint16_t pid = msg->packet_id();
+
   uint8_t retries = 0;
  send:
   msg->send(*_client);
   lastOutActivity = millis();
 
-  if (msg->response_type() == 0)
+  if (r_type == MQTT::None)
     return true;
 
-  if (!wait_for(msg->response_type(), msg->packet_id())) {
+  if (!wait_for(r_type, pid)) {
     if (retries < _max_retries) {
       retries++;
       goto send;

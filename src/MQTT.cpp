@@ -86,12 +86,12 @@ namespace MQTT {
     buf[bufpos] = _type << 4;
 
     switch (_type) {
-    case MQTTPUBLISH:
+    case PUBLISH:
       buf[bufpos] |= _flags & 0x0f;
       break;
-    case MQTTPUBREL:
-    case MQTTSUBSCRIBE:
-    case MQTTUNSUBSCRIBE:
+    case PUBREL:
+    case SUBSCRIBE:
+    case UNSUBSCRIBE:
       buf[bufpos] |= 0x02;
     }
     bufpos++;
@@ -163,43 +163,43 @@ namespace MQTT {
     // Use the type value to return an object of the appropriate class
     Message *obj;
     switch (type) {
-    case MQTTCONNACK:
+    case CONNACK:
       obj = new ConnectAck(remaining_data, remaining_length);
       break;
 
-    case MQTTPUBLISH:
+    case PUBLISH:
       obj = new Publish(flags, remaining_data, remaining_length);
       break;
 
-    case MQTTPUBACK:
+    case PUBACK:
       obj = new PublishAck(remaining_data, remaining_length);
       break;
 
-    case MQTTPUBREC:
+    case PUBREC:
       obj = new PublishRec(remaining_data, remaining_length);
       break;
 
-    case MQTTPUBREL:
+    case PUBREL:
       obj = new PublishRel(remaining_data, remaining_length);
       break;
 
-    case MQTTPUBCOMP:
+    case PUBCOMP:
       obj = new PublishComp(remaining_data, remaining_length);
       break;
 
-    case MQTTSUBACK:
+    case SUBACK:
       obj = new SubscribeAck(remaining_data, remaining_length);
       break;
 
-    case MQTTUNSUBACK:
+    case UNSUBACK:
       obj = new UnsubscribeAck(remaining_data, remaining_length);
       break;
 
-    case MQTTPINGREQ:
+    case PINGREQ:
       obj = new Ping(remaining_data, remaining_length);
       break;
 
-    case MQTTPINGRESP:
+    case PINGRESP:
       obj = new PingResp(remaining_data, remaining_length);
       break;
 
@@ -213,7 +213,7 @@ namespace MQTT {
 
   // Connect class
   Connect::Connect(String cid) :
-    Message(MQTTCONNECT),
+    Message(CONNECT),
     _clean_session(true),
     _clientid(cid),
     _keepalive(MQTT_KEEPALIVE)
@@ -283,7 +283,7 @@ namespace MQTT {
 
   // ConnectAck class
   ConnectAck::ConnectAck(uint8_t* data, uint32_t length) :
-    Message(MQTTCONNACK)
+    Message(CONNACK)
   {
     uint32_t pos = 0;
     uint8_t reserved = read<uint8_t>(data, pos);
@@ -293,7 +293,7 @@ namespace MQTT {
 
   // Publish class
   Publish::Publish(String topic, String payload) :
-    Message(MQTTPUBLISH),
+    Message(PUBLISH),
     _topic(topic),
     _payload(NULL), _payload_len(0),
     _payload_mine(false)
@@ -307,7 +307,7 @@ namespace MQTT {
   }
 
   Publish::Publish(String topic, const __FlashStringHelper* payload) :
-    Message(MQTTPUBLISH),
+    Message(PUBLISH),
     _topic(topic),
     _payload_len(strlen_P((PGM_P)payload)), _payload(new uint8_t[_payload_len + 1]),
     _payload_mine(true)
@@ -322,7 +322,7 @@ namespace MQTT {
   }
 
   Publish::Publish(uint8_t flags, uint8_t* data, uint32_t length) :
-    Message(MQTTPUBLISH, flags),
+    Message(PUBLISH, flags),
     _payload(NULL), _payload_len(0),
     _payload_mine(false)
   {
@@ -383,25 +383,25 @@ namespace MQTT {
     write(buf, bufpos, _payload, _payload_len);
   }
 
-  uint8_t Publish::response_type(void) const {
+  message_type Publish::response_type(void) const {
     switch (qos()) {
     case 0:
-      return 0;
+      return None;
     case 1:
-      return MQTTPUBACK;
+      return PUBACK;
     case 2:
-      return MQTTPUBREC;
+      return PUBREC;
     }
   }
 
 
   // PublishAck class
   PublishAck::PublishAck(uint16_t pid) :
-    Message(MQTTPUBACK, pid)
+    Message(PUBACK, pid)
   {}
 
   PublishAck::PublishAck(uint8_t* data, uint32_t length) :
-    Message(MQTTPUBACK)
+    Message(PUBACK)
   {
     uint32_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
@@ -410,11 +410,11 @@ namespace MQTT {
 
   // PublishRec class
   PublishRec::PublishRec(uint16_t pid) :
-    Message(MQTTPUBREC, pid)
+    Message(PUBREC, pid)
   {}
 
   PublishRec::PublishRec(uint8_t* data, uint32_t length) :
-    Message(MQTTPUBREC)
+    Message(PUBREC)
   {
     uint32_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
@@ -431,11 +431,11 @@ namespace MQTT {
 
   // PublishRel class
   PublishRel::PublishRel(uint16_t pid) :
-    Message(MQTTPUBREL, pid)
+    Message(PUBREL, pid)
   {}
 
   PublishRel::PublishRel(uint8_t* data, uint32_t length) :
-    Message(MQTTPUBREL)
+    Message(PUBREL)
   {
     uint32_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
@@ -452,11 +452,11 @@ namespace MQTT {
 
   // PublishComp class
   PublishComp::PublishComp(uint16_t pid) :
-    Message(MQTTPUBREC, pid)
+    Message(PUBREC, pid)
   {}
 
   PublishComp::PublishComp(uint8_t* data, uint32_t length) :
-    Message(MQTTPUBCOMP)
+    Message(PUBCOMP)
   {
     uint32_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
@@ -473,12 +473,12 @@ namespace MQTT {
 
   // Subscribe class
   Subscribe::Subscribe(uint16_t pid) :
-    Message(MQTTSUBSCRIBE, pid),
+    Message(SUBSCRIBE, pid),
     _buffer(NULL), _buflen(0)
   {}
 
   Subscribe::Subscribe(uint16_t pid, String topic, uint8_t qos) :
-    Message(MQTTSUBSCRIBE, pid),
+    Message(SUBSCRIBE, pid),
     _buffer(NULL), _buflen(0)
   {
     _buffer = new uint8_t[2 + topic.length() + 1];
@@ -516,7 +516,7 @@ namespace MQTT {
 
   // SubscribeAck class
   SubscribeAck::SubscribeAck(uint8_t* data, uint32_t length) :
-    Message(MQTTSUBACK),
+    Message(SUBACK),
     _rcs(NULL)
   {
     uint32_t pos = 0;
@@ -538,12 +538,12 @@ namespace MQTT {
 
   // Unsubscribe class
   Unsubscribe::Unsubscribe(uint16_t pid) :
-    Message(MQTTSUBSCRIBE, pid),
+    Message(SUBSCRIBE, pid),
     _buffer(NULL), _buflen(0)
   {}
 
   Unsubscribe::Unsubscribe(uint16_t pid, String topic) :
-    Message(MQTTSUBSCRIBE, pid),
+    Message(SUBSCRIBE, pid),
     _buffer(NULL), _buflen(0)
   {
     _buffer = (uint8_t*)malloc(2 + topic.length());
@@ -580,7 +580,7 @@ namespace MQTT {
 
   // SubscribeAck class
   UnsubscribeAck::UnsubscribeAck(uint8_t* data, uint32_t length) :
-    Message(MQTTUNSUBACK)
+    Message(UNSUBACK)
   {
     uint32_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);

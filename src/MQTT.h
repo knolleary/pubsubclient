@@ -28,41 +28,45 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
 #define MQTT_KEEPALIVE 15
 
-#define MQTTCONNECT     1  // Client request to connect to Server
-#define MQTTCONNACK     2  // Connect Acknowledgment
-#define MQTTPUBLISH     3  // Publish message
-#define MQTTPUBACK      4  // Publish Acknowledgment
-#define MQTTPUBREC      5  // Publish Received (assured delivery part 1)
-#define MQTTPUBREL      6  // Publish Release (assured delivery part 2)
-#define MQTTPUBCOMP     7  // Publish Complete (assured delivery part 3)
-#define MQTTSUBSCRIBE   8  // Client Subscribe request
-#define MQTTSUBACK      9  // Subscribe Acknowledgment
-#define MQTTUNSUBSCRIBE 10 // Client Unsubscribe request
-#define MQTTUNSUBACK    11 // Unsubscribe Acknowledgment
-#define MQTTPINGREQ     12 // PING Request
-#define MQTTPINGRESP    13 // PING Response
-#define MQTTDISCONNECT  14 // Client is Disconnecting
-#define MQTTReserved    15 // Reserved
-
 class PubSubClient;
 
 //! namespace for classes representing MQTT messages
 namespace MQTT {
 
+  enum message_type {
+    None,
+    CONNECT,		// Client request to connect to Server
+    CONNACK,		// Connect Acknowledgment
+    PUBLISH,		// Publish message
+    PUBACK,		// Publish Acknowledgment
+    PUBREC,		// Publish Received (assured delivery part 1)
+    PUBREL,		// Publish Release (assured delivery part 2)
+    PUBCOMP,		// Publish Complete (assured delivery part 3)
+    SUBSCRIBE,		// Client Subscribe request
+    SUBACK,		// Subscribe Acknowledgment
+    UNSUBSCRIBE,	// Client Unsubscribe request
+    UNSUBACK,		// Unsubscribe Acknowledgment
+    PINGREQ,		// PING Request
+    PINGRESP,		// PING Response
+    DISCONNECT,		// Client is Disconnecting
+    Reserved,		// Reserved
+  };
+
   //! Abstract base class
   class Message {
   protected:
-    uint8_t _type, _flags;
+    message_type _type;
+    uint8_t _flags;
     uint16_t _packet_id;	//! Not all message types use a packet id, but most do
 
     //! Private constructor from type and flags
-    Message(uint8_t t, uint8_t f = 0) :
+    Message(message_type t, uint8_t f = 0) :
       _type(t), _flags(f),
       _packet_id(0)
     {}
 
     //! Private constructor from type and packet id
-    Message(uint8_t t, uint16_t pid) :
+    Message(message_type t, uint16_t pid) :
       _type(t), _flags(0),
       _packet_id(pid)
     {}
@@ -112,7 +116,7 @@ namespace MQTT {
     virtual void write_payload(uint8_t *buf, uint32_t& bufpos) const { }
 
     //! Message type to expect in response to this message
-    virtual uint8_t response_type(void) const { return 0; }
+    virtual message_type response_type(void) const { return None; }
 
     friend PubSubClient;	// Just to allow it to call response_type()
 
@@ -121,7 +125,7 @@ namespace MQTT {
     bool send(Client& client);
 
     //! Get the message type
-    uint8_t type(void) const { return _type; }
+    message_type type(void) const { return _type; }
 
     //! Get the packet id
     uint16_t packet_id(void) const { return _packet_id; }
@@ -153,7 +157,7 @@ namespace MQTT {
     uint32_t payload_length(void) const;
     void write_payload(uint8_t *buf, uint32_t& bufpos) const;
 
-    uint8_t response_type(void) const { return MQTTCONNACK; }
+    message_type response_type(void) const { return CONNACK; }
 
   public:
     //! Connect with a client ID
@@ -210,11 +214,11 @@ namespace MQTT {
     uint32_t payload_length(void) const;
     void write_payload(uint8_t *buf, uint32_t& bufpos) const;
 
-    uint8_t response_type(void) const;
+    message_type response_type(void) const;
 
     //! Private constructor from a payload and allowing _payload_mine to be set
     Publish(String topic, uint8_t* payload, uint32_t length, bool mine) :
-      Message(MQTTPUBLISH),
+      Message(PUBLISH),
       _topic(topic),
       _payload(payload), _payload_len(length),
       _payload_mine(mine)
@@ -294,7 +298,7 @@ namespace MQTT {
     uint32_t variable_header_length(void) const;
     void write_variable_header(uint8_t *buf, uint32_t& bufpos) const;
 
-    uint8_t response_type(void) const { return MQTTPUBREL; }
+    message_type response_type(void) const { return PUBREL; }
 
   public:
     //! Construct with a packet id
@@ -312,7 +316,7 @@ namespace MQTT {
     uint32_t variable_header_length(void) const;
     void write_variable_header(uint8_t *buf, uint32_t& bufpos) const;
 
-    uint8_t response_type(void) const { return MQTTPUBCOMP; }
+    message_type response_type(void) const { return PUBCOMP; }
 
   public:
     //! Construct with a packet id
@@ -350,7 +354,7 @@ namespace MQTT {
     uint32_t payload_length(void) const;
     void write_payload(uint8_t *buf, uint32_t& bufpos) const;
 
-    uint8_t response_type(void) const { return MQTTSUBACK; }
+    message_type response_type(void) const { return SUBACK; }
 
   public:
     //! Constructor that starts with a packet id and empty list of subscriptions
@@ -399,7 +403,7 @@ namespace MQTT {
     uint32_t payload_length(void) const;
     void write_payload(uint8_t *buf, uint32_t& bufpos) const;
 
-    uint8_t response_type(void) const { return MQTTUNSUBACK; }
+    message_type response_type(void) const { return UNSUBACK; }
 
   public:
     //! Constructor that starts with a packet id and empty list of unsubscriptions
@@ -428,17 +432,17 @@ namespace MQTT {
   //! Ping the broker
   class Ping : public Message {
   private:
-    uint8_t response_type(void) const { return MQTTPINGRESP; }
+    message_type response_type(void) const { return PINGRESP; }
 
   public:
     //! Constructor
     Ping() :
-      Message(MQTTPINGREQ)
+      Message(PINGREQ)
     {}
 
     //! Construct from a network buffer
     Ping(uint8_t* data, uint32_t length) :
-      Message(MQTTPINGREQ)
+      Message(PINGREQ)
     {}
 
   };
@@ -449,12 +453,12 @@ namespace MQTT {
   public:
     //! Constructor
     PingResp() :
-      Message(MQTTPINGRESP)
+      Message(PINGRESP)
     {}
 
     //! Construct from a network buffer
     PingResp(uint8_t* data, uint32_t length) :
-      Message(MQTTPINGRESP)
+      Message(PINGRESP)
     {}
 
   };
@@ -465,7 +469,7 @@ namespace MQTT {
   public:
     //! Constructor
     Disconnect() :
-      Message(MQTTDISCONNECT)
+      Message(DISCONNECT)
     {}
 
   };
