@@ -38,13 +38,27 @@ private:
    unsigned long lastInActivity;
    bool pingOutstanding;
 
-   //! Internal function used by wait_for() and loop()
+   //! Process incoming messages
+   /*!
+     - Calls the callback function when a PUBLISH message comes in
+     - Handles the handshake for PUBLISH when qos > 0
+     - Handles ping requests and responses
+     \param msg Message to process
+    */
    void _process_message(MQTT::Message* msg);
 
    //! Wait for a certain type of packet to come back, optionally check its packet id
-   bool wait_for(uint8_t wait_type, uint16_t wait_pid = 0);
+   /*!
+     Other packets are handed over to _process_message()
+     \param wait_type	Message type to match on
+     \param wait_pid	Message packet id to match on
+    */
+   bool wait_for(MQTT::message_type wait_type, uint16_t wait_pid = 0);
 
-   //! Send a message and wait for its response message
+   //! Send a message and wait for its response message (if it has one)
+   /*!
+     \param msg The message to send
+    */
    bool send_reliably(MQTT::Message* msg);
 
 public:
