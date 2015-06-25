@@ -315,9 +315,6 @@ void PubSubClient::disconnect() {
 }
 
 bool PubSubClient::connected() {
-   if (_client == NULL)
-     return false;
-
    bool rc = _client->connected();
    if (!rc)
      _client->stop();
