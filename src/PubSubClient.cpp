@@ -141,16 +141,10 @@ bool PubSubClient::send_reliably(MQTT::Message* msg) {
 }
 
 bool PubSubClient::connect(String id) {
-  if (connected())
-    return false;
-
   return connect(id, "", 0, false, "");
 }
 
 bool PubSubClient::connect(String id, String willTopic, uint8_t willQos, bool willRetain, String willMessage) {
-  if (connected())
-    return false;
-
   MQTT::Connect conn(id);
   if (willTopic.length())
     conn.set_will(willTopic, willMessage, willQos, willRetain);
