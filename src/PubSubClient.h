@@ -52,14 +52,15 @@ private:
      Other packets are handed over to _process_message()
      \param wait_type	Message type to match on
      \param wait_pid	Message packet id to match on
+     \return True if we received the packet we wanted
     */
-   bool wait_for(MQTT::message_type wait_type, uint16_t wait_pid = 0);
+   bool _wait_for(MQTT::message_type wait_type, uint16_t wait_pid = 0);
 
    //! Send a message and wait for its response message (if it has one)
    /*!
      \param msg The message to send
     */
-   bool send_reliably(MQTT::Message* msg);
+   bool _send_reliably(MQTT::Message* msg);
 
 public:
    //! Simple constructor

@@ -61,7 +61,7 @@ void PubSubClient::_process_message(MQTT::Message* msg) {
 
 	{
 	  MQTT::PublishRec pubrec(pub->packet_id());
-	  if (!send_reliably(&pubrec))
+	  if (!_send_reliably(&pubrec))
 	    return;
 	}
 
@@ -87,7 +87,7 @@ void PubSubClient::_process_message(MQTT::Message* msg) {
   }
 }
 
-bool PubSubClient::wait_for(MQTT::message_type match_type, uint16_t match_pid) {
+bool PubSubClient::_wait_for(MQTT::message_type match_type, uint16_t match_pid) {
   while (!_client->available()) {
     if (millis() - lastInActivity > keepalive * 1000UL)
       return false;
@@ -118,7 +118,7 @@ bool PubSubClient::wait_for(MQTT::message_type match_type, uint16_t match_pid) {
   return false;
 }
 
-bool PubSubClient::send_reliably(MQTT::Message* msg) {
+bool PubSubClient::_send_reliably(MQTT::Message* msg) {
   MQTT::message_type r_type = msg->response_type();
   uint16_t pid = msg->packet_id();
 
@@ -130,7 +130,7 @@ bool PubSubClient::send_reliably(MQTT::Message* msg) {
   if (r_type == MQTT::None)
     return true;
 
-  if (!wait_for(r_type, pid)) {
+  if (!_wait_for(r_type, pid)) {
     if (retries < _max_retries) {
       retries++;
       goto send;
@@ -169,10 +169,10 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
 
   pingOutstanding = false;
   nextMsgId = 1;		// Init the next packet id
-  lastInActivity = millis();	// Init this so that wait_for() doesn't think we've already timed-out
+  lastInActivity = millis();	// Init this so that _wait_for() doesn't think we've already timed-out
   keepalive = conn.keepalive();	// Store the keepalive period from this connection
 
-  bool ret = send_reliably(&conn);
+  bool ret = _send_reliably(&conn);
   if (!ret)
     _client->stop();
 
@@ -244,17 +244,17 @@ bool PubSubClient::publish(MQTT::Publish &pub) {
     break;
 
   case 1:
-    if (!send_reliably(&pub))
+    if (!_send_reliably(&pub))
       return false;
     break;
 
   case 2:
     {
-      if (!send_reliably(&pub))
+      if (!_send_reliably(&pub))
 	return false;
 
       MQTT::PublishRel pubrel(pub.packet_id());
-      if (!send_reliably(&pubrel))
+      if (!_send_reliably(&pubrel))
 	return false;
     }
     break;
@@ -277,7 +277,7 @@ bool PubSubClient::subscribe(MQTT::Subscribe &sub) {
   if (!connected())
     return false;
 
-  if (!send_reliably(&sub))
+  if (!_send_reliably(&sub))
     return false;
 
   return true;
@@ -295,7 +295,7 @@ bool PubSubClient::unsubscribe(MQTT::Unsubscribe &unsub) {
   if (!connected())
     return false;
 
-  if (!send_reliably(&unsub))
+  if (!_send_reliably(&unsub))
     return false;
 
   return true;
