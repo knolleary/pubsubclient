@@ -8,16 +8,65 @@
 
 PubSubClient	KEYWORD1
 
+# No namespace support?
+MQTT		KEYWORD1
+message_type	KEYWORD1
+Message		KEYWORD1
+Connect		KEYWORD1
+Publish		KEYWORD1
+Subscribe	KEYWORD1
+Unsubscribe	KEYWORD1
+Ping		KEYWORD1
+Disconnect	KEYWORD1
+
+
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
+set_server	KEYWORD2
+callback	KEYWORD2
+set_callback	KEYWORD2
+unset_callback	KEYWORD2
+set_max_retries	KEYWORD2
 connect 	KEYWORD2
 disconnect 	KEYWORD2
 publish 	KEYWORD2
 subscribe 	KEYWORD2
-loop 	KEYWORD2
+loop 		KEYWORD2
 connected 	KEYWORD2
+next_packet_id	KEYWORD2
+
+send		KEYWORD2
+type		KEYWORD2
+packet_id	KEYWORD2
+readPacket	KEYWORD2
+set_clean_session   KEYWORD2
+unset_clean_session KEYWORD2
+set_will	KEYWORD2
+unset_will	KEYWORD2
+set_auth	KEYWORD2
+unset_auth	KEYWORD2
+keepalive	KEYWORD2
+set_keepalive	KEYWORD2
+retain		KEYWORD2
+set_retain	KEYWORD2
+unset_retain	KEYWORD2
+qos		KEYWORD2
+set_qos		KEYWORD2
+unset_qos	KEYWORD2
+dup		KEYWORD2
+set_dup		KEYWORD2
+unset_dup	KEYWORD2
+topic		KEYWORD2
+payload_string	KEYWORD2
+payload		KEYWORD2
+payload_len	KEYWORD2
+Publish_P	KEYWORD2
+add_topic	KEYWORD2
+num_rcs		KEYWORD2
+rc		KEYWORD2
+
 
 #######################################
 # Constants (LITERAL1)
