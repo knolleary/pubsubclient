@@ -308,6 +308,9 @@ bool PubSubClient::unsubscribe(MQTT::Unsubscribe &unsub) {
 }
 
 void PubSubClient::disconnect() {
+   if (!connected())
+     return;
+
    MQTT::Disconnect discon;
    discon.send(*_client);
    _client->stop();
