@@ -35,11 +35,9 @@ publish 	KEYWORD2
 subscribe 	KEYWORD2
 loop 		KEYWORD2
 connected 	KEYWORD2
-next_packet_id	KEYWORD2
 
 send		KEYWORD2
 type		KEYWORD2
-packet_id	KEYWORD2
 readPacket	KEYWORD2
 set_clean_session   KEYWORD2
 unset_clean_session KEYWORD2

@@ -49,10 +49,10 @@ void setup()
     client.publish("outTopic", "hello world qos=0");	// Simple publish with qos=0
 
     client.publish(MQTT::Publish("outTopic", "hello world qos=1")
-                   .set_qos(1, client.next_packet_id()));
+                   .set_qos(1));
 
     client.publish(MQTT::Publish("outTopic", "hello world qos=2")
-                   .set_qos(2, client.next_packet_id()));
+                   .set_qos(2));
   }
 }
 

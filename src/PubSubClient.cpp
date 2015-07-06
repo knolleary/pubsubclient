@@ -120,6 +120,9 @@ bool PubSubClient::_wait_for(MQTT::message_type match_type, uint16_t match_pid) 
 
 bool PubSubClient::_send_reliably(MQTT::Message* msg) {
   MQTT::message_type r_type = msg->response_type();
+
+  if (msg->need_packet_id())
+    msg->set_packet_id(_next_packet_id());
   uint16_t pid = msg->packet_id();
 
   uint8_t retries = 0;
@@ -269,7 +272,7 @@ bool PubSubClient::subscribe(String topic, uint8_t qos) {
   if (qos > 2)
     return false;
 
-  MQTT::Subscribe sub(next_packet_id(), topic, qos);
+  MQTT::Subscribe sub(topic, qos);
   return subscribe(sub);
 }
 
@@ -287,7 +290,7 @@ bool PubSubClient::unsubscribe(String topic) {
   if (!connected())
     return false;
 
-  MQTT::Unsubscribe unsub(next_packet_id(), topic);
+  MQTT::Unsubscribe unsub(topic);
   return unsubscribe(unsub);
 }
 

@@ -58,17 +58,21 @@ namespace MQTT {
     message_type _type;
     uint8_t _flags;
     uint16_t _packet_id;	//! Not all message types use a packet id, but most do
+    bool _need_packet_id;
+    bool _deferred_payload;
 
     //! Private constructor from type and flags
     Message(message_type t, uint8_t f = 0) :
       _type(t), _flags(f),
-      _packet_id(0)
+      _packet_id(0), _need_packet_id(false),
+      _deferred_payload(false)
     {}
 
     //! Private constructor from type and packet id
-    Message(message_type t, uint16_t pid) :
+    Message(message_type t, uint16_t pid, bool npid = false) :
       _type(t), _flags(0),
-      _packet_id(pid)
+      _packet_id(pid), _need_packet_id(npid),
+      _deferred_payload(false)
     {}
 
     //! Virtual destructor
@@ -87,6 +91,15 @@ namespace MQTT {
       \param rlength Remaining lengh i.e variable header + payload
     */
     void write_fixed_header(uint8_t *buf, uint32_t& bufpos, uint32_t rlength) const;
+
+    //! Does this message need a packet id before being sent?
+    bool need_packet_id(void) const { return _need_packet_id; }
+
+    //! Set the packet id
+    void set_packet_id(uint16_t pid) { _packet_id = pid; }
+
+    //! Get the packet id
+    uint16_t packet_id(void) const { return _packet_id; }
 
     //! Write the packet id to a buffer
     /*!
@@ -127,8 +140,6 @@ namespace MQTT {
     //! Get the message type
     message_type type(void) const { return _type; }
 
-    //! Get the packet id
-    uint16_t packet_id(void) const { return _packet_id; }
   };
 
   //! Parser
@@ -253,9 +264,9 @@ namespace MQTT {
     //! Get QoS value
     uint8_t qos(void) const		{ return (_flags >> 1) & 0x03; }
     //! Set QoS value
-    Publish& set_qos(uint8_t q, uint16_t pid = 0);
+    Publish& set_qos(uint8_t q);
     //! Unset QoS value
-    Publish& unset_qos(void)		{ _flags &= ~0x06; return *this; }
+    Publish& unset_qos(void)		{ _flags &= ~0x06; _need_packet_id = false; return *this; }
 
     //! Get dup flag
     bool dup(void) const		{ return (_flags >> 3) & 0x01; }
@@ -357,11 +368,11 @@ namespace MQTT {
     message_type response_type(void) const { return SUBACK; }
 
   public:
-    //! Constructor that starts with a packet id and empty list of subscriptions
-    Subscribe(uint16_t pid);
+    //! Constructor that starts an empty list of subscriptions
+    Subscribe();
 
-    //! Subscribe with a packet id, topic, and optional QoS level
-    Subscribe(uint16_t pid, String topic, uint8_t qos = 0);
+    //! Subscribe with a topic and optional QoS level
+    Subscribe(String topic, uint8_t qos = 0);
 
     ~Subscribe();
 
@@ -406,11 +417,11 @@ namespace MQTT {
     message_type response_type(void) const { return UNSUBACK; }
 
   public:
-    //! Constructor that starts with a packet id and empty list of unsubscriptions
-    Unsubscribe(uint16_t pid);
+    //! Constructor that starts with an empty list of unsubscriptions
+    Unsubscribe();
 
-    //! Unsubscribe from a topic, with a packet id
-    Unsubscribe(uint16_t pid, String topic);
+    //! Unsubscribe from a topic
+    Unsubscribe(String topic);
 
     ~Unsubscribe();
 

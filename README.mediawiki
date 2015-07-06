@@ -33,16 +33,16 @@ You can use the MQTT classes and their chainable setter methods like this:
 
  client.publish(MQTT::Publish("topic", "payload")
                 .set_retain()
-                .set_qos(1, client.next_packet_id())
+                .set_qos(1)
                 .set_dup()
                );
 
- client.subscribe(MQTT::Subscribe(client.next_packet_id())
+ client.subscribe(MQTT::Subscribe()
                   .add_topic("topic1")
                   .add_topic("topic2", 1)	// optional qos value
                  );
 
- client.unsubscribe(MQTT::Unsubscribe(client.next_packet_id())
+ client.unsubscribe(MQTT::Unsubscribe()
                     .add_topic("topic")
                    );
 

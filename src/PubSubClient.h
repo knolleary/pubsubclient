@@ -62,6 +62,13 @@ private:
     */
    bool _send_reliably(MQTT::Message* msg);
 
+   //! Return the next packet id
+   uint16_t _next_packet_id(void) {
+     nextMsgId++;
+     if (nextMsgId == 0) nextMsgId = 1;
+     return nextMsgId;
+   }
+
 public:
    //! Simple constructor
    /*!
@@ -157,16 +164,6 @@ public:
 
    //! Are we connected?
    bool connected();
-
-   //! Return the next packet id
-   /*!
-     Needed for constructing our own publish (with QoS>0) or (un)subscribe messages
-   */
-   uint16_t next_packet_id(void) {
-     nextMsgId++;
-     if (nextMsgId == 0) nextMsgId = 1;
-     return nextMsgId;
-   }
 
    //! Connect with a pre-constructed MQTT message object
    bool connect(MQTT::Connect &conn);

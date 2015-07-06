@@ -345,14 +345,14 @@ namespace MQTT {
       delete [] _payload;
   }
 
-  Publish& Publish::set_qos(uint8_t q, uint16_t pid) {
+  Publish& Publish::set_qos(uint8_t q) {
     if (q > 2)
       q = 2;
 
     _flags &= ~0x06;
     if (q) {
       _flags |= q << 1;
-      _packet_id = pid;
+      _need_packet_id = true;
     }
     return *this;
   }
@@ -473,13 +473,13 @@ namespace MQTT {
 
 
   // Subscribe class
-  Subscribe::Subscribe(uint16_t pid) :
-    Message(SUBSCRIBE, pid),
+  Subscribe::Subscribe() :
+    Message(SUBSCRIBE, 0, true),
     _buffer(NULL), _buflen(0)
   {}
 
-  Subscribe::Subscribe(uint16_t pid, String topic, uint8_t qos) :
-    Message(SUBSCRIBE, pid),
+  Subscribe::Subscribe(String topic, uint8_t qos) :
+    Message(SUBSCRIBE, 0, true),
     _buffer(NULL), _buflen(0)
   {
     _buffer = new uint8_t[2 + topic.length() + 1];
@@ -538,13 +538,13 @@ namespace MQTT {
 
 
   // Unsubscribe class
-  Unsubscribe::Unsubscribe(uint16_t pid) :
-    Message(SUBSCRIBE, pid),
+  Unsubscribe::Unsubscribe() :
+    Message(SUBSCRIBE, 0, true),
     _buffer(NULL), _buflen(0)
   {}
 
-  Unsubscribe::Unsubscribe(uint16_t pid, String topic) :
-    Message(SUBSCRIBE, pid),
+  Unsubscribe::Unsubscribe(String topic) :
+    Message(SUBSCRIBE, 0, true),
     _buffer(NULL), _buflen(0)
   {
     _buffer = (uint8_t*)malloc(2 + topic.length());
