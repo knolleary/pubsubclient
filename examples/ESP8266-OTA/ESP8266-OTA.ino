@@ -61,6 +61,7 @@ void receive_ota(const MQTT::Publish& pub) {
     Serial.println("Clearing retained message.");
     client.publish(MQTT::Publish(pub.topic(), "")
                    .set_retain());
+    client.disconnect();
 
     Serial.printf("Update Success: %u\nRebooting...\n", millis() - startTime);
     ESP.restart();
