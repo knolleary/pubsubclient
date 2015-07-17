@@ -22,7 +22,8 @@ IPAddress server_ip(192,168,1,1);
 void setup() {
   Serial.begin(115200);
   Serial.println("");
-  Serial.println("Arduino MQTT OTA Test");
+  Serial.print("Arduino MQTT OTA Test ");
+  Serial.println(__TIMESTAMP__);
 
   Serial.printf("Sketch size: %u\n", ESP.getSketchSize());
   Serial.printf("Free size: %u\n", ESP.getFreeSketchSpace());
