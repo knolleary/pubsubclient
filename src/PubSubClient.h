@@ -38,6 +38,12 @@ private:
    unsigned long lastInActivity;
    bool pingOutstanding;
 
+   //! Receive a message from the client
+   /*!
+     \return Pointer to message object, NULL if no message has been received
+    */
+   MQTT::Message* _recv_message(void);
+
    //! Process incoming messages
    /*!
      - Calls the callback function when a PUBLISH message comes in

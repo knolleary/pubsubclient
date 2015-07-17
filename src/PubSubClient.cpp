@@ -42,6 +42,13 @@ PubSubClient& PubSubClient::set_server(String hostname, uint16_t port) {
   return *this;
 }
 
+MQTT::Message* PubSubClient::_recv_message(void) {
+  MQTT::Message *msg = MQTT::readPacket(*_client);
+  if (msg != NULL)
+    lastInActivity = millis();
+  return msg;
+}
+
 void PubSubClient::_process_message(MQTT::Message* msg) {
   switch (msg->type()) {
   case MQTT::PUBLISH:
@@ -96,10 +103,8 @@ bool PubSubClient::_wait_for(MQTT::message_type match_type, uint16_t match_pid) 
 
   while (millis() < lastInActivity + (keepalive * 1000)) {
     // Read the packet and check it
-    MQTT::Message *msg = MQTT::readPacket(*_client);
+    MQTT::Message *msg = _recv_message();
     if (msg != NULL) {
-      lastInActivity = millis();
-
       if (msg->type() == match_type) {
 	uint8_t pid = msg->packet_id();
 	delete msg;
@@ -200,9 +205,8 @@ bool PubSubClient::loop() {
   }
   if (_client->available()) {
     // Read the packet and check it
-    MQTT::Message *msg = MQTT::readPacket(*_client);
+    MQTT::Message *msg = _recv_message();
     if (msg != NULL) {
-      lastInActivity = millis();
       _process_message(msg);
       delete msg;
     }
