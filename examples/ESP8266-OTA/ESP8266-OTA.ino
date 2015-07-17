@@ -50,7 +50,7 @@ void receive_ota(const MQTT::Publish& pub) {
 
   uint32_t total = 0;
   while (!Update.isFinished()) {
-    uint32_t written = Update.write(*pub.payload_stream());
+    uint32_t written = Update.writeStream(*pub.payload_stream());
     if (written > 0) {
       total += written;
       Serial.print(total, DEC);
