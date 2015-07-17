@@ -4,7 +4,7 @@
  * This sketch connects to an MQTT broker and subscribes to a specific topic
  * to receive OTA updates on.
  * Send the message using the mosquitto tool:
- $ mosquitto_pub -h 192.168.1.1 -t 'ota/192.168.1.13' -f /tmp/build*.tmp/sensor-node.cpp.bin
+ $ mosquitto_pub -h 192.168.1.1 -t 'ota/192.168.1.13' -r -f /tmp/build*.tmp/sensor-node.cpp.bin
  *
  */
 
