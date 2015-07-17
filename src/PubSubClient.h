@@ -44,6 +44,12 @@ private:
     */
    MQTT::Message* _recv_message(void);
 
+   //! Send a message and wait for its response message (if it has one)
+   /*!
+     \param msg The message to send
+    */
+   bool _send_message(MQTT::Message& msg);
+
    //! Process incoming messages
    /*!
      - Calls the callback function when a PUBLISH message comes in
@@ -61,12 +67,6 @@ private:
      \return True if we received the packet we wanted
     */
    bool _wait_for(MQTT::message_type wait_type, uint16_t wait_pid = 0);
-
-   //! Send a message and wait for its response message (if it has one)
-   /*!
-     \param msg The message to send
-    */
-   bool _send_reliably(MQTT::Message* msg);
 
    //! Return the next packet id
    uint16_t _next_packet_id(void) {

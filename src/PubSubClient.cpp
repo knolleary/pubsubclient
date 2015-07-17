@@ -49,6 +49,36 @@ MQTT::Message* PubSubClient::_recv_message(void) {
   return msg;
 }
 
+bool PubSubClient::_send_message(MQTT::Message& msg) {
+  MQTT::message_type r_type = msg.response_type();
+
+  if (msg.need_packet_id())
+    msg.set_packet_id(_next_packet_id());
+
+  uint8_t retries = 0;
+ send:
+  if (!msg.send(*_client)) {
+    if (retries < _max_retries) {
+      retries++;
+      goto send;
+    }
+    return false;
+  }
+  lastOutActivity = millis();
+
+  if (r_type == MQTT::None)
+    return true;
+
+  if (!_wait_for(r_type, msg.packet_id())) {
+    if (retries < _max_retries) {
+      retries++;
+      goto send;
+    }
+    return false;
+  }
+  return true;
+}
+
 void PubSubClient::_process_message(MQTT::Message* msg) {
   switch (msg->type()) {
   case MQTT::PUBLISH:
@@ -60,22 +90,20 @@ void PubSubClient::_process_message(MQTT::Message* msg) {
 
       if (pub->qos() == 1) {
 	MQTT::PublishAck puback(pub->packet_id());
-	puback.send(*_client);
-	lastOutActivity = millis();
+	_send_message(puback);
 
       } else if (pub->qos() == 2) {
 	uint8_t retries = 0;
 
 	{
 	  MQTT::PublishRec pubrec(pub->packet_id());
-	  if (!_send_reliably(&pubrec))
+	  if (!_send_message(pubrec))
 	    return;
 	}
 
 	{
 	  MQTT::PublishComp pubcomp(pub->packet_id());
-	  pubcomp.send(*_client);
-	  lastOutActivity = millis();
+	  _send_message(pubcomp);
 	}
       }
     }
@@ -84,8 +112,7 @@ void PubSubClient::_process_message(MQTT::Message* msg) {
   case MQTT::PINGREQ:
     {
       MQTT::PingResp pr;
-      pr.send(*_client);
-      lastOutActivity = millis();
+      _send_message(pr);
     }
     break;
 
@@ -123,31 +150,6 @@ bool PubSubClient::_wait_for(MQTT::message_type match_type, uint16_t match_pid) 
   return false;
 }
 
-bool PubSubClient::_send_reliably(MQTT::Message* msg) {
-  MQTT::message_type r_type = msg->response_type();
-
-  if (msg->need_packet_id())
-    msg->set_packet_id(_next_packet_id());
-  uint16_t pid = msg->packet_id();
-
-  uint8_t retries = 0;
- send:
-  msg->send(*_client);
-  lastOutActivity = millis();
-
-  if (r_type == MQTT::None)
-    return true;
-
-  if (!_wait_for(r_type, pid)) {
-    if (retries < _max_retries) {
-      retries++;
-      goto send;
-    }
-    return false;
-  }
-  return true;
-}
-
 bool PubSubClient::connect(String id) {
   return connect(id, "", 0, false, "");
 }
@@ -177,10 +179,10 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
 
   pingOutstanding = false;
   nextMsgId = 1;		// Init the next packet id
-  lastInActivity = millis();	// Init this so that _wait_for() doesn't think we've already timed-out
   keepalive = conn.keepalive();	// Store the keepalive period from this connection
 
-  bool ret = _send_reliably(&conn);
+  bool ret = _send_message(conn);
+  lastInActivity = lastOutActivity;
   if (!ret)
     _client->stop();
 
@@ -198,8 +200,8 @@ bool PubSubClient::loop() {
       return false;
     } else {
       MQTT::Ping ping;
-      ping.send(*_client);
-      lastInActivity = lastOutActivity = t;
+      _send_message(ping);
+      lastInActivity = lastOutActivity;
       pingOutstanding = true;
     }
   }
@@ -246,22 +248,21 @@ bool PubSubClient::publish(MQTT::Publish &pub) {
 
   switch (pub.qos()) {
   case 0:
-    pub.send(*_client);
-    lastOutActivity = millis();
+    _send_message(pub);
     break;
 
   case 1:
-    if (!_send_reliably(&pub))
+    if (!_send_message(pub))
       return false;
     break;
 
   case 2:
     {
-      if (!_send_reliably(&pub))
+      if (!_send_message(pub))
 	return false;
 
       MQTT::PublishRel pubrel(pub.packet_id());
-      if (!_send_reliably(&pubrel))
+      if (!_send_message(pubrel))
 	return false;
     }
     break;
@@ -284,7 +285,7 @@ bool PubSubClient::subscribe(MQTT::Subscribe &sub) {
   if (!connected())
     return false;
 
-  if (!_send_reliably(&sub))
+  if (!_send_message(sub))
     return false;
 
   return true;
@@ -302,7 +303,7 @@ bool PubSubClient::unsubscribe(MQTT::Unsubscribe &unsub) {
   if (!connected())
     return false;
 
-  if (!_send_reliably(&unsub))
+  if (!_send_message(unsub))
     return false;
 
   return true;
@@ -313,9 +314,9 @@ void PubSubClient::disconnect() {
      return;
 
    MQTT::Disconnect discon;
-   discon.send(*_client);
+   _send_message(discon);
+   lastInActivity = lastOutActivity;
    _client->stop();
-   lastInActivity = lastOutActivity = millis();
 }
 
 bool PubSubClient::connected() {
