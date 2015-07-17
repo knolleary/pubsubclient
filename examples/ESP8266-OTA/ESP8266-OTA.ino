@@ -43,22 +43,7 @@ void receive_ota(const MQTT::Publish& pub) {
   Serial.println(" bytes...");
 
   Serial.setDebugOutput(true);
-  if (!Update.begin(size)) {
-    Serial.println("Update Begin Error");
-    return;
-  }
-
-  uint32_t total = 0;
-  while (!Update.isFinished()) {
-    uint32_t written = Update.writeStream(*pub.payload_stream());
-    if (written > 0) {
-      total += written;
-      Serial.print(total, DEC);
-      Serial.println(" bytes");
-    }
-  }
-
-  if (Update.end()) {
+  if (ESP.updateSketch(*pub.payload_stream(), size, true, false)) {
     Serial.println("Clearing retained message.");
     client.publish(MQTT::Publish(pub.topic(), "")
                    .set_retain());
@@ -66,9 +51,10 @@ void receive_ota(const MQTT::Publish& pub) {
 
     Serial.printf("Update Success: %u\nRebooting...\n", millis() - startTime);
     ESP.restart();
-  } else {
-    Update.printError(Serial);
+    delay(10000);
   }
+
+  Update.printError(Serial);
   Serial.setDebugOutput(false);
 }
 
