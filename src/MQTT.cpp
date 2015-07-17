@@ -43,6 +43,7 @@ namespace MQTT {
     write(buf, length_pos, count);
   }
 
+  //! Template function to read from a buffer
   template <typename T>
   T read(uint8_t *buf, uint32_t& pos);
 
@@ -78,6 +79,25 @@ namespace MQTT {
     while(!client.available()) {}
     return client.read();
   }
+
+  template <>
+  uint16_t read<uint16_t>(Client& client) {
+    uint16_t val = read<uint8_t>(client) << 8;
+    val |= read<uint8_t>(client);
+    return val;
+  }
+
+  template <>
+  String read<String>(Client& client) {
+    uint16_t len = read<uint16_t>(client);
+    String val;
+    val.reserve(len);
+    for (uint16_t i = 0; i < len; i++)
+      val += (char)read<uint8_t>(client);
+
+    return val;
+  }
+
 
 
   // Message class
@@ -158,6 +178,17 @@ namespace MQTT {
     // Read variable header and/or payload
     uint8_t *remaining_data = NULL;
     if (remaining_length > 0) {
+      if (remaining_length > 1024) {
+	switch (type) {
+	case PUBLISH:
+	  return new Publish(flags, client, remaining_length);
+	case SUBACK:
+	  return new SubscribeAck(client, remaining_length);
+	default:
+	  return NULL;
+	}
+      }
+
       remaining_data = new uint8_t[remaining_length];
       uint32_t r = remaining_length;
       while (client.available() && r) {
@@ -345,8 +376,26 @@ namespace MQTT {
     }
   }
 
+  Publish::Publish(uint8_t flags, Client& client, uint32_t remaining_length) :
+    Message(PUBLISH, client, flags),
+    _payload(NULL), _payload_len(remaining_length),
+    _payload_mine(false)
+  {
+    // Read the topic
+    _topic = read<String>(client);
+    _payload_len -= 2 + _topic.length();
+
+    if (qos() > 0) {
+      // Read the packet id
+      _packet_id = read<uint16_t>(client);
+      _payload_len -= 2;
+    }
+
+    // Client stream is now at the start of the payload
+  }
+
   Publish::~Publish() {
-    if (_payload_mine)
+    if ((_payload_mine) && (_payload != NULL))
       delete [] _payload;
   }
 
@@ -536,9 +585,24 @@ namespace MQTT {
     }
   }
 
+  SubscribeAck::SubscribeAck(Client& client, uint32_t remaining_length) :
+    Message(SUBACK, client),
+    _rcs(NULL),
+    _num_rcs(remaining_length - 2)
+  {
+    // Read packet id
+    _packet_id = read<uint16_t>(client);
+
+    // Client stream is now at the start of the list of rcs
+  }
+
   SubscribeAck::~SubscribeAck() {
     if (_rcs != NULL)
       delete [] _rcs;
+  }
+
+  uint8_t SubscribeAck::next_rc(void) const {
+    return read<uint8_t>(*_stream_client);
   }
 
 

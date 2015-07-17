@@ -59,17 +59,27 @@ namespace MQTT {
     uint8_t _flags;
     uint16_t _packet_id;	//! Not all message types use a packet id, but most do
     bool _need_packet_id;
+    Client* _stream_client;
 
     //! Private constructor from type and flags
     Message(message_type t, uint8_t f = 0) :
       _type(t), _flags(f),
-      _packet_id(0), _need_packet_id(false)
+      _packet_id(0), _need_packet_id(false),
+      _stream_client(NULL)
     {}
 
     //! Private constructor from type and packet id
     Message(message_type t, uint16_t pid, bool npid = false) :
       _type(t), _flags(0),
-      _packet_id(pid), _need_packet_id(npid)
+      _packet_id(pid), _need_packet_id(npid),
+      _stream_client(NULL)
+    {}
+
+    //! Private constructor from type and client object
+    Message(message_type t, Client& c, uint8_t f = 0) :
+      _type(t), _flags(f),
+      _packet_id(0), _need_packet_id(false),
+      _stream_client(&c)
     {}
 
     //! Virtual destructor
@@ -136,6 +146,9 @@ namespace MQTT {
 
     //! Get the message type
     message_type type(void) const { return _type; }
+
+    //! Does this message have a network stream for reading the (large) payload?
+    bool has_stream(void) const { return _stream_client != NULL; }
 
   };
 
@@ -249,6 +262,9 @@ namespace MQTT {
     //! Construct from a network buffer
     Publish(uint8_t flags, uint8_t* data, uint32_t length);
 
+    //! Construct from a network stream
+    Publish(uint8_t flags, Client& client, uint32_t remaining_length);
+
     ~Publish();
 
     //! Get retain flag
@@ -283,6 +299,8 @@ namespace MQTT {
     //! Get the payload length
     uint32_t payload_len(void) const { return _payload_len; }
 
+    //! Get the network stream for reading the payload
+    Client* payload_stream(void) const { return _stream_client; }
   };
 
   //! A function made to look like a constructor, reading the payload from flash
@@ -389,6 +407,9 @@ namespace MQTT {
     //! Construct from a network buffer
     SubscribeAck(uint8_t* data, uint32_t length);
 
+    //! Construct from a network stream
+    SubscribeAck(Client& client, uint32_t remaining_length);
+
     ~SubscribeAck();
 
     //! Get the number of return codes available
@@ -396,6 +417,9 @@ namespace MQTT {
 
     //! Get a return code
     uint8_t rc(uint8_t i) const { return _rcs[i]; }
+
+    //! Get the next return code from a stream
+    uint8_t next_rc(void) const;
 
   };
 
