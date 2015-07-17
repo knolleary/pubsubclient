@@ -248,13 +248,10 @@ bool PubSubClient::publish(MQTT::Publish &pub) {
 
   switch (pub.qos()) {
   case 0:
-    _send_message(pub);
-    break;
+    return _send_message(pub);
 
   case 1:
-    if (!_send_message(pub))
-      return false;
-    break;
+    return _send_message(pub);
 
   case 2:
     {
@@ -262,12 +259,10 @@ bool PubSubClient::publish(MQTT::Publish &pub) {
 	return false;
 
       MQTT::PublishRel pubrel(pub.packet_id());
-      if (!_send_message(pubrel))
-	return false;
+      return _send_message(pubrel);
     }
-    break;
   }
-  return true;
+  return false;
 }
 
 bool PubSubClient::subscribe(String topic, uint8_t qos) {
@@ -285,10 +280,7 @@ bool PubSubClient::subscribe(MQTT::Subscribe &sub) {
   if (!connected())
     return false;
 
-  if (!_send_message(sub))
-    return false;
-
-  return true;
+  return _send_message(sub);
 }
 
 bool PubSubClient::unsubscribe(String topic) {
@@ -303,10 +295,7 @@ bool PubSubClient::unsubscribe(MQTT::Unsubscribe &unsub) {
   if (!connected())
     return false;
 
-  if (!_send_message(unsub))
-    return false;
-
-  return true;
+  return _send_message(unsub);
 }
 
 void PubSubClient::disconnect() {
