@@ -69,6 +69,16 @@ namespace MQTT {
     return val;
   }
 
+  //! Template function to read from a Client object
+  template <typename T>
+  T read(Client& client);
+
+  template <>
+  uint8_t read<uint8_t>(Client& client) {
+    while(!client.available()) {}
+    return client.read();
+  }
+
 
   // Message class
   uint8_t Message::fixed_header_length(uint32_t rlength) const {
@@ -126,15 +136,10 @@ namespace MQTT {
   }
 
 
-  uint8_t readByte(Client& client) {
-    while(!client.available()) {}
-    return client.read();
-  }
-
   // Parser
   Message* readPacket(Client& client) {
     // Read type and flags
-    uint8_t type = readByte(client);
+    uint8_t type = read<uint8_t>(client);
     uint8_t flags = type & 0x0f;
     type >>= 4;
 
@@ -144,7 +149,7 @@ namespace MQTT {
     uint8_t shifter = 0;
     uint8_t digit;
     do {
-      digit = readByte(client);
+      digit = read<uint8_t>(client);
       lenbuf[lenlen++] = digit;
       remaining_length += (digit & 0x7f) << shifter;
       shifter += 7;
