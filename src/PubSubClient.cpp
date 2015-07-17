@@ -181,12 +181,13 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
   nextMsgId = 1;		// Init the next packet id
   keepalive = conn.keepalive();	// Store the keepalive period from this connection
 
-  bool ret = _send_message(conn);
-  lastInActivity = lastOutActivity;
-  if (!ret)
+  if (!_send_message(conn)) {
     _client->stop();
+    return false;
+  }
 
-  return ret;
+  lastInActivity = lastOutActivity;
+  return true;
 }
 
 bool PubSubClient::loop() {
@@ -200,7 +201,9 @@ bool PubSubClient::loop() {
       return false;
     } else {
       MQTT::Ping ping;
-      _send_message(ping);
+      if (!_send_message(ping))
+	return false;
+
       lastInActivity = lastOutActivity;
       pingOutstanding = true;
     }
@@ -303,8 +306,8 @@ void PubSubClient::disconnect() {
      return;
 
    MQTT::Disconnect discon;
-   _send_message(discon);
-   lastInActivity = lastOutActivity;
+   if (_send_message(discon))
+     lastInActivity = lastOutActivity;
    _client->stop();
 }
 
