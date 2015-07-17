@@ -59,20 +59,17 @@ namespace MQTT {
     uint8_t _flags;
     uint16_t _packet_id;	//! Not all message types use a packet id, but most do
     bool _need_packet_id;
-    bool _deferred_payload;
 
     //! Private constructor from type and flags
     Message(message_type t, uint8_t f = 0) :
       _type(t), _flags(f),
-      _packet_id(0), _need_packet_id(false),
-      _deferred_payload(false)
+      _packet_id(0), _need_packet_id(false)
     {}
 
     //! Private constructor from type and packet id
     Message(message_type t, uint16_t pid, bool npid = false) :
       _type(t), _flags(0),
-      _packet_id(pid), _need_packet_id(npid),
-      _deferred_payload(false)
+      _packet_id(pid), _need_packet_id(npid)
     {}
 
     //! Virtual destructor
