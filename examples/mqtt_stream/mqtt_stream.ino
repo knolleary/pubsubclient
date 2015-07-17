@@ -26,9 +26,17 @@ void callback(const MQTT::Publish& pub) {
 
   // do something with the message
   for (uint8_t i = 0; i < pub.payload_len(); i++) {
-    sram.write(pub.payload()[i]);
-    Serial.write(pub.payload()[i]);
+    uint8_t byte;
+    if (pub.has_stream())
+      pub.payload_stream()->read(&byte, 1);
+    else
+      byte = pub.payload()[i];
+    sram.write(byte);
+    Serial.write(byte);
   }
+
+  if (pub.has_stream())
+    pub.payload_stream()->stop();
 
   Serial.println();
 }
