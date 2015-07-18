@@ -241,10 +241,19 @@ namespace MQTT {
     friend Message* readPacket(Client& client);
 
   public:
-    //! Constructors from string payload
+    //! Constructor from string payload
+    /*!
+      \param topic Topic of this message
+      \param payload Payload of this message
+     */
     Publish(String topic, String payload);
 
-    //! Constructors from arbitrary payload
+    //! Constructor from arbitrary payload
+    /*!
+      \param topic Topic of this message
+      \param payload Pointer to a block of data
+      \param length The length of the data stored at 'payload'
+     */
     Publish(String topic, uint8_t* payload, uint32_t length) :
       Publish(topic, payload, length, false)
     {}
@@ -305,7 +314,7 @@ namespace MQTT {
     friend Message* readPacket(Client& client);
 
   public:
-    //! Construct with a packet id
+    //! Constructor from a packet id
     PublishAck(uint16_t pid);
 
   };
@@ -325,7 +334,7 @@ namespace MQTT {
     friend Message* readPacket(Client& client);
 
   public:
-    //! Construct with a packet id
+    //! Constructor from a packet id
     PublishRec(uint16_t pid);
 
   };
@@ -345,7 +354,7 @@ namespace MQTT {
     friend Message* readPacket(Client& client);
 
   public:
-    //! Construct with a packet id
+    //! Constructor from a packet id
     PublishRel(uint16_t pid);
 
   };
@@ -363,7 +372,7 @@ namespace MQTT {
     friend Message* readPacket(Client& client);
 
   public:
-    //! Construct with a packet id
+    //! Constructor from a packet id
     PublishComp(uint16_t pid);
 
   };
@@ -386,7 +395,7 @@ namespace MQTT {
     //! Constructor that starts an empty list of subscriptions
     Subscribe();
 
-    //! Subscribe with a topic and optional QoS level
+    //! Constructor from a topic and optional QoS level
     Subscribe(String topic, uint8_t qos = 0);
 
     ~Subscribe();
@@ -443,7 +452,7 @@ namespace MQTT {
     //! Constructor that starts with an empty list of unsubscriptions
     Unsubscribe();
 
-    //! Unsubscribe from a topic
+    //! Constructor from a topic
     Unsubscribe(String topic);
 
     ~Unsubscribe();
