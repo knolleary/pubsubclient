@@ -232,11 +232,11 @@ namespace MQTT {
       break;
 
     case PINGREQ:
-      obj = new Ping(remaining_data, remaining_length);
+      obj = new Ping;
       break;
 
     case PINGRESP:
-      obj = new PingResp(remaining_data, remaining_length);
+      obj = new PingResp;
       break;
 
     }
