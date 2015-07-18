@@ -49,7 +49,7 @@ MQTT::Message* PubSubClient::_recv_message(void) {
   return msg;
 }
 
-bool PubSubClient::_send_message(MQTT::Message& msg) {
+bool PubSubClient::_send_message(MQTT::Message& msg, bool need_reply) {
   MQTT::message_type r_type = msg.response_type();
 
   if (msg.need_packet_id())
@@ -66,7 +66,7 @@ bool PubSubClient::_send_message(MQTT::Message& msg) {
   }
   lastOutActivity = millis();
 
-  if (r_type == MQTT::None)
+  if (!need_reply || (r_type == MQTT::None))
     return true;
 
   if (!_wait_for(r_type, msg.packet_id())) {
@@ -97,7 +97,7 @@ void PubSubClient::_process_message(MQTT::Message* msg) {
 
 	{
 	  MQTT::PublishRec pubrec(pub->packet_id());
-	  if (!_send_message(pubrec))
+	  if (!_send_message(pubrec, true))
 	    return;
 	}
 
@@ -182,7 +182,7 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
   lastInActivity = millis();	// Init this so that _wait_for() doesn't think we've already timed-out
   keepalive = conn.keepalive();	// Store the keepalive period from this connection
 
-  if (!_send_message(conn)) {
+  if (!_send_message(conn, true)) {
     _client->stop();
     return false;
   }
@@ -254,15 +254,15 @@ bool PubSubClient::publish(MQTT::Publish &pub) {
     return _send_message(pub);
 
   case 1:
-    return _send_message(pub);
+    return _send_message(pub, true);
 
   case 2:
     {
-      if (!_send_message(pub))
+      if (!_send_message(pub, true))
 	return false;
 
       MQTT::PublishRel pubrel(pub.packet_id());
-      return _send_message(pubrel);
+      return _send_message(pubrel, true);
     }
   }
   return false;
@@ -283,7 +283,7 @@ bool PubSubClient::subscribe(MQTT::Subscribe &sub) {
   if (!connected())
     return false;
 
-  return _send_message(sub);
+  return _send_message(sub, true);
 }
 
 bool PubSubClient::unsubscribe(String topic) {
@@ -298,7 +298,7 @@ bool PubSubClient::unsubscribe(MQTT::Unsubscribe &unsub) {
   if (!connected())
     return false;
 
-  return _send_message(unsub);
+  return _send_message(unsub, true);
 }
 
 void PubSubClient::disconnect() {

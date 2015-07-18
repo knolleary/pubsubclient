@@ -47,8 +47,9 @@ private:
    //! Send a message and wait for its response message (if it has one)
    /*!
      \param msg The message to send
+     \param need_reply Do we wait for the reply message?
     */
-   bool _send_message(MQTT::Message& msg);
+   bool _send_message(MQTT::Message& msg, bool need_reply = false);
 
    //! Process incoming messages
    /*!
