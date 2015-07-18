@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdint.h>
 #ifdef ESP8266
 #include <pgmspace.h>
+#include <functional>
 #endif
 #include <Client.h>
 
@@ -52,6 +53,12 @@ namespace MQTT {
     Reserved,		// Reserved
   };
 
+#ifdef _GLIBCXX_FUNCTIONAL
+  typedef std::function<bool(Client&)> payload_callback_t;
+#else
+  typedef bool(*payload_callback_t)(Client&);
+#endif
+
   //! Abstract base class
   class Message {
   protected:
@@ -60,6 +67,7 @@ namespace MQTT {
     uint16_t _packet_id;	//! Not all message types use a packet id, but most do
     bool _need_packet_id;
     Client* _stream_client;
+    payload_callback_t _payload_callback;
 
     //! Private constructor from type and flags
     Message(message_type t, uint8_t f = 0) :
@@ -257,6 +265,14 @@ namespace MQTT {
     Publish(String topic, uint8_t* payload, uint32_t length) :
       Publish(topic, payload, length, false)
     {}
+
+    //! Constructor from a callback
+    /*!
+      \param topic Topic of this message
+      \param pcb A callback function that writes the payload directly to the network Client object
+      \param length The length of the data that 'pcb' will send
+     */
+    Publish(String topic, payload_callback_t pcb, uint32_t length);
 
     //! Constructor from a string stored in flash using the F() macro
     Publish(String topic, const __FlashStringHelper* payload);

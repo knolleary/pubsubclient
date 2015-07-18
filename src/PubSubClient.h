@@ -142,6 +142,14 @@ public:
     */
    bool publish(String topic, const uint8_t *payload, uint32_t plength, bool retained = false);
 
+   //! Publish an arbitrary data payload from a callback
+   /*!
+     \param topic Topic of this message
+     \param pcb A callback function that writes the payload directly to the network Client object
+     \param length The length of the data that 'pcb' will send
+   */
+   bool publish(String topic, MQTT::payload_callback_t pcb, uint32_t length, bool retained = false);
+
    //! Publish an arbitrary data payload stored in "program" memory
    /*!
      \param topic Topic of the message

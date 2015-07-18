@@ -99,7 +99,6 @@ namespace MQTT {
   }
 
 
-
   // Message class
   uint8_t Message::fixed_header_length(uint32_t rlength) const {
     if (rlength < 128)
@@ -141,18 +140,31 @@ namespace MQTT {
   }
 
   bool Message::send(Client& client) {
-    uint32_t remaining_length = variable_header_length() + payload_length();
-    uint32_t packet_length = fixed_header_length(remaining_length) + remaining_length;
+    uint32_t variable_header_len = variable_header_length();
+    uint32_t remaining_length = variable_header_len + payload_length();
+    uint32_t packet_length = fixed_header_length(remaining_length);
+    if (_payload_callback == NULL)
+      packet_length += remaining_length;
+    else
+      packet_length += variable_header_len;
+
     uint8_t *packet = new uint8_t[packet_length];
 
     uint32_t pos = 0;
     write_fixed_header(packet, pos, remaining_length);
     write_variable_header(packet, pos);
+
     write_payload(packet, pos);
 
     uint32_t sent = client.write(const_cast<const uint8_t*>(packet), packet_length);
     delete [] packet;
-    return (sent == packet_length);
+    if (sent != packet_length)
+      return false;
+
+    if (_payload_callback != NULL)
+      return _payload_callback(client);
+
+    return true;
   }
 
 
@@ -376,6 +388,15 @@ namespace MQTT {
     }
   }
 
+  Publish::Publish(String topic, payload_callback_t pcb, uint32_t length) :
+    Message(PUBLISH),
+    _topic(topic),
+    _payload_len(length),
+    _payload(NULL), _payload_mine(false)
+  {
+    _payload_callback = pcb;
+  }
+
   Publish::Publish(uint8_t flags, Client& client, uint32_t remaining_length) :
     Message(PUBLISH, flags),
     _payload(NULL), _payload_len(remaining_length),
@@ -437,7 +458,8 @@ namespace MQTT {
   }
 
   void Publish::write_payload(uint8_t *buf, uint32_t& bufpos) const {
-    write(buf, bufpos, _payload, _payload_len);
+    if (_payload != NULL)
+      write(buf, bufpos, _payload, _payload_len);
   }
 
   message_type Publish::response_type(void) const {
