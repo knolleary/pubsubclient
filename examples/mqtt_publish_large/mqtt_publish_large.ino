@@ -32,9 +32,12 @@ bool message(Client& client) {
     int len = sprintf(buf, "%d", l);
     buf[len] = 32;
     buf[63] = '\n';
-    client.write((const uint8_t*)buf, 64);
+    uint32_t sent = client.write((const uint8_t*)buf, 64);
+    if (sent < 64)
+      return false;
   }
   Serial.println("Published large message.");
+  return true;
 }
 
 void loop() {
