@@ -68,20 +68,6 @@ namespace MQTT {
       _stream_client(NULL)
     {}
 
-    //! Private constructor from type and packet id
-    Message(message_type t, uint16_t pid, bool npid = false) :
-      _type(t), _flags(0),
-      _packet_id(pid), _need_packet_id(npid),
-      _stream_client(NULL)
-    {}
-
-    //! Private constructor from type and client object
-    Message(message_type t, Client& c, uint8_t f = 0) :
-      _type(t), _flags(f),
-      _packet_id(0), _need_packet_id(false),
-      _stream_client(&c)
-    {}
-
     //! Virtual destructor
     virtual ~Message() {}
 

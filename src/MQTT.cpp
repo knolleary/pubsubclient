@@ -377,10 +377,12 @@ namespace MQTT {
   }
 
   Publish::Publish(uint8_t flags, Client& client, uint32_t remaining_length) :
-    Message(PUBLISH, client, flags),
+    Message(PUBLISH, flags),
     _payload(NULL), _payload_len(remaining_length),
     _payload_mine(false)
   {
+    _stream_client = &client;
+
     // Read the topic
     _topic = read<String>(client);
     _payload_len -= 2 + _topic.length();
@@ -452,8 +454,10 @@ namespace MQTT {
 
   // PublishAck class
   PublishAck::PublishAck(uint16_t pid) :
-    Message(PUBACK, pid)
-  {}
+    Message(PUBACK)
+  {
+    _packet_id = pid;
+  }
 
   PublishAck::PublishAck(uint8_t* data, uint32_t length) :
     Message(PUBACK)
@@ -465,8 +469,10 @@ namespace MQTT {
 
   // PublishRec class
   PublishRec::PublishRec(uint16_t pid) :
-    Message(PUBREC, pid)
-  {}
+    Message(PUBREC)
+  {
+    _packet_id = pid;
+  }
 
   PublishRec::PublishRec(uint8_t* data, uint32_t length) :
     Message(PUBREC)
@@ -486,8 +492,10 @@ namespace MQTT {
 
   // PublishRel class
   PublishRel::PublishRel(uint16_t pid) :
-    Message(PUBREL, pid)
-  {}
+    Message(PUBREL)
+  {
+    _packet_id = pid;
+  }
 
   PublishRel::PublishRel(uint8_t* data, uint32_t length) :
     Message(PUBREL)
@@ -507,8 +515,10 @@ namespace MQTT {
 
   // PublishComp class
   PublishComp::PublishComp(uint16_t pid) :
-    Message(PUBREC, pid)
-  {}
+    Message(PUBREC)
+  {
+    _packet_id = pid;
+  }
 
   PublishComp::PublishComp(uint8_t* data, uint32_t length) :
     Message(PUBCOMP)
@@ -528,14 +538,17 @@ namespace MQTT {
 
   // Subscribe class
   Subscribe::Subscribe() :
-    Message(SUBSCRIBE, 0, true),
-    _buffer(NULL), _buflen(0)
-  {}
-
-  Subscribe::Subscribe(String topic, uint8_t qos) :
-    Message(SUBSCRIBE, 0, true),
+    Message(SUBSCRIBE),
     _buffer(NULL), _buflen(0)
   {
+    _need_packet_id = true;
+  }
+
+  Subscribe::Subscribe(String topic, uint8_t qos) :
+    Message(SUBSCRIBE),
+    _buffer(NULL), _buflen(0)
+  {
+    _need_packet_id = true;
     _buffer = new uint8_t[2 + topic.length() + 1];
     write(_buffer, _buflen, topic);
     _buffer[_buflen++] = qos;
@@ -586,10 +599,12 @@ namespace MQTT {
   }
 
   SubscribeAck::SubscribeAck(Client& client, uint32_t remaining_length) :
-    Message(SUBACK, client),
+    Message(SUBACK),
     _rcs(NULL),
     _num_rcs(remaining_length - 2)
   {
+    _stream_client = &client;
+
     // Read packet id
     _packet_id = read<uint16_t>(client);
 
@@ -608,14 +623,17 @@ namespace MQTT {
 
   // Unsubscribe class
   Unsubscribe::Unsubscribe() :
-    Message(SUBSCRIBE, 0, true),
-    _buffer(NULL), _buflen(0)
-  {}
-
-  Unsubscribe::Unsubscribe(String topic) :
-    Message(SUBSCRIBE, 0, true),
+    Message(SUBSCRIBE),
     _buffer(NULL), _buflen(0)
   {
+    _need_packet_id = true;
+  }
+
+  Unsubscribe::Unsubscribe(String topic) :
+    Message(SUBSCRIBE),
+    _buffer(NULL), _buflen(0)
+  {
+    _need_packet_id = true;
     _buffer = (uint8_t*)malloc(2 + topic.length());
     write(_buffer, _buflen, topic);
   }
