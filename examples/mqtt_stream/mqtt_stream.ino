@@ -44,42 +44,40 @@ void callback(const MQTT::Publish& pub) {
 WiFiClient wclient;
 PubSubClient client(wclient, server);
 
-void setup()
-{
+void setup() {
   // Setup console
   Serial.begin(115200);
   delay(10);
   Serial.println();
   Serial.println();
 
-  client.set_callback(callback);
+  sram.begin();
+  sram.seek(1);
+}
 
-  WiFi.begin(ssid, pass);
+void loop() {
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.print("Connecting to ");
+    Serial.print(ssid);
+    Serial.println("...");
+    WiFi.begin(ssid, pass);
 
-  int retries = 0;
-  while ((WiFi.status() != WL_CONNECTED) && (retries < 10)) {
-    retries++;
-    delay(500);
-    Serial.print(".");
-  }
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("");
+    if (WiFi.waitForConnectResult() != WL_CONNECTED)
+      return;
     Serial.println("WiFi connected");
   }
 
-  if (client.connect("arduinoClient")) {
-    client.publish("outTopic","hello world");
-    client.subscribe("inTopic");
+  if (WiFi.status() == WL_CONNECTED) {
+    if (!client.connected()) {
+      if (client.connect("arduinoClient")) {
+	client.set_callback(callback);
+	client.publish("outTopic","hello world");
+	client.subscribe("inTopic");
+      }
+    }
+
+    if (client.connected())
+      client.loop();
   }
-
-  sram.begin();
-  sram.seek(1);
-  
-  Serial.begin(9600);
-}
-
-void loop()
-{
-  client.loop();
 }
 

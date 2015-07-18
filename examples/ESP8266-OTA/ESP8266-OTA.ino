@@ -68,18 +68,25 @@ void loop() {
     if (WiFi.waitForConnectResult() != WL_CONNECTED)
       return;
 
-    IPAddress local = WiFi.localIP();
-    String ipaddr = String(local[0]) + "." + String(local[1]) + "." + String(local[2]) + "." + String(local[3]);
     Serial.print("IP address: ");
-    Serial.println(ipaddr);
-
-    client.connect(WiFi.macAddress());  // Give ourselves a unique client name
-    client.set_callback(receive_ota);   // Register our callback for receiving OTA's
-
-    String topic = "ota/" + ipaddr;
-    Serial.print("Subscribing to topic ");
-    Serial.println(topic);
-    client.subscribe(topic);
+    Serial.println(WiFi.localIP());
   }
-  client.loop();
+
+  if (WiFi.status() == WL_CONNECTED) {
+    if (!client.connected()) {
+      // Give ourselves a unique client name
+      if (client.connect(WiFi.macAddress())) {
+	client.set_callback(receive_ota);   // Register our callback for receiving OTA's
+	IPAddress local = WiFi.localIP();
+	String ipaddr = String(local[0]) + "." + String(local[1]) + "." + String(local[2]) + "." + String(local[3]);
+	String topic = "ota/" + ipaddr;
+	Serial.print("Subscribing to topic ");
+	Serial.println(topic);
+	client.subscribe(topic);
+      }
+    }
+
+    if (client.connected())
+      client.loop();
+  }
 }
