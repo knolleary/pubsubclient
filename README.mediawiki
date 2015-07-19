@@ -55,3 +55,42 @@ For details see the [http://imroy.github.io/pubsubclient/classMQTT_1_1Connect.ht
 classes in the Doxygen-generated documentation.
 
 See also the mqtt_auth or mqtt_qos example sketches for how this is used.
+
+=== Publishing and receiving large messages ===
+
+Messages are normally held completely in memory. This can obviously be a problem on microcontrollers, with a very limited amount of RAM. To get around this limitation, Publish payloads can be sent or received using callbacks, which have access to the bare network Client object.
+
+To publish a large payload:
+ bool write_payload(Client& payload_stream) {
+   uint8_t buffer[64];
+   for (int i = 0; i < 1024; i++) {
+     // put something in buffer[]
+     uint32_t sent = payload_stream.write(buffer, 64);
+     if (sent < 64)
+       return false;
+   }
+   return true;
+ }
+ 
+ ...
+ client.publish("topic", write_payload, 64 * 1024);
+
+Or see the mqtt_publish_large example.
+
+To receive a large payload:
+ void recv_payload(const MQTT::Publish& pub) {
+   if (pub.has_stream()) {
+     uint8_t buffer[64];
+     int read;
+     while (read = pub.payload_stream()->read(buffer, 64)) {
+       // Do something with data in buffer
+     }
+     pub.payload_stream()->stop();
+   }
+ }
+ 
+ ...
+	client.set_callback(recv_payload);
+	client.subscribe("inTopic");
+
+Or see the mqtt_subscriber example.
