@@ -12,14 +12,14 @@ Note that for now PubSubClient requires a broker that supports version '''3.1.1'
 
 == New features==
 
-A whole set of MQTT classes has been added, one for each message type.
+A whole set of [http://imroy.github.io/pubsubclient/namespaceMQTT.html MQTT classes] has been added, one for each message type.
 This moved a good amount of code out of the PubSubClient class, leaving it to
 handle the high-level flow of the protocol. The MQTT classes handle getting
 data into and out of the messages.
 
 === Setting options on messages ===
 
-The PubSubClient class operates mostly as it did before. However, the
+The [http://imroy.github.io/pubsubclient/classPubSubClient.html PubSubClient class] operates mostly as it did before. However, the
 connect(), publish(), subscribe(), and unsubscribe() methods can now take an
 appropriate MQTT object. This allows extra options to be set e.g QoS on
 publish, or multiple topics with one (un)subscribe message.
