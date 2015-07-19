@@ -25,14 +25,14 @@ void setup() {
   Serial.println();
 }
 
-bool message(Client& client) {
+bool write_payload(Client& payload_stream) {
   char buf[64];
   memset(buf, 32, 64);
   for (int l = 0; l < 1024; l++) {
     int len = sprintf(buf, "%d", l);
     buf[len] = 32;
     buf[63] = '\n';
-    uint32_t sent = client.write((const uint8_t*)buf, 64);
+    uint32_t sent = payload_stream.write((const uint8_t*)buf, 64);
     if (sent < 64)
       return false;
   }
@@ -55,7 +55,7 @@ void loop() {
   if (WiFi.status() == WL_CONNECTED) {
     if (!client.connected()) {
       if (client.connect("arduinoClient")) {
-	client.publish("outTopic", message, 65536);
+	client.publish("outTopic", write_payload, 65536);
       }
     }
 
