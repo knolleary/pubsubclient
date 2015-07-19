@@ -71,9 +71,8 @@ To publish a large payload:
    }
    return true;
  }
- 
  ...
- client.publish("topic", write_payload, 64 * 1024);
+   client.publish("topic", write_payload, 64 * 1024);
 
 Or see the mqtt_publish_large example.
 
@@ -88,9 +87,8 @@ To receive a large payload:
      pub.payload_stream()->stop();
    }
  }
- 
  ...
-	client.set_callback(recv_payload);
-	client.subscribe("inTopic");
+   client.set_callback(recv_payload);
+   client.subscribe("inTopic");
 
 Or see the mqtt_subscriber example.
