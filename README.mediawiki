@@ -54,7 +54,7 @@ For details see the [http://imroy.github.io/pubsubclient/classMQTT_1_1Connect.ht
 [http://imroy.github.io/pubsubclient/classMQTT_1_1Unsubscribe.html MQTT::Unsubscribe]
 classes in the Doxygen-generated documentation.
 
-See also the mqtt_auth or mqtt_qos example sketches for how this is used.
+See also the [[examples/mqtt_auth/mqtt_auth.ino|mqtt_auth]] or [[examples/mqtt_qos/mqtt_qos.ino|mqtt_qos]] example sketches for how this is used.
 
 === Publishing and receiving large messages ===
 
@@ -74,7 +74,7 @@ To publish a large payload:
  ...
    client.publish("topic", write_payload, 64 * 1024);
 
-Or see the mqtt_publish_large example.
+Or see the [[examples/mqtt_publish_large/mqtt_publish_large.ino|mqtt_publish_large]] example.
 
 To receive a large payload:
  void recv_payload(const MQTT::Publish& pub) {
@@ -91,4 +91,4 @@ To receive a large payload:
    client.set_callback(recv_payload);
    client.subscribe("inTopic");
 
-Or see the mqtt_subscriber example.
+Or see the [[examples/mqtt_subscriber/mqtt_subscriber.ino|mqtt_subscriber]] example.
