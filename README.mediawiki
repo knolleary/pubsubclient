@@ -1,10 +1,8 @@
 A client library for the ESP8266 (using the Arduino environment) that provides support for MQTT.
 
-Modified from Nicholas O'Leary's original for the Arduino + Ethernet shield:
-http://knolleary.net/arduino-client-for-mqtt/
+Modified from Nicholas O'Leary's original for the Arduino + Ethernet shield: http://knolleary.net/arduino-client-for-mqtt/
 
-See here for the ESP8266-Arduino work:
-https://github.com/esp8266/Arduino
+See here for the ESP8266-Arduino work: https://github.com/esp8266/Arduino
 
 == MQTT version ==
 
@@ -14,17 +12,11 @@ For [http://mosquitto.org/ Mosquitto], this means version 1.3 or later. Although
 
 == New features==
 
-A whole set of [http://imroy.github.io/pubsubclient/namespaceMQTT.html MQTT classes] has been added, one for each message type.
-This moved a good amount of code out of the PubSubClient class, leaving it to
-handle the high-level flow of the protocol. The MQTT classes handle getting
-data into and out of the messages.
+A whole set of [http://imroy.github.io/pubsubclient/namespaceMQTT.html MQTT classes] has been added, one for each message type. This moved a good amount of code out of the PubSubClient class, leaving it to handle the high-level flow of the protocol. The MQTT classes handle getting data into and out of the messages.
 
 === Setting options on messages ===
 
-The [http://imroy.github.io/pubsubclient/classPubSubClient.html PubSubClient class] operates mostly as it did before. However, the
-connect(), publish(), subscribe(), and unsubscribe() methods can now take an
-appropriate MQTT object. This allows extra options to be set e.g QoS on
-publish, or multiple topics with one (un)subscribe message.
+The [http://imroy.github.io/pubsubclient/classPubSubClient.html PubSubClient class] operates mostly as it did before. However, the connect(), publish(), subscribe(), and unsubscribe() methods can now take an appropriate MQTT object. This allows extra options to be set e.g QoS on publish, or multiple topics with one (un)subscribe message.
 
 You can use the MQTT classes and their chainable setter methods like this:
 
@@ -50,11 +42,7 @@ You can use the MQTT classes and their chainable setter methods like this:
                     .add_topic("topic")
                    );
 
-For details see the [http://imroy.github.io/pubsubclient/classMQTT_1_1Connect.html MQTT::Connect],
-[http://imroy.github.io/pubsubclient/classMQTT_1_1Publish.html MQTT::Publish],
-[http://imroy.github.io/pubsubclient/classMQTT_1_1Subscribe.html MQTT::Subscribe], and
-[http://imroy.github.io/pubsubclient/classMQTT_1_1Unsubscribe.html MQTT::Unsubscribe]
-classes in the Doxygen-generated documentation.
+For details see the [http://imroy.github.io/pubsubclient/classMQTT_1_1Connect.html MQTT::Connect], [http://imroy.github.io/pubsubclient/classMQTT_1_1Publish.html MQTT::Publish], [http://imroy.github.io/pubsubclient/classMQTT_1_1Subscribe.html MQTT::Subscribe], and [http://imroy.github.io/pubsubclient/classMQTT_1_1Unsubscribe.html MQTT::Unsubscribe] classes in the Doxygen-generated documentation.
 
 See also the [[examples/mqtt_auth/mqtt_auth.ino|mqtt_auth]] or [[examples/mqtt_qos/mqtt_qos.ino|mqtt_qos]] example sketches for how this is used.
 
