@@ -133,11 +133,11 @@ bool PubSubClient::_wait_for(MQTT::message_type match_type, uint16_t match_pid) 
     MQTT::Message *msg = _recv_message();
     if (msg != NULL) {
       if (msg->type() == match_type) {
-	uint8_t pid = msg->packet_id();
-	delete msg;
-	if (match_pid)
-	  return pid == match_pid;
-	return true;
+		uint16_t pid = msg->packet_id();
+		delete msg;
+		if (match_pid)
+			return pid == match_pid;
+		return true;
       }
 
       _process_message(msg);
