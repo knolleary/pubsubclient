@@ -43,14 +43,17 @@ void loop() {
     Serial.println("WiFi connected");
   }
 
-  if (WiFi.status() != WL_CONNECTED) {
+  if (WiFi.status() == WL_CONNECTED) {
     if (!client.connected()) {
+      Serial.println("Connecting to MQTT server");
       if (client.connect(MQTT::Connect("arduinoClient")
 			 .set_auth("testeruser", "testpass"))) {
-
+        Serial.println("Connected to MQTT server");
 	client.set_callback(callback);
 	client.publish("outTopic","hello world");
 	client.subscribe("inTopic");
+      } else {
+        Serial.println("Could not connect to MQTT server");   
       }
     }
 
