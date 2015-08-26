@@ -61,14 +61,13 @@ public:
    PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client, Stream&);
    PubSubClient(char*, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client);
    PubSubClient(char*, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client, Stream&);
-   
-   void setBrokerIP(uint8_t * ip);
-   void setBrokerDomain(char * domain);   
+
+   void setServer(uint8_t * ip, uint16_t port);
+   void setServer(char * domain, uint16_t port);
    void setCallback(void(*callback)(char*,uint8_t*,unsigned int));
-   void setPort(uint16_t port);
    void setClient(Client& client);
    void setStream(Stream& stream);
-   
+
    boolean connect(char *);
    boolean connect(char *, char *, char *);
    boolean connect(char *, char *, uint8_t, uint8_t, char *);

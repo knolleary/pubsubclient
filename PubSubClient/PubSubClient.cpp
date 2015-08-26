@@ -9,43 +9,35 @@
 
 PubSubClient::PubSubClient() {
    this->_client = NULL;
-   this->stream = NULL;   
+   this->stream = NULL;
    setCallback(NULL);
-   setPort(1883);
-   setBrokerDomain(NULL);
 }
 
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client) {
    setClient(client);
    setCallback(callback);
-   setBrokerIP(ip);
-   setPort(port);
-   setBrokerDomain(NULL);
+   setServer(ip, port);
    this->stream = NULL;
 }
 
 PubSubClient::PubSubClient(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client) {
    setClient(client);
    setCallback(callback);
-   setBrokerDomain(domain);
-   setPort(port);
+   setServer(domain,port);
    this->stream = NULL;
 }
 
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client, Stream& stream) {
-   setClient(client);  
+   setClient(client);
    setCallback(callback);
-   setBrokerIP(ip);
-   setPort(port);
-   setBrokerDomain(NULL);
+   setServer(ip,port);
    setStream(stream);
 }
 
 PubSubClient::PubSubClient(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client, Stream& stream) {
    setClient(client);
    setCallback(callback);
-   setBrokerDomain(domain);
-   setPort(port);
+   setServer(domain,port);
    setStream(stream);
 }
 
@@ -65,13 +57,13 @@ boolean PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_
 boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic, uint8_t willQos, uint8_t willRetain, char* willMessage) {
    if (!connected()) {
       int result = 0;
-      
+
       if (domain != NULL) {
         result = _client->connect(this->domain, this->port);
       } else {
         result = _client->connect(this->ip, this->port);
       }
-      
+
       if (result) {
          nextMsgId = 1;
          uint8_t d[9] = {0x00,0x06,'M','Q','I','s','d','p',MQTTPROTOCOLVERSION};
@@ -113,11 +105,11 @@ boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic,
                length = writeString(pass,buffer,length);
             }
          }
-         
+
          write(MQTTCONNECT,buffer,length-5);
-         
+
          lastInActivity = lastOutActivity = millis();
-         
+
          while (!_client->available()) {
             unsigned long t = millis();
             if (t-lastInActivity > MQTT_KEEPALIVE*1000UL) {
@@ -127,7 +119,7 @@ boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic,
          }
          uint8_t llen;
          uint16_t len = readPacket(&llen);
-         
+
          if (len == 4 && buffer[3] == 0) {
             lastInActivity = millis();
             pingOutstanding = false;
@@ -153,7 +145,7 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
    uint8_t digit = 0;
    uint16_t skip = 0;
    uint8_t start = 0;
-   
+
    do {
       digit = readByte();
       buffer[len++] = digit;
@@ -186,7 +178,7 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
       }
       len++;
    }
-   
+
    if (!this->stream && len > MQTT_MAX_PACKET_SIZE) {
        len = 0; // This will cause the packet to be ignored.
    }
@@ -231,7 +223,7 @@ boolean PubSubClient::loop() {
                     msgId = (buffer[llen+3+tl]<<8)+buffer[llen+3+tl+1];
                     payload = buffer+llen+3+tl+2;
                     callback(topic,payload,len-llen-3-tl-2);
-                    
+
                     buffer[0] = MQTTPUBACK;
                     buffer[1] = 2;
                     buffer[2] = (msgId >> 8);
@@ -293,13 +285,13 @@ boolean PubSubClient::publish_P(char* topic, uint8_t* PROGMEM payload, unsigned 
    unsigned int i;
    uint8_t header;
    unsigned int len;
-   
+
    if (!connected()) {
       return false;
    }
-   
+
    tlen = strlen(topic);
-   
+
    header = MQTTPUBLISH;
    if (retained) {
       header |= 1;
@@ -351,7 +343,7 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
       buf[5-llen+i] = lenBuf[i];
    }
    rc = _client->write(buf+(4-llen),length+1+llen);
-   
+
    lastOutActivity = millis();
    return (rc == 1+llen+length);
 }
@@ -428,21 +420,18 @@ boolean PubSubClient::connected() {
    return rc;
 }
 
-void PubSubClient::setBrokerIP(uint8_t * ip){
-  this->domain = NULL;
-  this->ip = ip;
+void PubSubClient::setServer(uint8_t * ip, uint16_t port) {
+    this->ip = ip;
+    this->port = port;
 }
 
-void PubSubClient::setBrokerDomain(char * domain){
-  this->domain = domain;
+void PubSubClient::setServer(char * domain, uint16_t port) {
+    this->domain = domain;
+    this->port = port;
 }
 
 void PubSubClient::setCallback(void(*callback)(char*,uint8_t*,unsigned int)){
   this->callback = callback;
-}
-
-void PubSubClient::setPort(uint16_t port){
-  this->port = port;
 }
 
 void PubSubClient::setClient(Client& client){
