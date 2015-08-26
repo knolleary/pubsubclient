@@ -281,7 +281,7 @@ boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plengt
    return false;
 }
 
-boolean PubSubClient::publish_P(char* topic, uint8_t* payload, unsigned int plength, boolean retained) {
+boolean PubSubClient::publish_P(char* topic, PGM_P payload, unsigned int plength, boolean retained) {
    uint8_t llen = 0;
    uint8_t digit;
    unsigned int rc = 0;

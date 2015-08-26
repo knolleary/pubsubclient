@@ -69,7 +69,7 @@ public:
    boolean publish(char *, char *);
    boolean publish(char *, uint8_t *, unsigned int);
    boolean publish(char *, uint8_t *, unsigned int, boolean);
-   boolean publish_P(char *, uint8_t *, unsigned int, boolean);
+   boolean publish_P(char *, PGM_P, unsigned int, boolean);
    boolean subscribe(char *);
    boolean subscribe(char *, uint8_t qos);
    boolean unsubscribe(char *);
