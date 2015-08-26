@@ -281,6 +281,9 @@ boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plengt
    return false;
 }
 
+// Dont provide this method if on an ESP8266-Chip as it doesn't have PROGMEM
+#ifdef ESP8266
+#else
 boolean PubSubClient::publish_P(char* topic, uint8_t* PROGMEM payload, unsigned int plength, boolean retained) {
    uint8_t llen = 0;
    uint8_t digit;
@@ -325,6 +328,7 @@ boolean PubSubClient::publish_P(char* topic, uint8_t* PROGMEM payload, unsigned 
    
    return rc == tlen + 4 + plength;
 }
+#endif
 
 boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
    uint8_t lenBuf[4];

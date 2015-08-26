@@ -69,7 +69,10 @@ public:
    boolean publish(char *, char *);
    boolean publish(char *, uint8_t *, unsigned int);
    boolean publish(char *, uint8_t *, unsigned int, boolean);
+#ifdef ESP8266
+#else
    boolean publish_P(char *, uint8_t PROGMEM *, unsigned int, boolean);
+#endif
    boolean subscribe(char *);
    boolean subscribe(char *, uint8_t qos);
    boolean unsubscribe(char *);
