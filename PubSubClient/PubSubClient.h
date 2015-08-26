@@ -10,6 +10,8 @@
 #include <Arduino.h>
 #include "Client.h"
 #include "Stream.h"
+//Adding support for Intel Galileo with Intel arduino SDK and Intel Edison arduino SDK
+#include <avr/pgmspace.h>
 
 // MQTT_MAX_PACKET_SIZE : Maximum packet size
 #define MQTT_MAX_PACKET_SIZE 128
