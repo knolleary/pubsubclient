@@ -275,7 +275,7 @@ boolean PubSubClient::publish(char* topic, uint8_t* payload, unsigned int plengt
    }
    return false;
 }
-
+#ifdef PROGMEM
 boolean PubSubClient::publish_P(char* topic, uint8_t* PROGMEM payload, unsigned int plength, boolean retained) {
    uint8_t llen = 0;
    uint8_t digit;
@@ -307,19 +307,20 @@ boolean PubSubClient::publish_P(char* topic, uint8_t* PROGMEM payload, unsigned 
       buffer[pos++] = digit;
       llen++;
    } while(len>0);
-   
+
    pos = writeString(topic,buffer,pos);
-   
+
    rc += _client->write(buffer,pos);
-   
+
    for (i=0;i<plength;i++) {
       rc += _client->write((char)pgm_read_byte_near(payload + i));
    }
-   
+
    lastOutActivity = millis();
-   
+
    return rc == tlen + 4 + plength;
 }
+#endif
 
 boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
    uint8_t lenBuf[4];
