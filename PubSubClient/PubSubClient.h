@@ -11,13 +11,18 @@
 #include "Client.h"
 #include "Stream.h"
 
+#define MQTT_VERSION_3_1      3
+#define MQTT_VERSION_3_1_1    4
+
+// MQTT_VERSION
+#define MQTT_VERSION MQTT_VERSION_3_1_1
+
 // MQTT_MAX_PACKET_SIZE : Maximum packet size
 #define MQTT_MAX_PACKET_SIZE 128
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
 #define MQTT_KEEPALIVE 15
 
-#define MQTTPROTOCOLVERSION 3
 #define MQTTCONNECT     1 << 4  // Client request to connect to Server
 #define MQTTCONNACK     2 << 4  // Connect Acknowledgment
 #define MQTTPUBLISH     3 << 4  // Publish message
