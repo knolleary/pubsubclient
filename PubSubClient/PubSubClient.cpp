@@ -328,7 +328,7 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
    uint8_t digit;
    uint8_t pos = 0;
    uint8_t rc;
-   uint8_t len = length;
+   uint16_t len = length;
    do {
       digit = len % 128;
       len = len / 128;
