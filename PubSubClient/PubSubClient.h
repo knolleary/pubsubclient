@@ -8,6 +8,7 @@
 #define PubSubClient_h
 
 #include <Arduino.h>
+#include "IPAddress.h"
 #include "Client.h"
 #include "Stream.h"
 
@@ -43,6 +44,8 @@
 #define MQTTQOS1        (1 << 1)
 #define MQTTQOS2        (2 << 1)
 
+#define MQTT_CALLBACK_SIGNATURE void (*callback)(char*,uint8_t*,unsigned int)
+
 class PubSubClient {
 private:
    Client* _client;
@@ -51,25 +54,34 @@ private:
    unsigned long lastOutActivity;
    unsigned long lastInActivity;
    bool pingOutstanding;
-   void (*callback)(char*,uint8_t*,unsigned int);
+   MQTT_CALLBACK_SIGNATURE;
    uint16_t readPacket(uint8_t*);
    uint8_t readByte();
    boolean write(uint8_t header, uint8_t* buf, uint16_t length);
    uint16_t writeString(char* string, uint8_t* buf, uint16_t pos);
-   uint8_t *ip;
+   IPAddress ip;
    char* domain;
    uint16_t port;
    Stream* stream;
 public:
    PubSubClient();
-   PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client);
-   PubSubClient(uint8_t *, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client, Stream&);
-   PubSubClient(char*, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client);
-   PubSubClient(char*, uint16_t, void(*)(char*,uint8_t*,unsigned int),Client& client, Stream&);
+   PubSubClient(IPAddress, uint16_t, Client& client);
+   PubSubClient(IPAddress, uint16_t, Client& client, Stream&);
+   PubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
+   PubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
+   PubSubClient(uint8_t *, uint16_t, Client& client);
+   PubSubClient(uint8_t *, uint16_t, Client& client, Stream&);
+   PubSubClient(uint8_t *, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
+   PubSubClient(uint8_t *, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
+   PubSubClient(char*, uint16_t, Client& client);
+   PubSubClient(char*, uint16_t, Client& client, Stream&);
+   PubSubClient(char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
+   PubSubClient(char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
 
+   void setServer(IPAddress ip, uint16_t port);
    void setServer(uint8_t * ip, uint16_t port);
    void setServer(char * domain, uint16_t port);
-   void setCallback(void(*callback)(char*,uint8_t*,unsigned int));
+   void setCallback(MQTT_CALLBACK_SIGNATURE);
    void setClient(Client& client);
    void setStream(Stream& stream);
 

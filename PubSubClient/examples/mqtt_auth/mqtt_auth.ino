@@ -1,6 +1,6 @@
 /*
  Basic MQTT example with Authentication
- 
+
   - connects to an MQTT server, providing username
     and password
   - publishes "hello world" to the topic "outTopic"
@@ -13,8 +13,8 @@
 
 // Update these with values suitable for your network.
 byte mac[]    = {  0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
-byte server[] = { 172, 16, 0, 2 };
-byte ip[]     = { 172, 16, 0, 100 };
+IPAddress ip(172, 16, 0, 100);
+IPAddress server(172, 16, 0, 2);
 
 void callback(char* topic, byte* payload, unsigned int length) {
   // handle message arrived
@@ -36,4 +36,3 @@ void loop()
 {
   client.loop();
 }
-

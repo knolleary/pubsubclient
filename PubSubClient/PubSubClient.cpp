@@ -5,7 +5,6 @@
 */
 
 #include "PubSubClient.h"
-#include <string.h>
 
 PubSubClient::PubSubClient() {
    this->_client = NULL;
@@ -13,31 +12,73 @@ PubSubClient::PubSubClient() {
    setCallback(NULL);
 }
 
-PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client) {
+PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client) {
+   setServer(addr, port);
    setClient(client);
-   setCallback(callback);
-   setServer(ip, port);
    this->stream = NULL;
 }
-
-PubSubClient::PubSubClient(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client) {
+PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client, Stream& stream) {
+   setServer(addr,port);
    setClient(client);
+   setStream(stream);
+}
+PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
+   setServer(addr, port);
    setCallback(callback);
-   setServer(domain,port);
+   setClient(client);
    this->stream = NULL;
 }
-
-PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client, Stream& stream) {
-   setClient(client);
+PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
+   setServer(addr,port);
    setCallback(callback);
-   setServer(ip,port);
+   setClient(client);
    setStream(stream);
 }
 
-PubSubClient::PubSubClient(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), Client& client, Stream& stream) {
+
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client) {
+   setServer(ip, port);
    setClient(client);
+   this->stream = NULL;
+}
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client, Stream& stream) {
+   setServer(ip,port);
+   setClient(client);
+   setStream(stream);
+}
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
+   setServer(ip, port);
    setCallback(callback);
+   setClient(client);
+   this->stream = NULL;
+}
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
+   setServer(ip,port);
+   setCallback(callback);
+   setClient(client);
+   setStream(stream);
+}
+
+PubSubClient::PubSubClient(char* domain, uint16_t port, Client& client) {
    setServer(domain,port);
+   setClient(client);
+   this->stream = NULL;
+}
+PubSubClient::PubSubClient(char* domain, uint16_t port, Client& client, Stream& stream) {
+   setServer(domain,port);
+   setClient(client);
+   setStream(stream);
+}
+PubSubClient::PubSubClient(char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
+   setServer(domain,port);
+   setCallback(callback);
+   setClient(client);
+   this->stream = NULL;
+}
+PubSubClient::PubSubClient(char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
+   setServer(domain,port);
+   setCallback(callback);
+   setClient(client);
    setStream(stream);
 }
 
@@ -49,8 +90,7 @@ boolean PubSubClient::connect(char *id, char *user, char *pass) {
    return connect(id,user,pass,0,0,0,0);
 }
 
-boolean PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t willRetain, char* willMessage)
-{
+boolean PubSubClient::connect(char *id, char* willTopic, uint8_t willQos, uint8_t willRetain, char* willMessage) {
    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage);
 }
 
@@ -63,7 +103,6 @@ boolean PubSubClient::connect(char *id, char *user, char *pass, char* willTopic,
       } else {
         result = _client->connect(this->ip, this->port);
       }
-
       if (result) {
          nextMsgId = 1;
          // Leave room in the buffer for header and variable length field
@@ -429,6 +468,11 @@ boolean PubSubClient::connected() {
 }
 
 void PubSubClient::setServer(uint8_t * ip, uint16_t port) {
+    IPAddress addr(ip[0],ip[1],ip[2],ip[3]);
+    setServer(addr,port);
+}
+
+void PubSubClient::setServer(IPAddress ip, uint16_t port) {
     this->ip = ip;
     this->port = port;
 }
