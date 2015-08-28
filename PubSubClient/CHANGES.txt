@@ -1,7 +1,14 @@
+2.0
+   * Add (and default to) MQTT 3.1.1 support
+   * Fix PROGMEM handling for Intel Galileo/ESP8266
+   * Add overloaded constructors for convenience
+   * Add chainable setters for server/callback/client/stream
+   * Add state function to return connack return code
+
 1.9
    * Do not split MQTT packets over multiple calls to _client->write()
    * API change: All constructors now require an instance of Client
-      to be passed in. 
+      to be passed in.
    * Fixed example to match 1.8 api changes - dpslwk
    * Added username/password support - WilHall
    * Added publish_P - publishes messages from PROGMEM - jobytaffey
@@ -10,7 +17,7 @@
     * KeepAlive interval is configurable in PubSubClient.h
     * Maximum packet size is configurable in PubSubClient.h
     * API change: Return boolean rather than int from various functions
-    * API change: Length parameter in message callback changed 
+    * API change: Length parameter in message callback changed
        from int to unsigned int
     * Various internal tidy-ups around types
 1.7
@@ -44,4 +51,3 @@
     * The maximum message size, including header, is 128 bytes
     * The keepalive interval is set to 30 seconds
     * No support for Will messages
-
