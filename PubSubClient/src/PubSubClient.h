@@ -1,6 +1,6 @@
 /*
  PubSubClient.h - A simple client for MQTT.
-  Nicholas O'Leary
+  Nick O'Leary
   http://knolleary.net
 */
 
@@ -15,14 +15,28 @@
 #define MQTT_VERSION_3_1      3
 #define MQTT_VERSION_3_1_1    4
 
-// MQTT_VERSION
+// MQTT_VERSION : Pick the version
+//#define MQTT_VERSION MQTT_VERSION_3_1
 #define MQTT_VERSION MQTT_VERSION_3_1_1
+
 
 // MQTT_MAX_PACKET_SIZE : Maximum packet size
 #define MQTT_MAX_PACKET_SIZE 128
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
 #define MQTT_KEEPALIVE 15
+
+// Possible values for client.state()
+#define MQTT_CONNECTION_TIMEOUT     -4
+#define MQTT_CONNECTION_LOST        -3
+#define MQTT_CONNECT_FAILED         -2
+#define MQTT_DISCONNECTED           -1
+#define MQTT_CONNECTED               0
+#define MQTT_CONNECT_BAD_PROTOCOL    1
+#define MQTT_CONNECT_BAD_CLIENT_ID   2
+#define MQTT_CONNECT_UNAVAILABLE     3
+#define MQTT_CONNECT_BAD_CREDENTIALS 4
+#define MQTT_CONNECT_UNAUTHORIZED    5
 
 #define MQTTCONNECT     1 << 4  // Client request to connect to Server
 #define MQTTCONNACK     2 << 4  // Connect Acknowledgment
@@ -43,19 +57,6 @@
 #define MQTTQOS0        (0 << 1)
 #define MQTTQOS1        (1 << 1)
 #define MQTTQOS2        (2 << 1)
-
-#define MQTT_CONNECTION_TIMEOUT     -4
-#define MQTT_CONNECTION_LOST        -3
-#define MQTT_CONNECT_FAILED         -2
-#define MQTT_DISCONNECTED           -1
-#define MQTT_CONNECTED               0
-#define MQTT_CONNECT_BAD_PROTOCOL    1
-#define MQTT_CONNECT_BAD_CLIENT_ID   2
-#define MQTT_CONNECT_UNAVAILABLE     3
-#define MQTT_CONNECT_BAD_CREDENTIALS 4
-#define MQTT_CONNECT_UNAUTHORIZED    5
-
-
 
 #define MQTT_CALLBACK_SIGNATURE void (*callback)(char*,uint8_t*,unsigned int)
 
