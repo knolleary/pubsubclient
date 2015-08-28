@@ -2,26 +2,64 @@
 layout: default
 title: Arduino Client for MQTT
 ---
-   <p>This library provides a client for doing simple publish/subscribe messaging with a server that supports MQTT v3.</p>
+   <p>This library provides a client for doing simple publish/subscribe messaging with a server that supports MQTT</p>
    <p>For more information about MQTT, visit <a href="http://mqtt.org">mqtt.org</a>.</p>
 
    <section id="Download">
-      <h3>Download</h3>
+      <h2>Download</h2>
       <p>The latest version of the library can be downloaded from <a href="https://github.com/knolleary/pubsubclient/tags">GitHub</a>.</p>
    </section>
    <section id="Documentation">
-      <h3>Documentation</h3>
+      <h2>Documentation</h2>
       <p>The library comes with a number of example sketches. See <code>File &gt; Examples &gt; PubSubClient</code> within the Arduino application.</p>
       <p>Full <a href="api.html">API Documentation</a></p>
    </section>
-   <section id="License">
-      <h3>License</h3>
-      <p>This library is released under the <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>.</p>
-   </section>
+   <section id="Hardware">
+       <h2>Compatible Hardware</h2>
+       <p>
+           The library uses the Arduino Ethernet Client api for interacting with the
+           underlying network hardware. This means it Just Works with a growing number of
+           boards and shields, including:
+       </p>
+       <ul>
+            <li>Arduino Ethernet</li>
+            <li>Arduino Ethernet Shield</li>
+            <li>Arduino YUN – use the included <code>YunClient</code> in place of <code>EthernetClient</code>, and
+                be sure to do a <code>Bridge.begin()</code> first</li>
+            <li>Arduino WiFi Shield</li>
+            <li>Sparkfun WiFly Shield – when used with <a href="https://github.com/dpslwk/WiFly">this library</a></li>
+            <li>Intel Galileo/Edison</li>
+            <li>ESP8266</li>
+        </ul>
+        <p>
+            The library cannot currently be used with hardware based on the ENC28J60 chip –
+            such as the Nanode or the Nuelectronics Ethernet Shield. For those, there is an
+            <a href="https://github.com/njh/NanodeMQTT">alternative library</a> available.
+        </p>
+    </section>
+
+    <section id="Author">
+       <h2>Author</h2>
+       <p>Nick O'Leary - <a href="https://twitter.com/knolleary">@knolleary</a></p>
+    </section>
+    <section id="License">
+       <h2>License</h2>
+       <p>This library is released under the <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>.</p>
+    </section>
    <section id="ChangeHistory">
-      <h3>Change History</h3>
+      <h2>Change History</h2>
       <p>The complete change history is available on <a href="https://github.com/knolleary/pubsubclient/commits/master">GitHub</a>.</p>
       <dl>
+         <dt>2.0</dt>
+         <dd>
+            <ul>
+               <li>Add (and default to) MQTT 3.1.1 support</li>
+               <li>Fix PROGMEM handling for Intel Galileo/ESP8266</li>
+               <li>Add overloaded constructors for convenience</li>
+               <li>Add chainable setters for server/callback/client/stream</li>
+               <li>Add state function to return connack return code</li>
+            </ul>
+         </dd>
          <dt>1.9</dt>
          <dd>
             <ul>
@@ -100,4 +138,3 @@ title: Arduino Client for MQTT
          </dd>
       </dl>
    </section>
-

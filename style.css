@@ -1,20 +1,74 @@
+body {
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+}
+h1,h2,h3,h4,h5 {
+    font-family: 'Questrial', serif;
+}
+h1 {
+    font-size: 1.953em;
+}
+h2 {
+    font-size: 1.563em;
+}
+h3 {
+    font-size: 1.25em;
+}
+h4 {
+    font-size: 1.15em;
+}
+pre, code {
+    font-family: 'Cutive Mono',monospace;
+}
+pre {
+    border: 1px solid #aaa;
+    padding: 10px;
+    margin: auto 10px;
+    overflow-x: auto;
+}
+a, a:visited{
+    color: #4178BE;
+}
+#content {
+    max-width: 900px;
+    padding: 10px;
+    margin: auto;
+}
+
 section {
    padding-top:40px;
    margin-top: -40px;
 }
-   
-.method { 
-   border-bottom: 3px solid #eee;
+
+#header ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0;
+}
+#header li {
+    display: inline-block;
+    padding: 0 10px;
+    margin: 0;
+}
+#header li:not(:first-child) {
+    border-left: 1px solid #999;
+}
+#header li:first-child {
+    padding-left: 0;
+}
+.method {
+   border-bottom: 2px solid #eee;
    margin-bottom: 20px;
    padding-bottom: 15px;
 }
-.methodname {}
+.methodname { font-weight: bold;color: #333;}
 .methodreturn { font-weight: normal; color: #777;}
 .methodparams { font-weight: normal; color: #777;}
-
-li.active {
-   font-weight: bold;
-   text-decoration: underline !important;
+ul  a {
+    text-decoration: none;
+}
+ul  a:hover {
+    text-decoration: underline;
 }
 
 #ChangeHistory * dd { margin-left: 25px;}
@@ -22,14 +76,13 @@ li.active {
 #toc a {
    color: #333;
 }
-
-h4 { font-size: 1.3em; }
 h5 {
-   margin: 0px;
+   margin: 15px 0px 5px 0;
    padding: 0px;
-   font-size: 1.0em;
+   font-size: 1.1em;
 }
 
 #content ul {
    margin: 0px;
+   line-height: 1.4em;
 }
