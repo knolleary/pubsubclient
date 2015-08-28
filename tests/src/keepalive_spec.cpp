@@ -175,10 +175,10 @@ int test_keepalive_disconnects_hung() {
 int main()
 {
     SUITE("Keep-alive");
-    // test_keepalive_pings_idle();
-    // test_keepalive_pings_with_outbound_qos0();
-    // test_keepalive_pings_with_inbound_qos0();
-    // test_keepalive_no_pings_inbound_qos1();
+    test_keepalive_pings_idle();
+    test_keepalive_pings_with_outbound_qos0();
+    test_keepalive_pings_with_inbound_qos0();
+    test_keepalive_no_pings_inbound_qos1();
     test_keepalive_disconnects_hung();
 
     FINISH
