@@ -11,8 +11,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
   // handle message arrived
 }
 
-
-
 int test_subscribe_no_qos() {
     IT("subscribe without qos defaults to 0");
     ShimClient shimClient;
@@ -78,7 +76,7 @@ int test_subscribe_not_connected() {
 }
 
 int test_subscribe_invalid_qos() {
-    IT("subscribe fails when not connected");
+    IT("subscribe fails with invalid qos values");
     ShimClient shimClient;
     shimClient.setAllowConnect(true);
 
