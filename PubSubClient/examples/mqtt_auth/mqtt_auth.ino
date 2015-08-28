@@ -26,6 +26,11 @@ PubSubClient client(server, 1883, callback, ethClient);
 void setup()
 {
   Ethernet.begin(mac, ip);
+  // Note - the default maximum packet size is 128 bytes. If the
+  // combined length of clientId, username and password exceed this,
+  // you will need to increase the value of MQTT_MAX_PACKET_SIZE in
+  // PubSubClient.h
+  
   if (client.connect("arduinoClient", "testuser", "testpass")) {
     client.publish("outTopic","hello world");
     client.subscribe("inTopic");

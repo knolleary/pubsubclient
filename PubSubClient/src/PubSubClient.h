@@ -44,6 +44,19 @@
 #define MQTTQOS1        (1 << 1)
 #define MQTTQOS2        (2 << 1)
 
+#define MQTT_CONNECTION_TIMEOUT     -4
+#define MQTT_CONNECTION_LOST        -3
+#define MQTT_CONNECT_FAILED         -2
+#define MQTT_DISCONNECTED           -1
+#define MQTT_CONNECTED               0
+#define MQTT_CONNECT_BAD_PROTOCOL    1
+#define MQTT_CONNECT_BAD_CLIENT_ID   2
+#define MQTT_CONNECT_UNAVAILABLE     3
+#define MQTT_CONNECT_BAD_CREDENTIALS 4
+#define MQTT_CONNECT_UNAUTHORIZED    5
+
+
+
 #define MQTT_CALLBACK_SIGNATURE void (*callback)(char*,uint8_t*,unsigned int)
 
 class PubSubClient {
@@ -63,8 +76,10 @@ private:
    const char* domain;
    uint16_t port;
    Stream* stream;
+   int _state;
 public:
    PubSubClient();
+   PubSubClient(Client& client);
    PubSubClient(IPAddress, uint16_t, Client& client);
    PubSubClient(IPAddress, uint16_t, Client& client, Stream&);
    PubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
@@ -78,12 +93,12 @@ public:
    PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
    PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
 
-   void setServer(IPAddress ip, uint16_t port);
-   void setServer(uint8_t * ip, uint16_t port);
-   void setServer(const char * domain, uint16_t port);
-   void setCallback(MQTT_CALLBACK_SIGNATURE);
-   void setClient(Client& client);
-   void setStream(Stream& stream);
+   PubSubClient& setServer(IPAddress ip, uint16_t port);
+   PubSubClient& setServer(uint8_t * ip, uint16_t port);
+   PubSubClient& setServer(const char * domain, uint16_t port);
+   PubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE);
+   PubSubClient& setClient(Client& client);
+   PubSubClient& setStream(Stream& stream);
 
    boolean connect(const char* id);
    boolean connect(const char* id, const char* user, const char* pass);
@@ -99,6 +114,7 @@ public:
    boolean unsubscribe(const char* topic);
    boolean loop();
    boolean connected();
+   int state();
 };
 
 
