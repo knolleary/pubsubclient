@@ -20,7 +20,7 @@ int test_subscribe_no_qos() {
 
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
-    
+
     PubSubClient client(server, 1883, callback, shimClient);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
@@ -29,10 +29,10 @@ int test_subscribe_no_qos() {
     shimClient.expect(subscribe,12);
     byte suback[] = { 0x90,0x3,0x0,0x2,0x0 };
     shimClient.respond(suback,5);
-    
+
     rc = client.subscribe((char*)"topic");
     IS_TRUE(rc);
-    
+
     IS_FALSE(shimClient.error());
 
     END_IT
@@ -45,7 +45,7 @@ int test_subscribe_qos_1() {
 
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
-    
+
     PubSubClient client(server, 1883, callback, shimClient);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
@@ -54,10 +54,10 @@ int test_subscribe_qos_1() {
     shimClient.expect(subscribe,12);
     byte suback[] = { 0x90,0x3,0x0,0x2,0x1 };
     shimClient.respond(suback,5);
-    
+
     rc = client.subscribe((char*)"topic",1);
     IS_TRUE(rc);
-    
+
     IS_FALSE(shimClient.error());
 
     END_IT
@@ -66,12 +66,12 @@ int test_subscribe_qos_1() {
 int test_subscribe_not_connected() {
     IT("subscribe fails when not connected");
     ShimClient shimClient;
-    
+
     PubSubClient client(server, 1883, callback, shimClient);
-    
+
     int rc = client.subscribe((char*)"topic");
     IS_FALSE(rc);
-    
+
     IS_FALSE(shimClient.error());
 
     END_IT
@@ -84,16 +84,16 @@ int test_subscribe_invalid_qos() {
 
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
-    
+
     PubSubClient client(server, 1883, callback, shimClient);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
-    
+
     rc = client.subscribe((char*)"topic",2);
     IS_FALSE(rc);
     rc = client.subscribe((char*)"topic",254);
     IS_FALSE(rc);
-    
+
     IS_FALSE(shimClient.error());
 
     END_IT
@@ -106,7 +106,7 @@ int test_unsubscribe() {
 
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
-    
+
     PubSubClient client(server, 1883, callback, shimClient);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
@@ -115,10 +115,10 @@ int test_unsubscribe() {
     shimClient.expect(unsubscribe,12);
     byte unsuback[] = { 0xB0,0x2,0x0,0x2 };
     shimClient.respond(unsuback,4);
-    
+
     rc = client.unsubscribe((char*)"topic");
     IS_TRUE(rc);
-    
+
     IS_FALSE(shimClient.error());
 
     END_IT
@@ -127,12 +127,12 @@ int test_unsubscribe() {
 int test_unsubscribe_not_connected() {
     IT("unsubscribe fails when not connected");
     ShimClient shimClient;
-    
+
     PubSubClient client(server, 1883, callback, shimClient);
-    
+
     int rc = client.unsubscribe((char*)"topic");
     IS_FALSE(rc);
-    
+
     IS_FALSE(shimClient.error());
 
     END_IT
@@ -140,6 +140,7 @@ int test_unsubscribe_not_connected() {
 
 int main()
 {
+    SUITE("Subscribe");
     test_subscribe_no_qos();
     test_subscribe_qos_1();
     test_subscribe_not_connected();

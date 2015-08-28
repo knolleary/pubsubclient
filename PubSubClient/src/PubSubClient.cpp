@@ -202,6 +202,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
         }
         return false;
     }
+    return true;
 }
 
 uint8_t PubSubClient::readByte() {

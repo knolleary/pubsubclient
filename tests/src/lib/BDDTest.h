@@ -1,11 +1,13 @@
 #ifndef bddtest_h
 #define bddtest_h
 
+void bddtest_suite(const char* name);
 int bddtest_test(const char*, int, const char*, int);
 void bddtest_start(const char*);
 void bddtest_end();
 int bddtest_summary();
 
+#define SUITE(x) { bddtest_suite(x); }
 #define TEST(x) { if (!bddtest_test(__FILE__, __LINE__, #x, (x))) return false;  }
 
 #define IT(x) { bddtest_start(x); }

@@ -26,10 +26,10 @@ int ShimClient::connect(IPAddress ip, uint16_t port) {
         this->_connected = true;
     }
     if (this->_expectedPort !=0) {
-        if (memcmp(ip,this->_expectedIP,4) != 0) {
-            TRACE( "ip mismatch\n");
-            this->_error = true;
-        }
+        // if (memcmp(ip,this->_expectedIP,4) != 0) {
+        //     TRACE( "ip mismatch\n");
+        //     this->_error = true;
+        // }
         if (port != this->_expectedPort) {
             TRACE( "port mismatch\n");
             this->_error = true;
@@ -80,7 +80,7 @@ size_t ShimClient::write(const uint8_t *buf, size_t size)  {
             TRACE(":");
         }
         TRACE(std::hex << (unsigned int)(buf[i]));
-        
+
         if (!this->expectAnything) {
             if (this->expectBuffer->available()) {
                 uint8_t expected = this->expectBuffer->next();
@@ -100,7 +100,7 @@ int ShimClient::available()  {
     return this->responseBuffer->available();
 }
 int ShimClient::read()  { return this->responseBuffer->next(); }
-int ShimClient::read(uint8_t *buf, size_t size) { 
+int ShimClient::read(uint8_t *buf, size_t size) {
     uint16_t i = 0;
     for (;i<size;i++) {
         buf[i] = this->read();
@@ -151,4 +151,3 @@ void ShimClient::expectConnect(const char *host, uint16_t port) {
     this->_expectedHost = host;
     this->_expectedPort = port;
 }
-
