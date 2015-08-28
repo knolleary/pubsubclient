@@ -19,6 +19,8 @@ int test_connect_fails_no_network() {
     PubSubClient client(server, 1883, callback, shimClient);
     int rc = client.connect((char*)"client_test1");
     IS_FALSE(rc);
+    int state = client.state();
+    IS_TRUE(state == MQTT_CONNECT_FAILED);
     END_IT
 }
 
@@ -29,6 +31,8 @@ int test_connect_fails_on_no_response() {
     PubSubClient client(server, 1883, callback, shimClient);
     int rc = client.connect((char*)"client_test1");
     IS_FALSE(rc);
+    int state = client.state();
+    IS_TRUE(state == MQTT_CONNECTION_TIMEOUT);
     END_IT
 }
 
@@ -46,9 +50,15 @@ int test_connect_properly_formatted() {
     shimClient.respond(connack,4);
 
     PubSubClient client(server, 1883, callback, shimClient);
+    int state = client.state();
+    IS_TRUE(state == MQTT_DISCONNECTED);
+
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     IS_FALSE(shimClient.error());
+
+    state = client.state();
+    IS_TRUE(state == MQTT_CONNECTED);
 
     END_IT
 }
@@ -81,6 +91,10 @@ int test_connect_fails_on_bad_rc() {
     PubSubClient client(server, 1883, callback, shimClient);
     int rc = client.connect((char*)"client_test1");
     IS_FALSE(rc);
+
+    int state = client.state();
+    IS_TRUE(state == 0x01);
+
     END_IT
 }
 
@@ -188,9 +202,16 @@ int test_connect_disconnect_connect() {
     shimClient.respond(connack,4);
 
     PubSubClient client(server, 1883, callback, shimClient);
+
+    int state = client.state();
+    IS_TRUE(state == MQTT_DISCONNECTED);
+
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     IS_FALSE(shimClient.error());
+
+    state = client.state();
+    IS_TRUE(state == MQTT_CONNECTED);
 
     byte disconnect[] = {0xE0,0x00};
     shimClient.expect(disconnect,2);
@@ -201,11 +222,16 @@ int test_connect_disconnect_connect() {
     IS_FALSE(shimClient.connected());
     IS_FALSE(shimClient.error());
 
+    state = client.state();
+    IS_TRUE(state == MQTT_DISCONNECTED);
+
     shimClient.expect(connect,28);
     shimClient.respond(connack,4);
     rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     IS_FALSE(shimClient.error());
+    state = client.state();
+    IS_TRUE(state == MQTT_CONNECTED);
 
     END_IT
 }

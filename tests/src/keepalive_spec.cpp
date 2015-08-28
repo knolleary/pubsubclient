@@ -32,6 +32,10 @@ int test_keepalive_pings_idle() {
 
     for (int i = 0; i < 50; i++) {
         sleep(1);
+        if ( i == 15 || i == 31 || i == 47) {
+            shimClient.expect(pingreq,2);
+            shimClient.respond(pingresp,2);
+        }
         rc = client.loop();
         IS_TRUE(rc);
     }
@@ -160,6 +164,9 @@ int test_keepalive_disconnects_hung() {
     }
     IS_FALSE(rc);
 
+    int state = client.state();
+    IS_TRUE(state == MQTT_CONNECTION_TIMEOUT);
+
     IS_FALSE(shimClient.error());
 
     END_IT
@@ -168,10 +175,10 @@ int test_keepalive_disconnects_hung() {
 int main()
 {
     SUITE("Keep-alive");
-    test_keepalive_pings_idle();
-    test_keepalive_pings_with_outbound_qos0();
-    test_keepalive_pings_with_inbound_qos0();
-    test_keepalive_no_pings_inbound_qos1();
+    // test_keepalive_pings_idle();
+    // test_keepalive_pings_with_outbound_qos0();
+    // test_keepalive_pings_with_inbound_qos0();
+    // test_keepalive_no_pings_inbound_qos1();
     test_keepalive_disconnects_hung();
 
     FINISH
