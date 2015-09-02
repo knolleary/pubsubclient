@@ -335,6 +335,10 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
 
 boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained) {
     if (connected()) {
+        if (MQTT_MAX_PACKET_SIZE < 5 + 2+strlen(topic) + plength) {
+            // Too long
+            return false;
+        }
         // Leave room in the buffer for header and variable length field
         uint16_t length = 5;
         length = writeString(topic,buffer,length);
@@ -428,9 +432,13 @@ boolean PubSubClient::subscribe(const char* topic) {
 }
 
 boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
-    if (qos < 0 || qos > 1)
-    return false;
-
+    if (qos < 0 || qos > 1) {
+        return false;
+    }
+    if (MQTT_MAX_PACKET_SIZE < 9 + strlen(topic)) {
+        // Too long
+        return false;
+    }
     if (connected()) {
         // Leave room in the buffer for header and variable length field
         uint16_t length = 5;
@@ -448,6 +456,10 @@ boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
 }
 
 boolean PubSubClient::unsubscribe(const char* topic) {
+    if (MQTT_MAX_PACKET_SIZE < 9 + strlen(topic)) {
+        // Too long
+        return false;
+    }
     if (connected()) {
         uint16_t length = 5;
         nextMsgId++;
