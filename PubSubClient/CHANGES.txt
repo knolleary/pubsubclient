@@ -1,3 +1,7 @@
+2.1
+   * Add MAX_TRANSFER_SIZE def to chunk messages if needed
+   * Reject topic/payloads that exceed MQTT_MAX_PACKET_SIZE
+
 2.0
    * Add (and default to) MQTT 3.1.1 support
    * Fix PROGMEM handling for Intel Galileo/ESP8266
