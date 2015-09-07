@@ -4,9 +4,9 @@ TEST_SRC=$(wildcard ${SRC_PATH}/*_spec.cpp)
 TEST_BIN= $(TEST_SRC:${SRC_PATH}/%.cpp=${OUT_PATH}/%)
 VPATH=${SRC_PATH}
 SHIM_FILES=${SRC_PATH}/lib/*.cpp
-PSC_FILE=../PubSubClient/src/PubSubClient.cpp
+PSC_FILE=../src/PubSubClient.cpp
 CC=g++
-CFLAGS=-I${SRC_PATH}/lib -I../PubSubClient/src
+CFLAGS=-I${SRC_PATH}/lib -I../src
 
 all: $(TEST_BIN)
 
