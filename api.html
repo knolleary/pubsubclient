@@ -167,8 +167,8 @@ void setup() {
     </ul>
     <h5>Returns</h5>
     <ul>
-        <li>false - publish failed.</li>
-        <li>true - publish succeeded.</li>
+        <li>false - publish failed, either connection lost, or message too large</li>
+        <li>true - publish succeeded</li>
     </ul>
 </section>
 
@@ -183,8 +183,8 @@ void setup() {
     </ul>
     <h5>Returns</h5>
     <ul>
-        <li>false - publish failed.</li>
-        <li>true - publish succeeded.</li>
+        <li>false - publish failed, either connection lost, or message too large</li>
+        <li>true - publish succeeded</li>
     </ul>
 </section>
 
@@ -205,8 +205,8 @@ void setup() {
     </ul>
     <h5>Returns</h5>
     <ul>
-        <li>false - publish failed.</li>
-        <li>true - publish succeeded.</li>
+        <li>false - publish failed, either connection lost, or message too large</li>
+        <li>true - publish succeeded</li>
     </ul>
 </section>
 
@@ -227,8 +227,8 @@ void setup() {
     </ul>
     <h5>Returns</h5>
     <ul>
-        <li>false - publish failed.</li>
-        <li>true - publish succeeded.</li>
+        <li>false - publish failed</li>
+        <li>true - publish succeeded</li>
     </ul>
 </section>
 
@@ -242,7 +242,7 @@ void setup() {
     </ul>
     <h5>Returns</h5>
     <ul>
-        <li>false - sending the subscribe failed.</li>
+        <li>false - sending the subscribe failed, either connection lost, or message too large.</li>
         <li>true - sending the subscribe succeeded. The request completes asynchronously.</li>
     </ul>
 </section>
@@ -256,7 +256,7 @@ void setup() {
     </ul>
     <h5>Returns</h5>
     <ul>
-        <li>false - sending the unsubscribe failed.</li>
+        <li>false - sending the unsubscribe failed, either connection lost, or message too large.</li>
         <li>true - sending the unsubscribe succeeded. The request completes asynchronously.</li>
     </ul>
 </section>
@@ -374,6 +374,12 @@ void setup() {
         <dt><code>MQTT_VERSION</code></dt>
         <dd>Sets the version of the MQTT protocol to use.</p>
             <p>Default: MQTT 3.1.1</p>
+        </dd>
+        <dt><code>MQTT_MAX_TRANSFER_SIZE</code></dt>
+        <dd>Sets the maximum number of bytes passed to the network client in each
+            write call. Some hardware has a limit to how much data can be passed
+            to them in one go, such as the Arduino Wifi Shield.</p>
+            <p>Default: undefined (complete packet passed in each write call)</p>
         </dd>
     </dl>
 </section>
