@@ -31,7 +31,8 @@ boards and shields, including:
  - Arduino Ethernet Shield
  - Arduino YUN – use the included `YunClient` in place of `EthernetClient`, and
    be sure to do a `Bridge.begin()` first
- - Arduino WiFi Shield
+ - Arduino WiFi Shield - if you want to send packets > 90 bytes with this shield,
+   enable the `MQTT_MAX_TRANSFER_SIZE` define in `PubSubClient.h`.
  - Sparkfun WiFly Shield – when used with [this library](https://github.com/dpslwk/WiFly)
  - Intel Galileo/Edison
  - ESP8266
