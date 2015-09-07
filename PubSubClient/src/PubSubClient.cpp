@@ -421,10 +421,25 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
     for (int i=0;i<llen;i++) {
         buf[5-llen+i] = lenBuf[i];
     }
-    rc = _client->write(buf+(4-llen),length+1+llen);
 
+#ifdef MQTT_MAX_TRANSFER_SIZE
+    uint8_t* writeBuf = buf+(4-llen);
+    uint8_t bytesRemaining = length+1+llen;
+    uint8_t bytesToWrite;
+    boolean result = true;
+    while((bytesRemaining > 0) && result) {
+        bytesToWrite = (bytesRemaining > MQTT_MAX_TRANSFER_SIZE)?MQTT_MAX_TRANSFER_SIZE:bytesRemaining;
+        rc = _client->write(writeBuf,bytesToWrite);
+        result = (rc == bytesToWrite);
+        bytesRemaining -= rc;
+        writeBuf += rc;
+    }
+    return result;
+#else
+    rc = _client->write(buf+(4-llen),length+1+llen);
     lastOutActivity = millis();
     return (rc == 1+llen+length);
+#endif
 }
 
 boolean PubSubClient::subscribe(const char* topic) {
@@ -506,8 +521,9 @@ boolean PubSubClient::connected() {
         if (!rc) {
             if (this->_state == MQTT_CONNECTED) {
                 this->_state = MQTT_CONNECTION_LOST;
+                _client->flush();
+                _client->stop();
             }
-            _client->stop();
         }
     }
     return rc;
