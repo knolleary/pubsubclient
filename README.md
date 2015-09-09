@@ -34,7 +34,7 @@ boards and shields, including:
  - Arduino WiFi Shield - if you want to send packets > 90 bytes with this shield,
    enable the `MQTT_MAX_TRANSFER_SIZE` define in `PubSubClient.h`.
  - Sparkfun WiFly Shield – [library](https://github.com/dpslwk/WiFly)
- - Sparkfun CC3000  - [library](https://github.com/sparkfun/SFE_CC3000_Library)
+ - TI CC3000 WiFi - [library](https://github.com/sparkfun/SFE_CC3000_Library)
  - Intel Galileo/Edison
  - ESP8266
 
