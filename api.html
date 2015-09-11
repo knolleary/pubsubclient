@@ -18,9 +18,10 @@ title: API Documentation
         <li><a href="#connect4"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password, willTopic, willQoS, willRetain, willMessage)</span></a></li>
         <li><a href="#disconnect"><span class="methodreturn">void</span> <span class="methodname">disconnect</span> <span class="methodparams">()</span></a></li>
         <li><a href="#publish1"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload)</span></a></li>
-        <li><a href="#publish2"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, length)</span></a></li>
-        <li><a href="#publish3"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, length, retained)</span></a></li>
-        <li><a href="#publish4"><span class="methodreturn">int</span> <span class="methodname">publish_P</span> <span class="methodparams">(topic, payload, length, retained)</span></a></li>
+        <li><a href="#publish2"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, retained)</span></a></li>
+        <li><a href="#publish3"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, length)</span></a></li>
+        <li><a href="#publish4"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, length, retained)</span></a></li>
+        <li><a href="#publish5"><span class="methodreturn">int</span> <span class="methodname">publish_P</span> <span class="methodparams">(topic, payload, length, retained)</span></a></li>
         <li><a href="#subscribe"><span class="methodreturn">boolean</span> <span class="methodname">subscribe</span> <span class="methodparams">(topic, [qos])</span></a></li>
         <li><a href="#unsubscribe"><span class="methodreturn">boolean</span> <span class="methodname">unsubscribe</span> <span class="methodparams">(topic)</span></a></li>
         <li><a href="#loop"><span class="methodreturn">boolean</span> <span class="methodname">loop</span> <span class="methodparams">()</span></a></li>
@@ -173,33 +174,16 @@ void setup() {
 </section>
 
 <section class="method" id="publish2">
-    <h4><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, length)</span></h4>
-    <p>Publishes a message to the specified topic.</p>
+    <h4><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, retained)</span></h4>
+    <p>Publishes a string message to the specified topic.</p>
     <h5>Parameters</h5>
     <ul>
         <li>topic - the topic to publish to (const char[])</li>
-        <li>payload - the message to publish (byte array)</li>
-        <li>length - the length of the message (byte)</li>
-    </ul>
-    <h5>Returns</h5>
-    <ul>
-        <li>false - publish failed, either connection lost, or message too large</li>
-        <li>true - publish succeeded</li>
-    </ul>
-</section>
-
-<section class="method" id="publish3">
-    <h4><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, length, retained)</span></h4>
-    <p>Publishes a message to the specified topic, with the retained flag as specified.</p>
-    <h5>Parameters</h5>
-    <ul>
-        <li>topic - the topic to publish to (const char[])</li>
-        <li>payload - the message to publish (byte array)</li>
-        <li>length - the length of the message (byte)</li>
-        <li>retained - whether the message should be retained (byte)
+        <li>payload - the message to publish (const char[])</li>
+        <li>retained - whether the message should be retained (boolean)
             <ul>
-                <li>0 - not retained</li>
-                <li>1 - retained</li>
+                <li>false - not retained</li>
+                <li>true - retained</li>
             </ul>
         </li>
     </ul>
@@ -210,18 +194,56 @@ void setup() {
     </ul>
 </section>
 
+<section class="method" id="publish3">
+    <h4><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, length)</span></h4>
+    <p>Publishes a message to the specified topic.</p>
+    <h5>Parameters</h5>
+    <ul>
+        <li>topic - the topic to publish to (const char[])</li>
+        <li>payload - the message to publish (byte[])</li>
+        <li>length - the length of the message (byte)</li>
+    </ul>
+    <h5>Returns</h5>
+    <ul>
+        <li>false - publish failed, either connection lost, or message too large</li>
+        <li>true - publish succeeded</li>
+    </ul>
+</section>
+
 <section class="method" id="publish4">
+    <h4><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, length, retained)</span></h4>
+    <p>Publishes a message to the specified topic, with the retained flag as specified.</p>
+    <h5>Parameters</h5>
+    <ul>
+        <li>topic - the topic to publish to (const char[])</li>
+        <li>payload - the message to publish (byte[])</li>
+        <li>length - the length of the message (byte)</li>
+        <li>retained - whether the message should be retained (boolean)
+            <ul>
+                <li>false - not retained</li>
+                <li>true - retained</li>
+            </ul>
+        </li>
+    </ul>
+    <h5>Returns</h5>
+    <ul>
+        <li>false - publish failed, either connection lost, or message too large</li>
+        <li>true - publish succeeded</li>
+    </ul>
+</section>
+
+<section class="method" id="publish5">
     <h4><span class="methodreturn">int</span> <span class="methodname">publish_P</span> <span class="methodparams">(topic, payload, length, retained)</span></h4>
     <p>Publishes a message stored in <code>PROGMEN</code> to the specified topic, with the retained flag as specified.</p>
     <h5>Parameters</h5>
     <ul>
         <li>topic - the topic to publish to (const char[])</li>
-        <li>payload - the message to publish (PROGMEM byte array)</li>
+        <li>payload - the message to publish (PROGMEM byte[])</li>
         <li>length - the length of the message (byte)</li>
-        <li>retained - whether the message should be retained (byte)
+        <li>retained - whether the message should be retained (boolean)
             <ul>
-                <li>0 - not retained</li>
-                <li>1 - retained</li>
+                <li>false - not retained</li>
+                <li>true - retained</li>
             </ul>
         </li>
     </ul>
