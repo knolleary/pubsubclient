@@ -63,7 +63,7 @@ int test_publish_bytes() {
 
 
 int test_publish_retained() {
-    IT("publishes retained");
+    IT("publishes retained - 1");
     ShimClient shimClient;
     shimClient.setAllowConnect(true);
 
@@ -81,6 +81,29 @@ int test_publish_retained() {
     shimClient.expect(publish,14);
 
     rc = client.publish((char*)"topic",payload,length,true);
+    IS_TRUE(rc);
+
+    IS_FALSE(shimClient.error());
+
+    END_IT
+}
+
+int test_publish_retained_2() {
+    IT("publishes retained - 2");
+    ShimClient shimClient;
+    shimClient.setAllowConnect(true);
+
+    byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
+    shimClient.respond(connack,4);
+
+    PubSubClient client(server, 1883, callback, shimClient);
+    int rc = client.connect((char*)"client_test1");
+    IS_TRUE(rc);
+
+    byte publish[] = {0x31,0xc,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,'A','B','C','D','E'};
+    shimClient.expect(publish,14);
+
+    rc = client.publish((char*)"topic",(char*)"ABCDE",true);
     IS_TRUE(rc);
 
     IS_FALSE(shimClient.error());
@@ -158,6 +181,7 @@ int main()
     test_publish();
     test_publish_bytes();
     test_publish_retained();
+    test_publish_retained_2();
     test_publish_not_connected();
     test_publish_too_long();
     test_publish_P();

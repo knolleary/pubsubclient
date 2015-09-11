@@ -329,6 +329,10 @@ boolean PubSubClient::publish(const char* topic, const char* payload) {
     return publish(topic,(const uint8_t*)payload,strlen(payload),false);
 }
 
+boolean PubSubClient::publish(const char* topic, const char* payload, boolean retained) {
+    return publish(topic,(const uint8_t*)payload,strlen(payload),retained);
+}
+
 boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigned int plength) {
     return publish(topic, payload, plength, false);
 }
