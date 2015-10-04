@@ -428,7 +428,7 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
 
 #ifdef MQTT_MAX_TRANSFER_SIZE
     uint8_t* writeBuf = buf+(4-llen);
-    uint8_t bytesRemaining = length+1+llen;
+    uint16_t bytesRemaining = length+1+llen;  //Match the length type
     uint8_t bytesToWrite;
     boolean result = true;
     while((bytesRemaining > 0) && result) {
