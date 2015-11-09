@@ -645,14 +645,14 @@ namespace MQTT {
 
   // Unsubscribe class
   Unsubscribe::Unsubscribe() :
-    Message(SUBSCRIBE),
+    Message(UNSUBSCRIBE),
     _buffer(NULL), _buflen(0)
   {
     _need_packet_id = true;
   }
 
   Unsubscribe::Unsubscribe(String topic) :
-    Message(SUBSCRIBE),
+    Message(UNSUBSCRIBE),
     _buffer(NULL), _buflen(0)
   {
     _need_packet_id = true;
