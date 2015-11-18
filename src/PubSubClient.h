@@ -74,7 +74,8 @@ private:
    bool pingOutstanding;
    MQTT_CALLBACK_SIGNATURE;
    uint16_t readPacket(uint8_t*);
-   uint8_t readByte();
+   boolean readByte(uint8_t * result);
+   boolean readByte(uint8_t * result, uint16_t * index);
    boolean write(uint8_t header, uint8_t* buf, uint16_t length);
    uint16_t writeString(const char* string, uint8_t* buf, uint16_t pos);
    IPAddress ip;
@@ -82,6 +83,7 @@ private:
    uint16_t port;
    Stream* stream;
    int _state;
+   int32_t read_timeout_ms;
 public:
    PubSubClient();
    PubSubClient(Client& client);
@@ -104,6 +106,7 @@ public:
    PubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE);
    PubSubClient& setClient(Client& client);
    PubSubClient& setStream(Stream& stream);
+   void setReadTimeout(int32_t timeout_ms);
 
    boolean connect(const char* id);
    boolean connect(const char* id, const char* user, const char* pass);

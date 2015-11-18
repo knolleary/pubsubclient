@@ -12,12 +12,14 @@ PubSubClient::PubSubClient() {
     this->_client = NULL;
     this->stream = NULL;
     setCallback(NULL);
+    setReadTimeout(-1);
 }
 
 PubSubClient::PubSubClient(Client& client) {
     this->_state = MQTT_DISCONNECTED;
     setClient(client);
     this->stream = NULL;
+    setReadTimeout(-1);
 }
 
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client) {
@@ -25,12 +27,14 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client) {
     setServer(addr, port);
     setClient(client);
     this->stream = NULL;
+    setReadTimeout(-1);
 }
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
     setServer(addr,port);
     setClient(client);
     setStream(stream);
+    setReadTimeout(-1);
 }
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
     this->_state = MQTT_DISCONNECTED;
@@ -38,6 +42,7 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATUR
     setCallback(callback);
     setClient(client);
     this->stream = NULL;
+    setReadTimeout(-1);
 }
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
@@ -45,6 +50,7 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATUR
     setCallback(callback);
     setClient(client);
     setStream(stream);
+    setReadTimeout(-1);
 }
 
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client) {
@@ -52,12 +58,14 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client) {
     setServer(ip, port);
     setClient(client);
     this->stream = NULL;
+    setReadTimeout(-1);
 }
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
     setServer(ip,port);
     setClient(client);
     setStream(stream);
+    setReadTimeout(-1);
 }
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
     this->_state = MQTT_DISCONNECTED;
@@ -65,6 +73,7 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, 
     setCallback(callback);
     setClient(client);
     this->stream = NULL;
+    setReadTimeout(-1);
 }
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
@@ -72,6 +81,7 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, 
     setCallback(callback);
     setClient(client);
     setStream(stream);
+    setReadTimeout(-1);
 }
 
 PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client) {
@@ -79,12 +89,14 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client) {
     setServer(domain,port);
     setClient(client);
     this->stream = NULL;
+    setReadTimeout(-1);
 }
 PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
     setServer(domain,port);
     setClient(client);
     setStream(stream);
+    setReadTimeout(-1);
 }
 PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
     this->_state = MQTT_DISCONNECTED;
@@ -92,6 +104,7 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
     setCallback(callback);
     setClient(client);
     this->stream = NULL;
+    setReadTimeout(-1);
 }
 PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
@@ -99,6 +112,7 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
     setCallback(callback);
     setClient(client);
     setStream(stream);
+    setReadTimeout(-1);
 }
 
 boolean PubSubClient::connect(const char *id) {
@@ -205,14 +219,37 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
     return true;
 }
 
-uint8_t PubSubClient::readByte() {
-    while(!_client->available()) {}
-    return _client->read();
+// reads a byte into result
+boolean PubSubClient::readByte(uint8_t * result) {
+   boolean ret = false;
+   uint32_t previousMillis = millis();
+   while(!_client->available()) {
+     uint32_t currentMillis = millis();     
+     if(read_timeout_ms > 0){
+       if(currentMillis - previousMillis >= read_timeout_ms){
+         return false;
+       }
+     }
+   }
+   *result = _client->read();
+   return true;
+}
+
+// reads a byte into result[*index] and increments index
+boolean PubSubClient::readByte(uint8_t * result, uint16_t * index){
+  boolean ret = false;
+  uint16_t current_index = *index;
+  uint8_t * write_address = &(result[current_index]);
+  if(readByte(write_address)){
+    *index = current_index + 1;
+    ret = true;
+  }
+  return ret;
 }
 
 uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
     uint16_t len = 0;
-    buffer[len++] = readByte();
+    if(!readByte(buffer, &len)) return 0;
     bool isPublish = (buffer[0]&0xF0) == MQTTPUBLISH;
     uint32_t multiplier = 1;
     uint16_t length = 0;
@@ -221,7 +258,7 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
     uint8_t start = 0;
 
     do {
-        digit = readByte();
+        if(!readByte(&digit)) return 0;
         buffer[len++] = digit;
         length += (digit & 127) * multiplier;
         multiplier *= 128;
@@ -230,8 +267,8 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
 
     if (isPublish) {
         // Read in topic length to calculate bytes to skip over for Stream writing
-        buffer[len++] = readByte();
-        buffer[len++] = readByte();
+        if(!readByte(buffer, &len)) return 0;
+        if(!readByte(buffer, &len)) return 0;
         skip = (buffer[*lengthLength+1]<<8)+buffer[*lengthLength+2];
         start = 2;
         if (buffer[0]&MQTTQOS1) {
@@ -241,7 +278,7 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
     }
 
     for (uint16_t i = start;i<length;i++) {
-        digit = readByte();
+        if(!readByte(&digit)) return 0;
         if (this->stream) {
             if (isPublish && len-*lengthLength-2>skip) {
                 this->stream->write(digit);
@@ -564,6 +601,10 @@ PubSubClient& PubSubClient::setClient(Client& client){
 PubSubClient& PubSubClient::setStream(Stream& stream){
     this->stream = &stream;
     return *this;
+}
+
+void PubSubClient::setReadTimeout(int32_t timeout_ms){
+  read_timeout_ms = timeout_ms;
 }
 
 int PubSubClient::state() {
