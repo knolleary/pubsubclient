@@ -25,6 +25,9 @@
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
 #define MQTT_KEEPALIVE 15
 
+// MQTT_SOCKET_TIMEOUT: socket timeout interval in Seconds
+#define MQTT_SOCKET_TIMEOUT 15
+
 // MQTT_MAX_TRANSFER_SIZE : limit how much data is passed to the network client
 //  in each write call. Needed for the Arduino Wifi Shield. Leave undefined to
 //  pass the entire MQTT packet in each write call.
@@ -83,7 +86,6 @@ private:
    uint16_t port;
    Stream* stream;
    int _state;
-   int32_t read_timeout_ms;
 public:
    PubSubClient();
    PubSubClient(Client& client);
@@ -106,7 +108,6 @@ public:
    PubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE);
    PubSubClient& setClient(Client& client);
    PubSubClient& setStream(Stream& stream);
-   void setReadTimeout(int32_t timeout_ms);
 
    boolean connect(const char* id);
    boolean connect(const char* id, const char* user, const char* pass);
