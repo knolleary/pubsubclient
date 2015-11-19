@@ -221,7 +221,6 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 
 // reads a byte into result
 boolean PubSubClient::readByte(uint8_t * result) {
-   boolean ret = false;
    uint32_t previousMillis = millis();
    while(!_client->available()) {
      uint32_t currentMillis = millis();     
@@ -237,14 +236,13 @@ boolean PubSubClient::readByte(uint8_t * result) {
 
 // reads a byte into result[*index] and increments index
 boolean PubSubClient::readByte(uint8_t * result, uint16_t * index){
-  boolean ret = false;
   uint16_t current_index = *index;
   uint8_t * write_address = &(result[current_index]);
   if(readByte(write_address)){
     *index = current_index + 1;
-    ret = true;
+    return true;
   }
-  return ret;
+  return false;
 }
 
 uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
