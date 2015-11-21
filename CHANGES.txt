@@ -1,3 +1,8 @@
+2.4
+   * Add MQTT_SOCKET_TIMEOUT to prevent it blocking indefinitely
+     whilst waiting for inbound data
+   * Fixed return code when publishing >256 bytes
+   
 2.3
    * Add publish(topic,payload,retained) function
 
