@@ -23,7 +23,7 @@
 #define MQTT_MAX_PACKET_SIZE 128
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
-#define MQTT_KEEPALIVE 15
+#define MQTT_KEEPALIVE 30
 
 // MQTT_SOCKET_TIMEOUT: socket timeout interval in Seconds
 #define MQTT_SOCKET_TIMEOUT 15
@@ -115,10 +115,10 @@ public:
    boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
    void disconnect();
    boolean publish(const char* topic, const char* payload);
-   boolean publish(const char* topic, const char* payload, boolean retained);
+   boolean publish(const char* topic, const char* payload, uint8_t qos, boolean retained);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength);
-   boolean publish(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
-   boolean publish_P(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
+   boolean publish(const char* topic, const uint8_t * payload, unsigned int plength, uint8_t qos, boolean retained);
+   boolean publish_P(const char* topic, const uint8_t * payload, unsigned int plength, uint8_t qos, boolean retained);
    boolean subscribe(const char* topic);
    boolean subscribe(const char* topic, uint8_t qos);
    boolean unsubscribe(const char* topic);
