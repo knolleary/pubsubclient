@@ -11,6 +11,7 @@
 #include "IPAddress.h"
 #include "Client.h"
 #include "Stream.h"
+#include <functional>
 
 #define MQTT_VERSION_3_1      3
 #define MQTT_VERSION_3_1_1    4
@@ -65,7 +66,7 @@
 #define MQTTQOS1        (1 << 1)
 #define MQTTQOS2        (2 << 1)
 
-#define MQTT_CALLBACK_SIGNATURE void (*callback)(char*,uint8_t*,unsigned int)
+#define MQTT_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, uint32_t)> callback
 
 class PubSubClient {
 private:
