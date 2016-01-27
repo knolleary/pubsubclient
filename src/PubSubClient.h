@@ -11,7 +11,6 @@
 #include "IPAddress.h"
 #include "Client.h"
 #include "Stream.h"
-#include <functional>
 
 #define MQTT_VERSION_3_1      3
 #define MQTT_VERSION_3_1_1    4
@@ -67,6 +66,7 @@
 #define MQTTQOS2        (2 << 1)
 
 #ifdef ESP8266
+#include <functional>
 #define MQTT_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, uint32_t)> callback
 #else
 #define MQTT_CALLBACK_SIGNATURE void (*callback)(char*, uint8_t*, uint32_t)
