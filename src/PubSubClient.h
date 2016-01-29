@@ -7,13 +7,19 @@
 #ifndef PubSubClient_h
 #define PubSubClient_h
 
+#if defined(ARDUINO) && ARDUINO >= 100
 #include <Arduino.h>
+#else
+#include <WProgram.h>
+#endif
 #include "IPAddress.h"
 #include "Client.h"
 #include "Stream.h"
 
-#define MQTT_VERSION_3_1      3
-#define MQTT_VERSION_3_1_1    4
+typedef enum {
+	MQTT_VERSION_3_1      = 0x3,
+	MQTT_VERSION_3_1_1    = 0x4
+} ProtocolType;
 
 // MQTT_VERSION : Pick the version
 //#define MQTT_VERSION MQTT_VERSION_3_1
@@ -86,6 +92,8 @@ private:
    uint16_t port;
    Stream* stream;
    int _state;
+   ProtocolType protocolType;
+   
 public:
    PubSubClient();
    PubSubClient(Client& client);
@@ -108,6 +116,7 @@ public:
    PubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE);
    PubSubClient& setClient(Client& client);
    PubSubClient& setStream(Stream& stream);
+   PubSubClient& setProtocol( const ProtocolType protocolType );
 
    boolean connect(const char* id);
    boolean connect(const char* id, const char* user, const char* pass);
