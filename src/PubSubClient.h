@@ -17,16 +17,24 @@
 
 // MQTT_VERSION : Pick the version
 //#define MQTT_VERSION MQTT_VERSION_3_1
+#ifndef MQTT_VERSION
 #define MQTT_VERSION MQTT_VERSION_3_1_1
+#endif
 
 // MQTT_MAX_PACKET_SIZE : Maximum packet size
+#ifndef MQTT_MAX_PACKET_SIZE
 #define MQTT_MAX_PACKET_SIZE 128
+#endif
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
+#ifndef MQTT_KEEPALIVE
 #define MQTT_KEEPALIVE 15
+#endif
 
 // MQTT_SOCKET_TIMEOUT: socket timeout interval in Seconds
+#ifndef MQTT_SOCKET_TIMEOUT
 #define MQTT_SOCKET_TIMEOUT 15
+#endif
 
 // MQTT_MAX_TRANSFER_SIZE : limit how much data is passed to the network client
 //  in each write call. Needed for the Arduino Wifi Shield. Leave undefined to
