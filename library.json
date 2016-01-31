@@ -1,0 +1,19 @@
+{
+  "name": "PubSubClient",
+  "keywords": "ethernet, mqtt, m2m",
+  "description": "A client library for the Ethernet Shield that provides support for MQTT (extremely lightweight publish/subscribe messaging transport)",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/knolleary/pubsubclient.git"
+  },
+  "version": "2.4",
+  "exclude": "tests",
+  "examples": "examples/*/*.ino",
+  "frameworks": "arduino",
+  "platforms":
+  [
+    "atmelavr",
+    "espressif"
+  ]
+}
