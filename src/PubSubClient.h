@@ -7,11 +7,7 @@
 #ifndef PubSubClient_h
 #define PubSubClient_h
 
-#if defined(ARDUINO) && ARDUINO >= 100
 #include <Arduino.h>
-#else
-#include <WProgram.h>
-#endif
 #include "IPAddress.h"
 #include "Client.h"
 #include "Stream.h"
@@ -26,7 +22,7 @@ typedef enum {
 #define MQTT_VERSION MQTT_VERSION_3_1_1
 
 // MQTT_MAX_PACKET_SIZE : Maximum packet size
-#define MQTT_MAX_PACKET_SIZE 128
+#define MQTT_MAX_PACKET_SIZE 1024
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
 #define MQTT_KEEPALIVE 15
@@ -93,6 +89,7 @@ private:
    Stream* stream;
    int _state;
    ProtocolType protocolType;
+   uint8_t socketTimeout;
    
 public:
    PubSubClient();
@@ -116,12 +113,11 @@ public:
    PubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE);
    PubSubClient& setClient(Client& client);
    PubSubClient& setStream(Stream& stream);
-   PubSubClient& setProtocol( const ProtocolType protocolType );
+   PubSubClient& setProtocol(const ProtocolType protocolType);
 
-   boolean connect(const char* id);
-   boolean connect(const char* id, const char* user, const char* pass);
+   boolean connect(const char* id, const char* user=NULL, const char* pass=NULL);
    boolean connect(const char* id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
-   boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
+   boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, const uint8_t socketTimeout);
    void disconnect();
    boolean publish(const char* topic, const char* payload);
    boolean publish(const char* topic, const char* payload, boolean retained);

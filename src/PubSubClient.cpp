@@ -114,19 +114,16 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
     setProtocol(MQTT_VERSION);
 }
 
-boolean PubSubClient::connect(const char *id) {
-    return connect(id,NULL,NULL,0,0,0,0);
-}
-
 boolean PubSubClient::connect(const char *id, const char *user, const char *pass) {
-    return connect(id,user,pass,0,0,0,0);
+    return connect(id,user,pass,0,0,0,0,MQTT_SOCKET_TIMEOUT);
 }
 
 boolean PubSubClient::connect(const char *id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
-    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage);
+    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage,MQTT_SOCKET_TIMEOUT);
 }
 
-boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
+boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, const uint8_t socketTimeout) {
+    this->socketTimeout = socketTimeout;
     if (!connected()) {
         int result = 0;
 
@@ -189,7 +186,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 			
             while (!_client->available()) {
                 unsigned long t = millis();
-                if (t-lastInActivity >= ((int32_t) MQTT_SOCKET_TIMEOUT*1000UL)) {
+                if (t-lastInActivity >= ((int32_t) socketTimeout*1000UL)) {
                     _state = MQTT_CONNECTION_TIMEOUT;
                     _client->stop();
 
@@ -226,7 +223,7 @@ boolean PubSubClient::readByte(uint8_t * result) {
    uint32_t previousMillis = millis();
    while(!_client->available()) {
      uint32_t currentMillis = millis();
-     if(currentMillis - previousMillis >= ((int32_t) MQTT_SOCKET_TIMEOUT*1000UL)){
+     if(currentMillis - previousMillis >= ((int32_t) socketTimeout*1000UL)){
        return false;
      }
    }
@@ -568,7 +565,7 @@ boolean PubSubClient::connected() {
     return rc;
 }
 
-PubSubClient& PubSubClient::setProtocol( const ProtocolType protocolType )
+PubSubClient& PubSubClient::setProtocol(const ProtocolType protocolType)
 {
 	this->protocolType = protocolType;
 	return *this;
@@ -592,7 +589,7 @@ PubSubClient& PubSubClient::setServer(const char * domain, uint16_t port) {
     return *this;
 }
 
-PubSubClient& PubSubClient::setCallback(void(*callback)(char*,uint8_t*,unsigned int)){
+PubSubClient& PubSubClient::setCallback(MQTT_CALLBACK_SIGNATURE){
     this->callback = callback;
     return *this;
 }
