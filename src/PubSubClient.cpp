@@ -138,7 +138,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             uint16_t length = 5;
             unsigned int j;
 
-			if ( protocolType==MQTT_VERSION_3_1 ) {
+			if ( (protocolType&~MQTT_AUTO_NEGOTIATE_FLAG)==MQTT_VERSION_3_1 ) {
 				const uint8_t d[9] = {0x00,0x06,'M','Q','I','s','d','p', MQTT_VERSION_3_1};
 				for ( j=0;j<sizeof(d);j++ )
                 	buffer[length++] = d[j];            
@@ -190,8 +190,10 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
                     _state = MQTT_CONNECTION_TIMEOUT;
                     _client->stop();
 
-                    // Next time, Try to Switch Protocol if client not responding 
-                    protocolType = (protocolType==MQTT_VERSION_3_1_1) ? MQTT_VERSION_3_1 : MQTT_VERSION_3_1_1; 
+                    // Next time, Try to Switch Protocol if client not responding
+                    // and auto negotiation flag is set
+                    if ( protocolType&MQTT_AUTO_NEGOTIATE_FLAG )
+						protocolType = ((protocolType&~MQTT_AUTO_NEGOTIATE_FLAG)==MQTT_VERSION_3_1_1) ? (MQTT_AUTO_NEGOTIATE_FLAG|MQTT_VERSION_3_1) : (MQTT_AUTO_NEGOTIATE_FLAG|MQTT_VERSION_3_1_1); 
                     
                     return false;
                 }

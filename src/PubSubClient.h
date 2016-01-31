@@ -12,9 +12,12 @@
 #include "Client.h"
 #include "Stream.h"
 
+#define MQTT_AUTO_NEGOTIATE_FLAG		(0x8)
+
 typedef enum {
 	MQTT_VERSION_3_1      = 0x3,
-	MQTT_VERSION_3_1_1    = 0x4
+	MQTT_VERSION_3_1_1    = 0x4,
+	MQTT_AUTO_NEGOTIATE   = MQTT_AUTO_NEGOTIATE_FLAG|MQTT_VERSION_3_1_1,
 } ProtocolType;
 
 // MQTT_VERSION : Pick the version
@@ -88,7 +91,7 @@ private:
    uint16_t port;
    Stream* stream;
    int _state;
-   ProtocolType protocolType;
+   uint8_t protocolType;
    uint8_t socketTimeout;
    
 public:
