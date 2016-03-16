@@ -99,9 +99,6 @@ namespace MQTT {
     //! Set the packet id
     void set_packet_id(uint16_t pid) { _packet_id = pid; }
 
-    //! Get the packet id
-    uint16_t packet_id(void) const { return _packet_id; }
-
     //! Write the packet id to a buffer
     /*!
       \param buf Pointer to start of buffer (never advances)
@@ -140,6 +137,9 @@ namespace MQTT {
 
     //! Get the message type
     message_type type(void) const { return _type; }
+
+    //! Get the packet id
+    uint16_t packet_id(void) const { return _packet_id; }
 
     //! Does this message have a network stream for reading the (large) payload?
     bool has_stream(void) const { return _stream_client != NULL; }
