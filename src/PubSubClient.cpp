@@ -93,7 +93,6 @@ void PubSubClient::_process_message(MQTT::Message* msg) {
 	_send_message(puback);
 
       } else if (pub->qos() == 2) {
-	uint8_t retries = 0;
 
 	{
 	  MQTT::PublishRec pubrec(pub->packet_id());
