@@ -150,7 +150,8 @@ bool PubSubClient::_wait_for(MQTT::message_type match_type, uint16_t match_pid) 
 }
 
 bool PubSubClient::connect(String id) {
-  return connect(id, "", 0, false, "");
+  MQTT::Connect conn(id);
+  return connect(conn);
 }
 
 bool PubSubClient::connect(String id, String willTopic, uint8_t willQos, bool willRetain, String willMessage) {
