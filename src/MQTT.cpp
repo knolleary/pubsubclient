@@ -176,16 +176,18 @@ namespace MQTT {
     type >>= 4;
 
     // Read the remaining length
-    uint8_t lenbuf[4], lenlen = 0;
     uint32_t remaining_length = 0;
-    uint8_t shifter = 0;
-    uint8_t digit;
-    do {
-      digit = read<uint8_t>(client);
-      lenbuf[lenlen++] = digit;
-      remaining_length += (digit & 0x7f) << shifter;
-      shifter += 7;
-    } while (digit & 0x80);
+    {
+      uint8_t lenbuf[4], lenlen = 0;
+      uint8_t shifter = 0;
+      uint8_t digit;
+      do {
+	digit = read<uint8_t>(client);
+	lenbuf[lenlen++] = digit;
+	remaining_length += (digit & 0x7f) << shifter;
+	shifter += 7;
+      } while (digit & 0x80);
+    }
 
     // Read variable header and/or payload
     uint8_t *remaining_data = NULL;
