@@ -244,6 +244,10 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
         buffer[len++] = digit;
         length += (digit & 127) * multiplier;
         multiplier *= 128;
+        /* Prevent buffer overflow */
+        if (multiplier > 0x200000) {
+          return 0;
+        }
     } while ((digit & 128) != 0);
     *lengthLength = len-1;
 
