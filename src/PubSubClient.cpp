@@ -246,7 +246,9 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
         multiplier *= 128;
         /* Prevent buffer overflow */
         if (multiplier > 0x200000) {
-          return 0;
+          this->_state = MQTT_CONNECTION_LOST;
+          _client->flush();
+          _client->stop();
         }
     } while ((digit & 128) != 0);
     *lengthLength = len-1;
