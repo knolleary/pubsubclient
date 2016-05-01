@@ -606,5 +606,6 @@ int PubSubClient::state() {
 PubSubClient& PubSubClient::setPacketBuffer(uint8_t * pBuf, uint16_t length){
   MQTT_MAX_PACKET_SIZE = length;
   buffer = pBuf;  
+  return *this;
 }
 
