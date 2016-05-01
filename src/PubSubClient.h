@@ -21,9 +21,9 @@
 #define MQTT_VERSION MQTT_VERSION_3_1_1
 #endif
 
-// MQTT_MAX_PACKET_SIZE : Maximum packet size
-#ifndef MQTT_MAX_PACKET_SIZE
-#define MQTT_MAX_PACKET_SIZE 128
+// _MQTT_MAX_PACKET_SIZE : Maximum packet size
+#ifndef _MQTT_MAX_PACKET_SIZE
+#define _MQTT_MAX_PACKET_SIZE 128
 #endif
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
@@ -83,7 +83,9 @@
 class PubSubClient {
 private:
    Client* _client;
-   uint8_t buffer[MQTT_MAX_PACKET_SIZE];
+   uint8_t * buffer;
+   uint16_t MQTT_MAX_PACKET_SIZE;
+   uint8_t _buffer[_MQTT_MAX_PACKET_SIZE];
    uint16_t nextMsgId;
    unsigned long lastOutActivity;
    unsigned long lastInActivity;
@@ -121,6 +123,7 @@ public:
    PubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE);
    PubSubClient& setClient(Client& client);
    PubSubClient& setStream(Stream& stream);
+   PubSubClient& setPacketBuffer(uint8_t * pBuf, uint16_t length = _MQTT_MAX_PACKET_SIZE);
 
    boolean connect(const char* id);
    boolean connect(const char* id, const char* user, const char* pass);
