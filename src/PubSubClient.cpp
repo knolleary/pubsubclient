@@ -185,7 +185,6 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             }
             uint8_t type;
             readPacketHeader(&type, &length);
-            _state = MQTT_CONNECT_FAILED;
             if (MQTTTYPE(type) == MQTTCONNACK && length == 2) {
                 uint8_t connState;
                 
@@ -198,11 +197,14 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
                     _state = MQTT_CONNECTED;
                     return true;
                 } else {
-                    _state = buffer[3];
+                    _state = connState;
+                    _client->stop();
+                    return false;
                 }
             }
             _client->stop();
         }
+        _state = MQTT_CONNECT_FAILED;
         return false;
     }
     return true;
