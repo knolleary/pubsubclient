@@ -301,15 +301,26 @@ boolean PubSubClient::handlePublishPacket(uint8_t type, uint32_t remaining) {
     }
     
     
-    if(remaining > MQTT_MAX_PACKET_SIZE) { // ignore big packets
-        skipData(remaining);
+    if(remaining > MQTT_MAX_PACKET_SIZE) { // read big packets only into the stream
+        if(this->stream) {
+            while(remaining-- != 0) {
+                if(!readByte(&digit)) return false;
+                this->stream->write(digit);
+            }
+        } else {
+            skipData(remaining);
+        }
         if(MQTTQOS(type) != MQTTQOS0) sendPubAck(msgId);
             
         return true;
     }
     
     uint16_t pos = 0;
-    while(remaining-- != 0) if(!readByte(buffer, &pos)) return false;
+    while(remaining-- != 0) {
+        if(!readByte(buffer, &pos)) return false;
+        if(this->stream)
+            this->stream->write(buffer[pos -1]);
+    }
     
     if(callback) callback(topic, buffer, pos);
     
