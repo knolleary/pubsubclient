@@ -53,21 +53,24 @@
 #define MQTT_CONNECT_BAD_CREDENTIALS 4
 #define MQTT_CONNECT_UNAUTHORIZED    5
 
-#define MQTTCONNECT     1 << 4  // Client request to connect to Server
-#define MQTTCONNACK     2 << 4  // Connect Acknowledgment
-#define MQTTPUBLISH     3 << 4  // Publish message
-#define MQTTPUBACK      4 << 4  // Publish Acknowledgment
-#define MQTTPUBREC      5 << 4  // Publish Received (assured delivery part 1)
-#define MQTTPUBREL      6 << 4  // Publish Release (assured delivery part 2)
-#define MQTTPUBCOMP     7 << 4  // Publish Complete (assured delivery part 3)
-#define MQTTSUBSCRIBE   8 << 4  // Client Subscribe request
-#define MQTTSUBACK      9 << 4  // Subscribe Acknowledgment
-#define MQTTUNSUBSCRIBE 10 << 4 // Client Unsubscribe request
-#define MQTTUNSUBACK    11 << 4 // Unsubscribe Acknowledgment
-#define MQTTPINGREQ     12 << 4 // PING Request
-#define MQTTPINGRESP    13 << 4 // PING Response
-#define MQTTDISCONNECT  14 << 4 // Client is Disconnecting
+#define MQTTCONNECT     1 << 4  // Client request to connect to Server        C->S
+#define MQTTCONNACK     2 << 4  // Connect Acknowledgment                     S->C
+#define MQTTPUBLISH     3 << 4  // Publish message                            C<>S
+#define MQTTPUBACK      4 << 4  // Publish Acknowledgment                     C<>S
+#define MQTTPUBREC      5 << 4  // Publish Received (assured delivery part 1) C<>S
+#define MQTTPUBREL      6 << 4  // Publish Release (assured delivery part 2)  C<>S
+#define MQTTPUBCOMP     7 << 4  // Publish Complete (assured delivery part 3) C<>S
+#define MQTTSUBSCRIBE   8 << 4  // Client Subscribe request                   C->S
+#define MQTTSUBACK      9 << 4  // Subscribe Acknowledgment                   S->C
+#define MQTTUNSUBSCRIBE 10 << 4 // Client Unsubscribe request                 C->S
+#define MQTTUNSUBACK    11 << 4 // Unsubscribe Acknowledgment                 S->C
+#define MQTTPINGREQ     12 << 4 // PING Request                               C->S
+#define MQTTPINGRESP    13 << 4 // PING Response                              S->C
+#define MQTTDISCONNECT  14 << 4 // Client is Disconnecting                    C->S
 #define MQTTReserved    15 << 4 // Reserved
+
+#define MQTTTYPE(t)     ((t)&0xF0)
+#define MQTTQOS(t)      ((t)&0x0E)
 
 #define MQTTQOS0        (0 << 1)
 #define MQTTQOS1        (1 << 1)
@@ -89,7 +92,10 @@ private:
    unsigned long lastInActivity;
    bool pingOutstanding;
    MQTT_CALLBACK_SIGNATURE;
-   uint16_t readPacket(uint8_t*);
+   boolean readPacketHeader(uint8_t* type, uint32_t* length);
+   boolean handlePublishPacket(uint8_t type, uint32_t remaining);
+   boolean sendPubAck(uint16_t msgId);
+   boolean skipData(uint32_t remaining);
    boolean readByte(uint8_t * result);
    boolean readByte(uint8_t * result, uint16_t * index);
    boolean write(uint8_t header, uint8_t* buf, uint16_t length);
