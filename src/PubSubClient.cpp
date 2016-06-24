@@ -242,9 +242,8 @@ boolean PubSubClient::readPacketHeader(uint8_t* type, uint32_t* length) {
     
     *length = 0;
     do {
-        *length <<= (7*(lengthPos++));
         if(!readByte(&digit)) return false;
-        *length += (digit & 127);
+        *length += (digit & 127) << (7*lengthPos++);
     } while ((digit & 128) != 0);
     
     return true;
