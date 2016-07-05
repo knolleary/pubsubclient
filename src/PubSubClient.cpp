@@ -102,18 +102,34 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
 }
 
 boolean PubSubClient::connect(const char *id) {
-    return connect(id,NULL,NULL,0,0,0,0);
+    return connect(id,NULL,NULL,0,0,0,0,0);
+}
+
+boolean PubSubClient::connect(const char *id, uint16_t keepAlive) {
+    return connect(id,NULL,NULL,0,0,0,0,keepAlive);
 }
 
 boolean PubSubClient::connect(const char *id, const char *user, const char *pass) {
-    return connect(id,user,pass,0,0,0,0);
+    return connect(id,user,pass,0,0,0,0,0);
+}
+
+boolean PubSubClient::connect(const char *id, const char *user, const char *pass, uint16_t keepAlive) {
+    return connect(id,user,pass,0,0,0,0,keepAlive);
 }
 
 boolean PubSubClient::connect(const char *id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
-    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage);
+    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage,0);
+}
+
+boolean PubSubClient::connect(const char *id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, uint16_t keepAlive) {
+    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage,keepAlive);
 }
 
 boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
+    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage,0);
+}
+
+boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, uint16_t keepAlive) {
     if (!connected()) {
         int result = 0;
 
@@ -156,8 +172,14 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 
             buffer[length++] = v;
 
-            buffer[length++] = ((MQTT_KEEPALIVE) >> 8);
-            buffer[length++] = ((MQTT_KEEPALIVE) & 0xFF);
+            if (keepAlive > 0) {
+                this->keepAlive = keepAlive;
+            } else {
+                this->keepAlive = 15;
+            }
+
+            buffer[length++] = ((this->keepAlive) >> 8);
+            buffer[length++] = ((this->keepAlive) & 0xFF);
             length = writeString(id,buffer,length);
             if (willTopic) {
                 length = writeString(willTopic,buffer,length);
@@ -282,7 +304,7 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
 boolean PubSubClient::loop() {
     if (connected()) {
         unsigned long t = millis();
-        if ((t - lastInActivity > MQTT_KEEPALIVE*1000UL) || (t - lastOutActivity > MQTT_KEEPALIVE*1000UL)) {
+        if ((t - lastInActivity > this->keepAlive*1000UL) || (t - lastOutActivity > this->keepAlive*1000UL)) {
             if (pingOutstanding) {
                 this->_state = MQTT_CONNECTION_TIMEOUT;
                 _client->stop();
