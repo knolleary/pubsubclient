@@ -26,11 +26,6 @@
 #define MQTT_MAX_PACKET_SIZE 128
 #endif
 
-// MQTT_KEEPALIVE : keepAlive interval in Seconds
-#ifndef MQTT_KEEPALIVE
-#define MQTT_KEEPALIVE 15
-#endif
-
 // MQTT_SOCKET_TIMEOUT: socket timeout interval in Seconds
 #ifndef MQTT_SOCKET_TIMEOUT
 #define MQTT_SOCKET_TIMEOUT 15
@@ -99,6 +94,7 @@ private:
    uint16_t port;
    Stream* stream;
    int _state;
+   uint16_t keepAlive;
 public:
    PubSubClient();
    PubSubClient(Client& client);
@@ -123,9 +119,13 @@ public:
    PubSubClient& setStream(Stream& stream);
 
    boolean connect(const char* id);
+   boolean connect(const char* id, uint16_t keepAlive);
    boolean connect(const char* id, const char* user, const char* pass);
+   boolean connect(const char* id, const char* user, const char* pass, uint16_t keepAlive);
    boolean connect(const char* id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
+   boolean connect(const char* id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, uint16_t keepAlive);
    boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
+   boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, uint16_t keepAlive);
    void disconnect();
    boolean publish(const char* topic, const char* payload);
    boolean publish(const char* topic, const char* payload, boolean retained);
