@@ -101,35 +101,19 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
     setStream(stream);
 }
 
-boolean PubSubClient::connect(const char *id) {
-    return connect(id,NULL,NULL,0,0,0,0,0);
+boolean PubSubClient::connect(const char *id, uint16_t keepAlive, uint16_t socketTimeout) {
+    return connect(id,NULL,NULL,0,0,0,0,keepAlive,socketTimeout);
 }
 
-boolean PubSubClient::connect(const char *id, uint16_t keepAlive) {
-    return connect(id,NULL,NULL,0,0,0,0,keepAlive);
+boolean PubSubClient::connect(const char *id, const char *user, const char *pass, uint16_t keepAlive, uint16_t socketTimeout) {
+    return connect(id,user,pass,0,0,0,0,keepAlive,socketTimeout);
 }
 
-boolean PubSubClient::connect(const char *id, const char *user, const char *pass) {
-    return connect(id,user,pass,0,0,0,0,0);
+boolean PubSubClient::connect(const char *id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, uint16_t keepAlive, uint16_t socketTimeout) {
+    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage,keepAlive,socketTimeout);
 }
 
-boolean PubSubClient::connect(const char *id, const char *user, const char *pass, uint16_t keepAlive) {
-    return connect(id,user,pass,0,0,0,0,keepAlive);
-}
-
-boolean PubSubClient::connect(const char *id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
-    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage,0);
-}
-
-boolean PubSubClient::connect(const char *id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, uint16_t keepAlive) {
-    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage,keepAlive);
-}
-
-boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
-    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage,0);
-}
-
-boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, uint16_t keepAlive) {
+boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, uint16_t keepAlive, uint16_t socketTimeout) {
     if (!connected()) {
         int result = 0;
 
@@ -197,9 +181,15 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 
             lastInActivity = lastOutActivity = millis();
 
+            if (socketTimeout > 0) {
+                this->socketTimeout = socketTimeout;
+            } else {
+                this->socketTimeout = 15;
+            }
+
             while (!_client->available()) {
                 unsigned long t = millis();
-                if (t-lastInActivity >= ((int32_t) MQTT_SOCKET_TIMEOUT*1000UL)) {
+                if (t-lastInActivity >= ((int32_t) this->socketTimeout*1000UL)) {
                     _state = MQTT_CONNECTION_TIMEOUT;
                     _client->stop();
                     return false;
@@ -232,7 +222,7 @@ boolean PubSubClient::readByte(uint8_t * result) {
    uint32_t previousMillis = millis();
    while(!_client->available()) {
      uint32_t currentMillis = millis();
-     if(currentMillis - previousMillis >= ((int32_t) MQTT_SOCKET_TIMEOUT * 1000)){
+     if(currentMillis - previousMillis >= ((int32_t) this->socketTimeout * 1000)){
        return false;
      }
    }
@@ -602,6 +592,11 @@ PubSubClient& PubSubClient::setClient(Client& client){
 
 PubSubClient& PubSubClient::setStream(Stream& stream){
     this->stream = &stream;
+    return *this;
+}
+
+PubSubClient& PubSubClient::setTimeout(uint16_t socketTimeout){
+    this->socketTimeout = socketTimeout;
     return *this;
 }
 
