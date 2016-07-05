@@ -12,10 +12,10 @@ title: API Documentation
     </ul>
     <h3>Functions</h3>
     <ul>
-        <li><a href="#connect1"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID)</span></a></li>
-        <li><a href="#connect2"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, willTopic, willQoS, willRetain, willMessage)</span></a></li>
-        <li><a href="#connect3"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password)</span></a></li>
-        <li><a href="#connect4"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password, willTopic, willQoS, willRetain, willMessage)</span></a></li>
+        <li><a href="#connect1"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, keepAlive=15, socketTimeout=15)</span></a></li>
+        <li><a href="#connect2"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, willTopic, willQoS, willRetain, willMessage, keepAlive=15, socketTimeout=15)</span></a></li>
+        <li><a href="#connect3"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password, keepAlive=15, socketTimeout=15)</span></a></li>
+        <li><a href="#connect4"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password, willTopic, willQoS, willRetain, willMessage, keepAlive=15, socketTimeout=15)</span></a></li>
         <li><a href="#disconnect"><span class="methodreturn">void</span> <span class="methodname">disconnect</span> <span class="methodparams">()</span></a></li>
         <li><a href="#publish1"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload)</span></a></li>
         <li><a href="#publish2"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, retained)</span></a></li>
@@ -31,6 +31,7 @@ title: API Documentation
         <li><a href="#setcallback"><span class="methodreturn">PubSubClient</span> <span class="methodname">setCallback</span> <span class="methodparams">(callback)</span></a></li>
         <li><a href="#setclient"><span class="methodreturn">PubSubClient</span> <span class="methodname">setClient</span> <span class="methodparams">(client)</span></a></li>
         <li><a href="#setstream"><span class="methodreturn">PubSubClient</span> <span class="methodname">setStream</span> <span class="methodparams">(stream)</span></a></li>
+        <li><a href="#settimeout"><span class="methodreturn">PubSubClient</span> <span class="methodname">setTimeout</span> <span class="methodparams">(socketTimeout)</span></a></li>
 
     </ul>
     <h3>Other</h3>
@@ -91,6 +92,8 @@ void setup() {
     <h5>Parameters</h5>
     <ul>
         <li><span class="methodparams">clientID</span> : the client ID to use when connecting to the server.</li>
+        <li><span class="methodparams">keepAlive</span> : <i>optional</i> the MQTT keepalive interval in seconds. (default: 15)</li>
+        <li><span class="methodparams">socketTimeout</span> : <i>optional</i> the timeout when reading from the network in seconds. (default: 15)</li>
     </ul>
     <h5>Returns</h5>
     <ul>
@@ -109,6 +112,8 @@ void setup() {
         <li><span class="methodparams">willQoS</span> : the quality of service to be used by the will message (int :  0,1 or 2)</li>
         <li><span class="methodparams">willRetain</span> : whether the will should be published with the retain flag (boolean)</li>
         <li><span class="methodparams">willMessage</span> : the payload of the will message (const char[])</li>
+        <li><span class="methodparams">keepAlive</span> : <i>optional</i> the MQTT keepalive interval in seconds. (default: 15)</li>
+        <li><span class="methodparams">socketTimeout</span> : <i>optional</i> the timeout when reading from the network in seconds. (default: 15)</li>
     </ul>
     <h5>Returns</h5>
     <ul>
@@ -125,6 +130,8 @@ void setup() {
         <li><span class="methodparams">clientID</span> : the client ID to use when connecting to the server.</li>
         <li><span class="methodparams">username</span> : the username to use. If NULL, no username or password is used (const char[])</li>
         <li><span class="methodparams">password</span> : the password to use. If NULL, no password is used (const char[])</li>
+        <li><span class="methodparams">keepAlive</span> : <i>optional</i> the MQTT keepalive interval in seconds. (default: 15)</li>
+        <li><span class="methodparams">socketTimeout</span> : <i>optional</i> the timeout when reading from the network in seconds. (default: 15)</li>
     </ul>
     <h5>Returns</h5>
     <ul>
@@ -145,6 +152,8 @@ void setup() {
         <li><span class="methodparams">willQoS</span> : the quality of service to be used by the will message (int :  0,1 or 2)</li>
         <li><span class="methodparams">willRetain</span> : whether the will should be published with the retain flag (int : 0 or 1)</li>
         <li><span class="methodparams">willMessage</span> : the payload of the will message (const char[])</li>
+        <li><span class="methodparams">keepAlive</span> : <i>optional</i> the MQTT keepalive interval in seconds. (default: 15)</li>
+        <li><span class="methodparams">socketTimeout</span> : <i>optional</i> the timeout when reading from the network in seconds. (default: 15)</li>
     </ul>
     <h5>Returns</h5>
     <ul>
@@ -377,6 +386,19 @@ void setup() {
     </ul>
 </section>
 
+<section class="method" id="settimeout">
+    <h4><span class="methodreturn">PubSubClient</span> <span class="methodname">setTimeout</span> <span class="methodparams">(socketTimeout)</span></h4>
+    <p>Sets the socket timeout when reading from the network in seconds.</p>
+    <h5>Parameters</h5>
+    <ul>
+        <li><span class="methodparams">timeout</span> : timeout in seconds.</li>
+    </ul>
+    <h5>Returns</h5>
+    <ul>
+        <li>PubSubClient - the client instance, allowing the function to be chained</li>
+    </ul>
+</section>
+
 <section class="method" id="configoptions">
     <h4>Configuration Options</h4>
     <p>The following configuration options can be used to configure the library.
@@ -387,12 +409,6 @@ void setup() {
             packet received that exceeds this size will be ignored.</p>
             <p>Default: 128 bytes</p>
         </dd>
-        <dt><code>MQTT_KEEPALIVE</code></dt>
-        <dd>Sets the keepalive interval, in seconds, the client will use. This
-            is used to maintain the connection when no other packets are being
-            sent or received.</p>
-            <p>Default: 15 seconds</p>
-        </dd>
         <dt><code>MQTT_VERSION</code></dt>
         <dd>Sets the version of the MQTT protocol to use.</p>
             <p>Default: MQTT 3.1.1</p>
@@ -402,11 +418,6 @@ void setup() {
             write call. Some hardware has a limit to how much data can be passed
             to them in one go, such as the Arduino Wifi Shield.</p>
             <p>Default: undefined (complete packet passed in each write call)</p>
-        </dd>
-        <dt><code>MQTT_SOCKET_TIMEOUT</code></dt>
-        <dd>Sets the timeout when reading from the network. This also applies as
-            the timeout for calls to <code>connect</code>.
-            <p>Default: 15 seconds</p>
         </dd>
     </dl>
 </section>
