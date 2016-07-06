@@ -12,10 +12,10 @@ title: API Documentation
     </ul>
     <h3>Functions</h3>
     <ul>
-        <li><a href="#connect1"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, keepAlive=15, socketTimeout=15)</span></a></li>
-        <li><a href="#connect2"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, willTopic, willQoS, willRetain, willMessage, keepAlive=15, socketTimeout=15)</span></a></li>
-        <li><a href="#connect3"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password, keepAlive=15, socketTimeout=15)</span></a></li>
-        <li><a href="#connect4"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password, willTopic, willQoS, willRetain, willMessage, keepAlive=15, socketTimeout=15)</span></a></li>
+        <li><a href="#connect1"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, [keepAlive], [socketTimeout])</span></a></li>
+        <li><a href="#connect2"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, willTopic, willQoS, willRetain, willMessage, [keepAlive], [socketTimeout])</span></a></li>
+        <li><a href="#connect3"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password, [keepAlive], [socketTimeout])</span></a></li>
+        <li><a href="#connect4"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password, willTopic, willQoS, willRetain, willMessage, [keepAlive], [socketTimeout])</span></a></li>
         <li><a href="#disconnect"><span class="methodreturn">void</span> <span class="methodname">disconnect</span> <span class="methodparams">()</span></a></li>
         <li><a href="#publish1"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload)</span></a></li>
         <li><a href="#publish2"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, retained)</span></a></li>
@@ -87,7 +87,7 @@ void setup() {
 </section>
 
 <section class="method" id="connect1">
-    <h4><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID)</span></h4>
+    <h4><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, [keepAlive], [socketTimeout])</span></h4>
     <p>Connects the client.</p>
     <h5>Parameters</h5>
     <ul>
@@ -103,7 +103,7 @@ void setup() {
 </section>
 
 <section class="method" id="connect2">
-    <h4><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, willTopic, willQoS, willRetain, willMessage)</span></h4>
+    <h4><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, willTopic, willQoS, willRetain, willMessage, [keepAlive], [socketTimeout])</span></h4>
     <p>Connects the client with a Will message specified.</p>
     <h5>Parameters</h5>
     <ul>
@@ -123,7 +123,7 @@ void setup() {
 </section>
 
 <section class="method" id="connect3">
-    <h4><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password)</span></h4>
+    <h4><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password, [keepAlive], [socketTimeout])</span></h4>
     <p>Connects the client with a username and password specified.</p>
     <h5>Parameters</h5>
     <ul>
@@ -141,7 +141,7 @@ void setup() {
 </section>
 
 <section class="method" id="connect4">
-    <h4><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password, willTopic, willQoS, willRetain, willMessage)</span></h4>
+    <h4><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password, willTopic, willQoS, willRetain, willMessage, [keepAlive], [socketTimeout])</span></h4>
     <p>Connects the client with a Will message, username and password specified.</p>
     <h5>Parameters</h5>
     <ul>
