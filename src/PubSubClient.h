@@ -35,6 +35,11 @@
 #ifndef MQTT_SOCKET_TIMEOUT
 #define MQTT_SOCKET_TIMEOUT 15
 #endif
+                           // RCC MQTT_QOS1_WAIT_TIME:  timeout for wait for QOS1 PUBACK interval in ms
+#ifndef MQTT_QOS1_WAIT_TIME                                     //rcc
+#define MQTT_QOS1_WAIT_TIME 100                                 //rcc
+#endif                                                          //rcc
+
 
 // MQTT_MAX_TRANSFER_SIZE : limit how much data is passed to the network client
 //  in each write call. Needed for the Arduino Wifi Shield. Leave undefined to
@@ -99,7 +104,15 @@ private:
    uint16_t port;
    Stream* stream;
    int _state;
+                  //rcc added         for  QOS 1 publication and resend
+   uint32_t   _QOS1_SENT_TIME;                              //rcc
+   boolean   _QOS1Acknowledged;                             //rcc
+   int       _QOS1MSGID;                                    //rcc
+   uint8_t   _SentQOS1buffer[MQTT_MAX_PACKET_SIZE];         //rcc
+   char      _SentQOS1Topic[20];                                // rcc    is 20 enough??      
+   uint16_t  _SENTQOS1Length;                                // rcc
 public:
+ 
    PubSubClient();
    PubSubClient(Client& client);
    PubSubClient(IPAddress, uint16_t, Client& client);
@@ -130,7 +143,9 @@ public:
    boolean publish(const char* topic, const char* payload);
    boolean publish(const char* topic, const char* payload, boolean retained);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength);
-   boolean publish(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
+   boolean publish(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);  
+   boolean publish_Q1(const char* topic, const uint8_t* payload, unsigned int plength);                                                           //rcc new
+   boolean publish_Q1(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained, boolean QOS1_MSG_Repeat); //rcc new
    boolean publish_P(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
    boolean subscribe(const char* topic);
    boolean subscribe(const char* topic, uint8_t qos);
