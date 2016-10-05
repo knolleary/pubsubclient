@@ -312,11 +312,9 @@ boolean PubSubClient::loop() {
                 if (type == MQTTPUBLISH) {
                     if (callback) {
                         uint16_t tl = (buffer[llen+1]<<8)+buffer[llen+2];
-                        char topic[tl+1];
-                        for (uint16_t i=0;i<tl;i++) {
-                            topic[i] = buffer[llen+3+i];
-                        }
-                        topic[tl] = 0;
+                        memmove(buffer+llen+2,buffer+llen+3,tl); /* move topic inside buffer 1 byte to front */
+                        buffer[llen+2+tl] = 0; /* end the topic as a 'C' string with \x00 */
+                        char *topic = (char*) buffer+llen+2;
                         // msgId only present for QOS>0
                         if ((buffer[0]&0x06) == MQTTQOS1) {
                             msgId = (buffer[llen+3+tl]<<8)+buffer[llen+3+tl+1];
@@ -410,10 +408,10 @@ boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsi
         for (i=0;i<plength;i++) {
             buffer[length++] = payload[i];
         }
-        uint8_t header = MQTTPUBLISH;
-        if (retained) {
-            header |= 1;
-        }
+        uint8_t header = MQTTPUBLISH|MQTTQOS1;                    // rcc change so it sends qos 1        RCC
+        if (retained) { header |= 1; }    
+        _QOS1Acknowledged=false;       // rcc set for follow up
+      // if((_QOS1MSGID>=10)&&(QOS1_MSG_Repeat==false)) {Serial.print("testing retry");return true;}    // rcc test
         return write(header,buffer,length-5);
     }
     return false;
