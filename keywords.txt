@@ -12,14 +12,14 @@ PubSubClient	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
-connect 	KEYWORD2
+connect 	  KEYWORD2
 disconnect 	KEYWORD2
-publish 	KEYWORD2
+publish 	  KEYWORD2
 publish_P 	KEYWORD2
-publish_Q1 KEYWORD2
+publish_Q1  KEYWORD2
 subscribe 	KEYWORD2
 unsubscribe 	KEYWORD2
-loop 	KEYWORD2
+loop 	      KEYWORD2
 connected 	KEYWORD2
 setServer	KEYWORD2
 setCallback	KEYWORD2
