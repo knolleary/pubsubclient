@@ -116,7 +116,7 @@ boolean PubSubClient::connect(const char *id, const char* willTopic, uint8_t wil
 boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
     if (!connected()) {
         int result = 0;
-                      _QOS1Acknowledged=true;                                        //rcc got to set this true somwhere when we start!
+         _QOS1Acknowledged=true;                                        // set this flag true  when we start
         if (domain != NULL) {
             result = _client->connect(this->domain, this->port);
         } else {
@@ -201,7 +201,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             _state = MQTT_CONNECT_FAILED;
         }
         return false;
-    }     
+    }
     return true;
 }
 
@@ -295,13 +295,11 @@ boolean PubSubClient::loop() {
                 lastInActivity = t;
                 pingOutstanding = true;
             }
-        }                               // end timeout check
-                                        // QOS 1 resend??
-           if ((t - _QOS1_SENT_TIME >= MQTT_QOS1_WAIT_TIME) && (_QOS1Acknowledged==false)){      //rcc Resend QOS1 message if not acknowledged
-           Serial.println("need to resend");
-           publish_Q1(_SentQOS1Topic, _SentQOS1buffer, _SENTQOS1Length, false,true);}      //rcc resend                                              //rcc 
-        
-        
+        }
+        if ((t - _QOS1_SENT_TIME >= MQTT_QOS1_WAIT_TIME) && (_QOS1Acknowledged==false)){  // Resend QOS1 message if not acknowledged
+              publish_Q1(_SentQOS1Topic, _SentQOS1buffer, _SENTQOS1Length, false,true);   // send last message again
+              _QOS1_SENT_TIME=millis();                                                   //Reset timer
+        }  
         
         if (_client->available()) {
             uint8_t llen;
@@ -343,19 +341,14 @@ boolean PubSubClient::loop() {
                     _client->write(buffer,2);
                 } else if (type == MQTTPINGRESP) {
                     pingOutstanding = false;
-                } else if (type == MQTTPUBACK) {  //rcc added new else if   test for  _RXMSGID= ((buffer[2]<<8)+ buffer[3])
-                            if (((buffer[2]<<8)+ buffer[3])==_QOS1MSGID){ _QOS1Acknowledged=true; }
-                            Serial.print("*MQQT PUBACK delta T:"); Serial.print(millis()-_QOS1_SENT_TIME);Serial.print("ms  rx ID:"); 
-                            Serial.print(((buffer[2]<<8)+ buffer[3])); Serial.print("  storedID:");Serial.println(_QOS1MSGID);
-                            Serial.print("*MQQT ACK=");Serial.println(_QOS1Acknowledged);
-                             }                                 // rcc added end
-            } // end len >0 
-        }  // end client available check
+                } else if (type == MQTTPUBACK) {  
+                    if (((buffer[2]<<8)+ buffer[3])==_QOS1MSGID){ _QOS1Acknowledged=true; }   }
+            }
+        }
         return true;
-    }  //end if connected
+    }
     return false;
 }
-
 
 boolean PubSubClient::publish(const char* topic, const char* payload) {
     return publish(topic,(const uint8_t*)payload,strlen(payload),false);
@@ -390,42 +383,42 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
     }
     return false;
 }
- boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsigned int plength)  {
-    return publish_Q1(topic,(const uint8_t*)payload,plength,false,false);
+ boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsigned int plength) {
+    return publish_Q1(topic, payload, plength, false,false);
 }
- boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained, boolean QOS1_MSG_Repeat) {
-                         
-       if (connected()) {
+
+boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained, boolean QOS1_MSG_Repeat) {
+    if (connected()) {
         if (MQTT_MAX_PACKET_SIZE < 5 + 2+strlen(topic) + plength) {
             // Too long
             return false;
         }
         // Leave room in the buffer for header and variable length field
-        uint16_t length = 5;                    
+        uint16_t length = 5;
         length = writeString(topic,buffer,length);
-        uint16_t i;
-              for (i=0;i<sizeof(topic);i++){_SentQOS1Topic[i]=topic[i]; }       // rcc       
-              _SentQOS1Topic[sizeof(topic)-1]='\0';                             //rcc set last to o..
-              for (i=0;i<plength;i++) { _SentQOS1buffer[i]=payload[i];}         //rcc
-               _SentQOS1buffer[sizeof(payload)-1]='0';                          //rcc set last to o..                                // rcc          
-              _SENTQOS1Length=plength;                                          // rcc save for resend
-          if(QOS1_MSG_Repeat==false) {_QOS1MSGID= _QOS1MSGID +1 ;}   // rcc If last msg was acknowledged then increment id , else we are retransmitting, so use last msgid                           // increment id
-          buffer[length]=(_QOS1MSGID >> 8);                       //rcc   / add msg id for qos1
-          buffer[length+1]= (_QOS1MSGID & 0xFF);                  // index          //rcc   
-         length=length+2;                                         //rcc    
-         _QOS1_SENT_TIME=millis();                                // rcc .. can do test on this elsewhere..with +  MQTT_QOS1_WAIT_TIME; later      // rcc set delay before retry
+        uint16_t i;      
+              strncpy(_SentQOS1Topic,topic,20);                                   
+              for (i=0;i<plength;i++) { _SentQOS1buffer[i]=payload[i];}         
+              _SentQOS1buffer[sizeof(payload)-1]='\0';                       
+              _SENTQOS1Length=plength;                                        
+              if(QOS1_MSG_Repeat==false) {_QOS1MSGID= _QOS1MSGID +1 ;}   // If last msg was acknowledged then increment id , else we are retransmitting, so use last msgid   
+              buffer[length]=(_QOS1MSGID >> 8);                       //add msg id for qos1
+              buffer[length+1]= (_QOS1MSGID & 0xFF);                  // 
+              length=length+2;                                        //
+              _QOS1_SENT_TIME=millis();                               // set time for PUBACK check
+              _QOS1Acknowledged=false;                                // set Acknowledged flag false                            
         for (i=0;i<plength;i++) {
             buffer[length++] = payload[i];
         }
-        uint8_t header = MQTTPUBLISH|MQTTQOS1;                    // rcc change so it sends qos 1        RCC
-        if (retained) { header |= 1; }    
-        _QOS1Acknowledged=false;                                  // rcc set for follow up
-        return write(header,buffer,length-5);   
+        uint8_t header = MQTTPUBLISH;
+        if (retained) {
+            header |= 1;
+        }
+        return write(header,buffer,length-5);
     }
     return false;
-}                             // to resend                publish_Q1(_SentQOS1Topic, _SentQOS1buffer, _SENTQOS1Length, boolean retained, boolean QOS1_MSG_Repeat)
-
-boolean PubSubClient::publish_P(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained) {
+}
+boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained) {
     uint8_t llen = 0;
     uint8_t digit;
     unsigned int rc = 0;
