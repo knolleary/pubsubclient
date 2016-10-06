@@ -297,6 +297,7 @@ boolean PubSubClient::loop() {
             }
         }
         if ((t - _QOS1_SENT_TIME >= MQTT_QOS1_WAIT_TIME) && (_QOS1Acknowledged==false)){  // Resend QOS1 message if not acknowledged
+           //debug   Serial.print("*MQQT q1 RESENDING");
               publish_Q1(_SentQOS1Topic, _SentQOS1buffer, _SENTQOS1Length, false,true);   // send last message again
               _QOS1_SENT_TIME=millis();                                                   //Reset timer
         }  
@@ -339,8 +340,11 @@ boolean PubSubClient::loop() {
                     _client->write(buffer,2);
                 } else if (type == MQTTPINGRESP) {
                     pingOutstanding = false;
-                } else if (type == MQTTPUBACK) {  
-                    if (((buffer[2]<<8)+ buffer[3])==_QOS1MSGID){ _QOS1Acknowledged=true; }   }
+                } else if (type == MQTTPUBACK) { 
+          //debug      Serial.print("*MQQT PUBACK mid:"); Serial.println(((buffer[2]<<8)+ buffer[3])); Serial.print(" looking for:"); Serial.println(_QOS1MSGID);      
+                    if (((buffer[2]<<8)+ buffer[3])==_QOS1MSGID){ 
+          //debug          Serial.println(" --- PUBACK SEEN:----");
+                    _QOS1Acknowledged=true; }   }
             }
         }
         return true;
@@ -399,19 +403,21 @@ boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsi
               for (i=0;i<plength;i++) { _SentQOS1buffer[i]=payload[i];}         
               _SentQOS1buffer[sizeof(payload)-1]='\0';                       
               _SENTQOS1Length=plength;                                        
-              if(QOS1_MSG_Repeat==false) {_QOS1MSGID= _QOS1MSGID +1 ;}   // If last msg was acknowledged then increment id , else we are retransmitting, so use last msgid   
-              buffer[length]=(_QOS1MSGID >> 8);                       //add msg id for qos1
-              buffer[length+1]= (_QOS1MSGID & 0xFF);                  // 
-              length=length+2;                                        //
-              _QOS1_SENT_TIME=millis();                               // set time for PUBACK check
-              _QOS1Acknowledged=false;                                // set Acknowledged flag false                            
+              if(QOS1_MSG_Repeat==false) {_QOS1MSGID= _QOS1MSGID +1 ;}     // If last msg was acknowledged then increment id , else we are retransmitting, so use last msgid   
+              if (_QOS1MSGID==0){_QOS1MSGID=1;}                            // msgid 0 is a disconnect
+              buffer[length]=(_QOS1MSGID >> 8);                            //add msg id for qos1
+              buffer[length+1]= (_QOS1MSGID & 0xFF);                       // 
+              length=length+2;                                             //
+              _QOS1_SENT_TIME=millis();                                    // set time for PUBACK check
+              _QOS1Acknowledged=false;                                     // set Acknowledged flag false    
+      //debug      Serial.print("*MQQT qos1 publish mid:"); Serial.println(_QOS1MSGID);                       
         for (i=0;i<plength;i++) {
             buffer[length++] = payload[i];
         }
-        uint8_t header = MQTTPUBLISH|MQTTQOS1;                    // rcc change so it sends qos 1        RCC
+        uint8_t header = MQTTPUBLISH|MQTTQOS1;                             // Main change so it sends qos 1     
         if (retained) { header |= 1; }    
-        _QOS1Acknowledged=false;       // rcc set for follow up
-      // if((_QOS1MSGID>=10)&&(QOS1_MSG_Repeat==false)) {Serial.print("testing retry");return true;}    // rcc test
+        _QOS1Acknowledged=false;                                           // set for follow up
+     //debug  if((_QOS1MSGID>=10)&&(QOS1_MSG_Repeat==false)) {Serial.print("testing retry");return true;}    // test - deliberately do not send - so that retry will be activated
         return write(header,buffer,length-5);
     }
     return false;
