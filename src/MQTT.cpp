@@ -26,11 +26,6 @@ namespace MQTT {
     buf[bufpos++] = data & 0xff;
   }
 
-  void write(uint8_t *buf, uint32_t& bufpos, uint8_t *data, uint32_t dlen) {
-    memcpy(buf + bufpos, data, dlen);
-    bufpos += dlen;
-  }
-
   void write(uint8_t *buf, uint32_t& bufpos, String str) {
     const char* c = str.c_str();
     uint32_t length_pos = bufpos;
@@ -41,6 +36,11 @@ namespace MQTT {
       count++;
     }
     write(buf, length_pos, count);
+  }
+
+  void write_bare_payload(uint8_t *buf, uint32_t& bufpos, uint8_t *data, uint32_t dlen) {
+    memcpy(buf + bufpos, data, dlen);
+    bufpos += dlen;
   }
 
   //! Template function to read from a buffer
@@ -466,7 +466,7 @@ namespace MQTT {
 
   void Publish::write_payload(uint8_t *buf, uint32_t& bufpos) const {
     if (_payload != NULL)
-      write(buf, bufpos, _payload, _payload_len);
+      write_bare_payload(buf, bufpos, _payload, _payload_len);
   }
 
   message_type Publish::response_type(void) const {
@@ -607,7 +607,7 @@ namespace MQTT {
   }
 
   void Subscribe::write_payload(uint8_t *buf, uint32_t& bufpos) const {
-    write(buf, bufpos, _buffer, _buflen);
+    write_bare_payload(buf, bufpos, _buffer, _buflen);
   }
 
 
@@ -691,7 +691,7 @@ namespace MQTT {
   }
 
   void Unsubscribe::write_payload(uint8_t *buf, uint32_t& bufpos) const {
-    write(buf, bufpos, _buffer, _buflen);
+    write_bare_payload(buf, bufpos, _buffer, _buflen);
   }
 
 
