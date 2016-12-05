@@ -155,7 +155,7 @@ namespace MQTT {
 
   //! Message sent when connecting to a broker
   class Connect : public Message {
-  private:
+  protected:
     bool _clean_session;
     uint8_t _will_qos;
     bool _will_retain;
@@ -219,7 +219,7 @@ namespace MQTT {
 
   //! Publish a payload to a topic
   class Publish : public Message {
-  private:
+  protected:
     String _topic;
     uint8_t *_payload;
     uint32_t _payload_len;
