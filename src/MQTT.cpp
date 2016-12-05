@@ -20,18 +20,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "MQTT.h"
 
 namespace MQTT {
-  // First some convenience functions
+  //! Write a 16-bit value, big-endian order
   void write(uint8_t *buf, uint32_t& bufpos, uint16_t data) {
     buf[bufpos++] = data >> 8;
     buf[bufpos++] = data & 0xff;
   }
 
+  //! Write an arbitrary chunk of data, with 16-bit length first
   void write(uint8_t *buf, uint32_t& bufpos, uint8_t *data, uint16_t dlen) {
     write(buf, bufpos, dlen);
     memcpy(buf + bufpos, data, dlen);
     bufpos += dlen;
   }
 
+  //! Write a string, with 16-bit length first
   void write(uint8_t *buf, uint32_t& bufpos, String str) {
     const char* c = str.c_str();
     uint32_t length_pos = bufpos;
