@@ -651,7 +651,8 @@ namespace MQTT {
   }
 
   void Subscribe::write_payload(uint8_t *buf, uint32_t& bufpos) const {
-    write_bare_payload(buf, bufpos, _buffer, _buflen);
+    if (_buffer != NULL)
+      write_bare_payload(buf, bufpos, _buffer, _buflen);
   }
 
 
@@ -735,7 +736,8 @@ namespace MQTT {
   }
 
   void Unsubscribe::write_payload(uint8_t *buf, uint32_t& bufpos) const {
-    write_bare_payload(buf, bufpos, _buffer, _buflen);
+    if (_buffer != NULL)
+      write_bare_payload(buf, bufpos, _buffer, _buflen);
   }
 
 
