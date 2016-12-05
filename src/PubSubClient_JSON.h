@@ -22,6 +22,44 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <ArduinoJson.h>
 
 namespace MQTT {
+  class ConnectJSON : public Connect {
+  public:
+    //! Set the "will" flag and attributes, with a JSON object "will" message
+    Connect& set_will(String willTopic, ArduinoJson::JsonObject& willMessage, uint8_t willQos, bool willRetain) {
+      _will_topic = willTopic;
+      _will_qos = willQos;
+      _will_retain = willRetain;
+
+      if (_will_message != NULL)
+	delete [] _will_message;
+
+      _will_message_len = willMessage.measureLength() + 1;
+      _will_message = new uint8_t[_will_message_len];
+      if (_will_message != NULL)
+	willMessage.printTo((char*)_will_message, _will_message_len);
+
+      return *this;
+    }
+
+    //! Set the "will" flag and attributes, with a JSON array "will" message
+    Connect& set_will(String willTopic, ArduinoJson::JsonArray& willMessage, uint8_t willQos, bool willRetain) {
+      _will_topic = willTopic;
+      _will_qos = willQos;
+      _will_retain = willRetain;
+
+      if (_will_message != NULL)
+	delete [] _will_message;
+
+      _will_message_len = willMessage.measureLength() + 1;
+      _will_message = new uint8_t[_will_message_len];
+      if (_will_message != NULL)
+	willMessage.printTo((char*)_will_message, _will_message_len);
+
+      return *this;
+    }
+
+  };
+
   class PublishJSON : public Publish {
   public:
     //! Publish a JSON object from the ArduinoJson library
