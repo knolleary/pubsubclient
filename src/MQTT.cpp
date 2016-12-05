@@ -26,6 +26,12 @@ namespace MQTT {
     buf[bufpos++] = data & 0xff;
   }
 
+  void write(uint8_t *buf, uint32_t& bufpos, uint8_t *data, uint16_t dlen) {
+    write(buf, bufpos, dlen);
+    memcpy(buf + bufpos, data, dlen);
+    bufpos += dlen;
+  }
+
   void write(uint8_t *buf, uint32_t& bufpos, String str) {
     const char* c = str.c_str();
     uint32_t length_pos = bufpos;
@@ -271,8 +277,44 @@ namespace MQTT {
     Message(CONNECT),
     _clean_session(true),
     _clientid(cid),
+    _will_message(NULL), _will_message_len(0),
     _keepalive(MQTT_KEEPALIVE)
   {}
+
+  Connect& Connect::set_will(String willTopic, String willMessage, uint8_t willQos, bool willRetain) {
+    _will_topic = willTopic;
+    _will_qos = willQos;
+    _will_retain = willRetain;
+
+    if (_will_message != NULL)
+      delete [] _will_message;
+
+    _will_message_len = willMessage.length();
+    _will_message = new uint8_t[_will_message_len];
+    memcpy(_will_message, willMessage.c_str(), _will_message_len);
+
+    return *this;
+  }
+
+  Connect& Connect::set_will(String willTopic, uint8_t *willMessage, uint16_t willMessageLength, uint8_t willQos, bool willRetain) {
+    _will_topic = willTopic;
+    _will_qos = willQos;
+    _will_retain = willRetain;
+
+    if (_will_message != NULL)
+      delete [] _will_message;
+
+    _will_message_len = willMessageLength;
+    _will_message = new uint8_t[_will_message_len];
+    memcpy(_will_message, willMessage, _will_message_len);
+
+    return *this;
+  }
+
+  Connect::~Connect() {
+    if (_will_message != NULL)
+      delete [] _will_message;
+  }
 
   uint32_t Connect::variable_header_length(void) const {
     return 10;
@@ -310,7 +352,7 @@ namespace MQTT {
     uint32_t len = 2 + _clientid.length();
     if (_will_topic.length()) {
       len += 2 + _will_topic.length();
-      len += 2 + _will_message.length();
+      len += 2 + _will_message_len;
     }
     if (_username.length()) {
       len += 2 + _username.length();
@@ -325,7 +367,7 @@ namespace MQTT {
 
     if (_will_topic.length()) {
       write(buf, bufpos, _will_topic);
-      write(buf, bufpos, _will_message);
+      write(buf, bufpos, _will_message, _will_message_len);
     }
 
     if (_username.length()) {
