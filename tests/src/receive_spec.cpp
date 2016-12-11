@@ -11,12 +11,22 @@ bool callback_called = false;
 char lastTopic[1024];
 char lastPayload[1024];
 unsigned int lastLength;
+int testParam = 0;
+
+struct TestArg {
+    TestArg(int param):
+        param_(param)
+    {}
+
+    int param_;
+};
 
 void reset_callback() {
     callback_called = false;
     lastTopic[0] = '\0';
     lastPayload[0] = '\0';
     lastLength = 0;
+    testParam = 0;
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -24,6 +34,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
     strcpy(lastTopic,topic);
     memcpy(lastPayload,payload,length);
     lastLength = length;
+}
+
+void callbackWithArg(char* topic, byte* payload, unsigned int length, void* arg) {
+    callback_called = true;
+    strcpy(lastTopic,topic);
+    memcpy(lastPayload,payload,length);
+    lastLength = length;
+    testParam = static_cast<TestArg*>(arg)->param_;
 }
 
 int test_receive_callback() {
@@ -51,6 +69,40 @@ int test_receive_callback() {
     IS_TRUE(strcmp(lastTopic,"topic")==0);
     IS_TRUE(memcmp(lastPayload,"payload",7)==0);
     IS_TRUE(lastLength == 7);
+
+    IS_FALSE(shimClient.error());
+
+    END_IT
+}
+
+int test_receive_callback_with_arg() {
+    IT("receives a callback with arg message");
+    reset_callback();
+
+    ShimClient shimClient;
+    shimClient.setAllowConnect(true);
+
+    byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
+    shimClient.respond(connack,4);
+
+    TestArg testInstance(1234321);
+
+    PubSubClient client(server, 1883, callbackWithArg, static_cast<void*>(&testInstance), shimClient);
+    int rc = client.connect((char*)"client_test1");
+    IS_TRUE(rc);
+
+    byte publish[] = {0x30,0xe,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
+    shimClient.respond(publish,16);
+
+    rc = client.loop();
+
+    IS_TRUE(rc);
+
+    IS_TRUE(callback_called);
+    IS_TRUE(strcmp(lastTopic,"topic")==0);
+    IS_TRUE(memcmp(lastPayload,"payload",7)==0);
+    IS_TRUE(lastLength == 7);
+    IS_TRUE(testParam == 1234321);
 
     IS_FALSE(shimClient.error());
 
@@ -239,6 +291,7 @@ int main()
 {
     SUITE("Receive");
     test_receive_callback();
+    test_receive_callback_with_arg();
     test_receive_stream();
     test_receive_max_sized_message();
     test_receive_oversized_message();
