@@ -11,14 +11,16 @@ bool callback_called = false;
 char lastTopic[1024];
 char lastPayload[1024];
 unsigned int lastLength;
-int testParam = 0;
+int testParams[2] = { 0, 0 };
 
 struct TestArg {
-    TestArg(int param):
-        param_(param)
+    TestArg(int param1, int param2):
+        param1_(param1),
+        param2_(param2)
     {}
 
-    int param_;
+    int param1_;
+    int param2_;
 };
 
 void reset_callback() {
@@ -26,7 +28,8 @@ void reset_callback() {
     lastTopic[0] = '\0';
     lastPayload[0] = '\0';
     lastLength = 0;
-    testParam = 0;
+    testParams[0] = 0;
+    testParams[1] = 0;
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -41,7 +44,8 @@ void callbackWithArg(char* topic, byte* payload, unsigned int length, void* arg)
     strcpy(lastTopic,topic);
     memcpy(lastPayload,payload,length);
     lastLength = length;
-    testParam = static_cast<TestArg*>(arg)->param_;
+    testParams[0] = static_cast<TestArg*>(arg)->param1_;
+    testParams[1] = static_cast<TestArg*>(arg)->param2_;
 }
 
 int test_receive_callback() {
@@ -85,7 +89,7 @@ int test_receive_callback_with_arg() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
 
-    TestArg testInstance(1234321);
+    TestArg testInstance(1234321, 3333);
 
     PubSubClient client(server, 1883, callbackWithArg, static_cast<void*>(&testInstance), shimClient);
     int rc = client.connect((char*)"client_test1");
@@ -102,7 +106,8 @@ int test_receive_callback_with_arg() {
     IS_TRUE(strcmp(lastTopic,"topic")==0);
     IS_TRUE(memcmp(lastPayload,"payload",7)==0);
     IS_TRUE(lastLength == 7);
-    IS_TRUE(testParam == 1234321);
+    IS_TRUE(testParams[0] == 1234321);
+    IS_TRUE(testParams[1] == 3333);
 
     IS_FALSE(shimClient.error());
 
