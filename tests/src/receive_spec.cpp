@@ -23,6 +23,85 @@ struct TestArg {
     int param2_;
 };
 
+class AbstractTopicHandler {
+    public:
+        virtual ~AbstractTopicHandler() {}
+
+        virtual bool operator()(byte* payload, unsigned int length) = 0;
+
+};
+
+struct TopicHandler: public AbstractTopicHandler {
+        TopicHandler():
+            AbstractTopicHandler()
+        {}
+        virtual ~TopicHandler() {}
+        virtual bool operator()(byte* payload, unsigned int length) {
+            memcpy(lastPayload,payload,length);
+            lastLength = length;
+            return true;
+        }
+};
+
+struct AnotherTopicHandler: public AbstractTopicHandler {
+        AnotherTopicHandler(int param):
+            AbstractTopicHandler(),
+            param_(param)
+        {}
+
+        virtual ~AnotherTopicHandler() {}
+        
+        virtual bool operator()(byte* payload, unsigned int length) {
+            //extra params can be passed via ctr - param_ is an example
+            memcpy(lastPayload,payload,length);
+            lastLength = length;
+            return true;
+        }
+
+        int param_;
+};
+
+class SubscriptionHandler {
+    public:
+        SubscriptionHandler(const char* topic, AbstractTopicHandler* handler):
+            topic_(topic),
+            handler_(handler)
+        {}
+
+        SubscriptionHandler():
+            topic_(NULL),
+            handler_(NULL)
+        {}
+
+        bool operator==(char* T2)
+        {
+            return strcmp(topic_, T2) == 0;
+        }
+
+        bool operator()(byte* payload, unsigned int length)
+        {
+            return (*handler_)(payload, length);
+        }
+
+        const char* get_topic() const
+        {
+            return topic_;
+        }
+
+    private:
+        const char* topic_;
+        AbstractTopicHandler* handler_;
+};
+
+
+struct SubscriptionHandlerTrampoline {
+    //this can be dynamically allocated
+    SubscriptionHandler sub_[10];
+    unsigned int size_;
+};
+
+
+
 void reset_callback() {
     callback_called = false;
     lastTopic[0] = '\0';
@@ -37,6 +116,18 @@ void callback(char* topic, byte* payload, unsigned int length) {
     strcpy(lastTopic,topic);
     memcpy(lastPayload,payload,length);
     lastLength = length;
+}
+
+void callbackWithArg2(char* topic, byte* payload, unsigned int length, void* arg) {
+    callback_called = true;
+    SubscriptionHandlerTrampoline* tramp = static_cast<SubscriptionHandlerTrampoline*>(arg);
+    //brute force search
+    for(unsigned int counter = 0; counter < tramp->size_; ++counter) {
+        if (tramp->sub_[counter] == topic) {
+            strcpy(lastTopic,topic);
+            tramp->sub_[counter](payload, length);
+        }
+    }
 }
 
 void callbackWithArg(char* topic, byte* payload, unsigned int length, void* arg) {
@@ -108,6 +199,41 @@ int test_receive_callback_with_arg() {
     IS_TRUE(lastLength == 7);
     IS_TRUE(testParams[0] == 1234321);
     IS_TRUE(testParams[1] == 3333);
+
+    IS_FALSE(shimClient.error());
+
+    END_IT
+}
+
+int test_receive_callback_with_arg_object_oriented() {
+    IT("receives a callback with object oriented arg message");
+    reset_callback();
+
+    ShimClient shimClient;
+    shimClient.setAllowConnect(true);
+
+    byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
+    shimClient.respond(connack,4);
+
+    TopicHandler topicA;
+    AnotherTopicHandler topicB(321);
+    SubscriptionHandlerTrampoline trampoline = { { SubscriptionHandler("topic", &topicA), SubscriptionHandler("topicB", &topicB) }, 2 };
+
+    PubSubClient client(server, 1883, callbackWithArg2, static_cast<void*>(&trampoline), shimClient);
+    int rc = client.connect((char*)"client_test1");
+    IS_TRUE(rc);
+
+    byte publish[] = {0x30,0xe,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
+    shimClient.respond(publish,16);
+
+    rc = client.loop();
+
+    IS_TRUE(rc);
+
+    IS_TRUE(callback_called);
+    IS_TRUE(strcmp(lastTopic,"topic")==0);
+    IS_TRUE(memcmp(lastPayload,"payload",7)==0);
+    IS_TRUE(lastLength == 7);
 
     IS_FALSE(shimClient.error());
 
@@ -297,6 +423,7 @@ int main()
     SUITE("Receive");
     test_receive_callback();
     test_receive_callback_with_arg();
+    test_receive_callback_with_arg_object_oriented();
     test_receive_stream();
     test_receive_max_sized_message();
     test_receive_oversized_message();
