@@ -25,82 +25,58 @@ struct TestArg {
 
 class AbstractTopicHandler {
     public:
-        virtual ~AbstractTopicHandler() {}
+        AbstractTopicHandler(const char* topic):
+            subscribedTopic_(topic)
+        {}
 
-        virtual bool operator()(byte* payload, unsigned int length) = 0;
+        virtual ~AbstractTopicHandler()
+        {}
+
+        bool operator==(char* T2)
+        {
+            return strcmp(subscribedTopic_, T2) == 0;
+        }
+
+        virtual void operator()(byte* payload, unsigned int length) = 0;
+
+    protected:
+        const char* subscribedTopic_;
 
 };
 
 struct TopicHandler: public AbstractTopicHandler {
         TopicHandler():
-            AbstractTopicHandler()
+            AbstractTopicHandler("topic")
         {}
+
         virtual ~TopicHandler() {}
-        virtual bool operator()(byte* payload, unsigned int length) {
+        virtual void operator()(byte* payload, unsigned int length) {
+            callback_called = true;
             memcpy(lastPayload,payload,length);
             lastLength = length;
-            return true;
         }
 };
 
 struct AnotherTopicHandler: public AbstractTopicHandler {
         AnotherTopicHandler(int param):
-            AbstractTopicHandler(),
+            AbstractTopicHandler("anotherTopic"),
             param_(param)
         {}
 
         virtual ~AnotherTopicHandler() {}
         
-        virtual bool operator()(byte* payload, unsigned int length) {
+        virtual void operator()(byte* payload, unsigned int length) {
             //extra params can be passed via ctr - param_ is an example
-            memcpy(lastPayload,payload,length);
-            lastLength = length;
-            return true;
         }
 
         int param_;
 };
 
-class SubscriptionHandler {
-    public:
-        SubscriptionHandler(const char* topic, AbstractTopicHandler* handler):
-            topic_(topic),
-            handler_(handler)
-        {}
-
-        SubscriptionHandler():
-            topic_(NULL),
-            handler_(NULL)
-        {}
-
-        bool operator==(char* T2)
-        {
-            return strcmp(topic_, T2) == 0;
-        }
-
-        bool operator()(byte* payload, unsigned int length)
-        {
-            return (*handler_)(payload, length);
-        }
-
-        const char* get_topic() const
-        {
-            return topic_;
-        }
-
-    private:
-        const char* topic_;
-        AbstractTopicHandler* handler_;
-};
-
-
 struct SubscriptionHandlerTrampoline {
-    //this can be dynamically allocated
-    SubscriptionHandler sub_[10];
+    //this can be allocated in better way
+    AbstractTopicHandler* sub_[10];
     unsigned int size_;
 };
-
-
 
 void reset_callback() {
     callback_called = false;
@@ -118,18 +94,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     lastLength = length;
 }
 
-void callbackWithArg2(char* topic, byte* payload, unsigned int length, void* arg) {
-    callback_called = true;
-    SubscriptionHandlerTrampoline* tramp = static_cast<SubscriptionHandlerTrampoline*>(arg);
-    //brute force search
-    for(unsigned int counter = 0; counter < tramp->size_; ++counter) {
-        if (tramp->sub_[counter] == topic) {
-            strcpy(lastTopic,topic);
-            tramp->sub_[counter](payload, length);
-        }
-    }
-}
-
 void callbackWithArg(char* topic, byte* payload, unsigned int length, void* arg) {
     callback_called = true;
     strcpy(lastTopic,topic);
@@ -137,6 +101,17 @@ void callbackWithArg(char* topic, byte* payload, unsigned int length, void* arg)
     lastLength = length;
     testParams[0] = static_cast<TestArg*>(arg)->param1_;
     testParams[1] = static_cast<TestArg*>(arg)->param2_;
+}
+
+void callbackWithArg2(char* topic, byte* payload, unsigned int length, void* arg) {
+    SubscriptionHandlerTrampoline* tramp = static_cast<SubscriptionHandlerTrampoline*>(arg);
+    //brute force search
+    for(unsigned int counter = 0; counter < tramp->size_; ++counter) {
+        if (*(tramp->sub_[counter]) == topic) {
+            strcpy(lastTopic,topic);
+            tramp->sub_[counter]->operator()(payload, length);
+        }
+    }
 }
 
 int test_receive_callback() {
@@ -217,7 +192,7 @@ int test_receive_callback_with_arg_object_oriented() {
 
     TopicHandler topicA;
     AnotherTopicHandler topicB(321);
-    SubscriptionHandlerTrampoline trampoline = { { SubscriptionHandler("topic", &topicA), SubscriptionHandler("topicB", &topicB) }, 2 };
+    SubscriptionHandlerTrampoline trampoline = { { &topicB, &topicA }, 2 };
 
     PubSubClient client(server, 1883, callbackWithArg2, static_cast<void*>(&trampoline), shimClient);
     int rc = client.connect((char*)"client_test1");
