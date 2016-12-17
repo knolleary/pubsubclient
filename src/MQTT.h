@@ -73,7 +73,8 @@ namespace MQTT {
     Message(message_type t, uint8_t f = 0) :
       _type(t), _flags(f),
       _packet_id(0), _need_packet_id(false),
-      _stream_client(NULL)
+      _stream_client(NULL),
+      _payload_callback(NULL)
     {}
 
     //! Virtual destructor
