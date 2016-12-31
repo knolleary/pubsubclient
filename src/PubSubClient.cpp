@@ -10,13 +10,15 @@
 PubSubClient::PubSubClient(Client& c) :
   _callback(NULL),
   _client(&c),
-  _max_retries(10)
+  _max_retries(10),
+  isSubAckFound(false)
 {}
 
 PubSubClient::PubSubClient(Client& c, IPAddress &ip, uint16_t port) :
   _callback(NULL),
   _client(&c),
   _max_retries(10),
+  isSubAckFound(false),
   server_ip(ip),
   server_port(port)
 {}
@@ -25,6 +27,7 @@ PubSubClient::PubSubClient(Client& c, String hostname, uint16_t port) :
   _callback(NULL),
   _client(&c),
   _max_retries(10),
+  isSubAckFound(false),
   server_port(port),
   server_hostname(hostname)
 {}
@@ -137,9 +140,20 @@ bool PubSubClient::_wait_for(MQTT::message_type match_type, uint16_t match_pid) 
 		if (match_pid)
 			return pid == match_pid;
 		return true;
+      }else if(msg->type() == MQTT::SUBACK){ // if the current message is not the one we want
+        // Signal that we found a SUBACK message
+        isSubAckFound = true;
       }
 
       _process_message(msg);
+
+      // After having proceeded new incoming packets, we check if our response as not already been processed
+      if(match_type == MQTT::SUBACK && isSubAckFound){
+        isSubAckFound = false;
+        // Return false will cause a resend of a SUBSCRIBE message (and so a new chance to get a SUBACK)
+        return false; 
+      }
+
       delete msg;
     }
 

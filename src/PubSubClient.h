@@ -37,6 +37,7 @@ private:
    unsigned long lastOutActivity;
    unsigned long lastInActivity;
    bool pingOutstanding;
+   bool isSubAckFound;
 
    //! Receive a message from the client
    /*!
