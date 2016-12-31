@@ -588,7 +588,7 @@ namespace MQTT {
 
   // PublishComp class
   PublishComp::PublishComp(uint16_t pid) :
-    Message(PUBREC)
+    Message(PUBCOMP)
   {
     _packet_id = pid;
   }
