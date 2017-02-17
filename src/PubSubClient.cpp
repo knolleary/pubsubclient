@@ -159,7 +159,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             if (keepAlive > 0) {
                 this->keepAlive = keepAlive;
             } else {
-                this->keepAlive = 15;
+                this->keepAlive = MQTT_KEEPALIVE;
             }
 
             buffer[length++] = ((this->keepAlive) >> 8);
@@ -184,7 +184,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             if (socketTimeout > 0) {
                 this->socketTimeout = socketTimeout;
             } else {
-                this->socketTimeout = 15;
+                this->socketTimeout = MQTT_SOCKET_TIMEOUT;
             }
 
             while (!_client->available()) {

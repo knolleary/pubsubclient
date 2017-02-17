@@ -26,6 +26,16 @@
 #define MQTT_MAX_PACKET_SIZE 128
 #endif
 
+// MQTT_KEEPALIVE : keepAlive interval in Seconds
+#ifndef MQTT_KEEPALIVE
+#define MQTT_KEEPALIVE 15
+#endif
+
+// MQTT_SOCKET_TIMEOUT: socket timeout interval in Seconds
+#ifndef MQTT_SOCKET_TIMEOUT
+#define MQTT_SOCKET_TIMEOUT 15
+#endif
+
 // MQTT_MAX_TRANSFER_SIZE : limit how much data is passed to the network client
 //  in each write call. Needed for the Arduino Wifi Shield. Leave undefined to
 //  pass the entire MQTT packet in each write call.
@@ -115,10 +125,10 @@ public:
    PubSubClient& setStream(Stream& stream);
    PubSubClient& setTimeout(uint16_t socketTimeout);
 
-   boolean connect(const char* id, uint16_t keepAlive=15, uint16_t socketTimeout=15);
-   boolean connect(const char* id, const char* user, const char* pass, uint16_t keepAlive=15, uint16_t socketTimeout=15);
-   boolean connect(const char* id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, uint16_t keepAlive=15, uint16_t socketTimeout=15);
-   boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, uint16_t keepAlive=15, uint16_t socketTimeout=15);
+   boolean connect(const char* id, uint16_t keepAlive=MQTT_KEEPALIVE, uint16_t socketTimeout=MQTT_SOCKET_TIMEOUT);
+   boolean connect(const char* id, const char* user, const char* pass, uint16_t keepAlive=MQTT_KEEPALIVE, uint16_t socketTimeout=MQTT_SOCKET_TIMEOUT);
+   boolean connect(const char* id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, uint16_t keepAlive=MQTT_KEEPALIVE, uint16_t socketTimeout=MQTT_SOCKET_TIMEOUT);
+   boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, uint16_t keepAlive=MQTT_KEEPALIVE, uint16_t socketTimeout=MQTT_SOCKET_TIMEOUT);
    void disconnect();
    boolean publish(const char* topic, const char* payload);
    boolean publish(const char* topic, const char* payload, boolean retained);
