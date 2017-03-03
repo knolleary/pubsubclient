@@ -20,6 +20,15 @@ PubSubClient::PubSubClient(Client& client) {
     this->stream = NULL;
 }
 
+#ifdef ESP8266
+PubSubClient::PubSubClient(WiFiClientSecure& client, const char* fingerprint) {
+    this->_state = MQTT_DISCONNECTED;
+    setClient(client);
+    this->stream = NULL;
+    this->fingerprint = fingerprint;
+}
+#endif
+
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client) {
     this->_state = MQTT_DISCONNECTED;
     setServer(addr, port);
@@ -122,6 +131,29 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
         } else {
             result = _client->connect(this->ip, this->port);
         }
+        
+#ifdef ESP8266
+        if (fingerprint != NULL) {
+            if (domain != NULL) {
+                // there's only one way to set fingerprint: using the WiFiClientSecure-based constructor, so this cast is safe
+                if (!static_cast<WiFiClientSecure*>(_client)->verify(fingerprint, domain)) {
+                    _state = MQTT_TLS_BAD_SERVER_CREDENTIALS;
+                    return false;
+                }
+            }
+            else {
+                char buffer[16];  // IPv4 only (which is what IPAddress supports anyway)
+                
+                ip.toString().toCharArray(buffer, 16);
+                
+                if (!static_cast<WiFiClientSecure*>(_client)->verify(fingerprint, buffer)) {
+                    _state = MQTT_TLS_BAD_SERVER_CREDENTIALS;
+                    return false;
+                }
+            }
+        }
+#endif
+        
         if (result == 1) {
             nextMsgId = 1;
             // Leave room in the buffer for header and variable length field

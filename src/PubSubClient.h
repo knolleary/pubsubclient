@@ -12,6 +12,10 @@
 #include "Client.h"
 #include "Stream.h"
 
+#ifdef ESP8266
+#include "WiFiClientSecure.h"
+#endif
+
 #define MQTT_VERSION_3_1      3
 #define MQTT_VERSION_3_1_1    4
 
@@ -42,16 +46,17 @@
 //#define MQTT_MAX_TRANSFER_SIZE 80
 
 // Possible values for client.state()
-#define MQTT_CONNECTION_TIMEOUT     -4
-#define MQTT_CONNECTION_LOST        -3
-#define MQTT_CONNECT_FAILED         -2
-#define MQTT_DISCONNECTED           -1
-#define MQTT_CONNECTED               0
-#define MQTT_CONNECT_BAD_PROTOCOL    1
-#define MQTT_CONNECT_BAD_CLIENT_ID   2
-#define MQTT_CONNECT_UNAVAILABLE     3
-#define MQTT_CONNECT_BAD_CREDENTIALS 4
-#define MQTT_CONNECT_UNAUTHORIZED    5
+#define MQTT_TLS_BAD_SERVER_CREDENTIALS -5
+#define MQTT_CONNECTION_TIMEOUT         -4
+#define MQTT_CONNECTION_LOST            -3
+#define MQTT_CONNECT_FAILED             -2
+#define MQTT_DISCONNECTED               -1
+#define MQTT_CONNECTED                   0
+#define MQTT_CONNECT_BAD_PROTOCOL        1
+#define MQTT_CONNECT_BAD_CLIENT_ID       2
+#define MQTT_CONNECT_UNAVAILABLE         3
+#define MQTT_CONNECT_BAD_CREDENTIALS     4
+#define MQTT_CONNECT_UNAUTHORIZED        5
 
 #define MQTTCONNECT     1 << 4  // Client request to connect to Server
 #define MQTTCONNACK     2 << 4  // Connect Acknowledgment
@@ -99,6 +104,11 @@ private:
    uint16_t port;
    Stream* stream;
    int _state;
+
+#ifdef ESP8266
+   const char* fingerprint = NULL;
+#endif
+   
 public:
    PubSubClient();
    PubSubClient(Client& client);
@@ -114,6 +124,10 @@ public:
    PubSubClient(const char*, uint16_t, Client& client, Stream&);
    PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
    PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
+   
+#ifdef ESP8266
+   PubSubClient(WiFiClientSecure& client, const char* fingerprint);
+#endif
 
    PubSubClient& setServer(IPAddress ip, uint16_t port);
    PubSubClient& setServer(uint8_t * ip, uint16_t port);
