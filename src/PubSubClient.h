@@ -92,7 +92,7 @@ private:
    uint16_t nextMsgId;
    unsigned long lastOutActivity;
    unsigned long lastInActivity;
-   int _available = 0;
+   int _available;
    bool pingOutstanding;
    MQTT_CALLBACK_SIGNATURE;
    int available();
@@ -108,7 +108,7 @@ private:
    int _state;
 
 #ifdef ESP8266
-   const char* fingerprint = NULL;
+   const char* fingerprint;
 #endif
    
 public:
