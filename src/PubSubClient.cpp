@@ -207,7 +207,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 
             lastInActivity = lastOutActivity = millis();
 
-            while (!_client->available()) {
+            while (!available()) {
                 unsigned long t = millis();
                 if (t-lastInActivity >= ((int32_t) MQTT_SOCKET_TIMEOUT*1000UL)) {
                     _state = MQTT_CONNECTION_TIMEOUT;
@@ -237,16 +237,26 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
     return true;
 }
 
+// return and cache the available number of bytes in the client;
+// remember to reduce the available count when consuming the buffer
+int PubSubClient::available() {
+    if (_available == 0) {
+        _available = _client->available();
+    }
+    return _available;
+}
+
 // reads a byte into result
 boolean PubSubClient::readByte(uint8_t * result) {
    uint32_t previousMillis = millis();
-   while(!_client->available()) {
+   while(!available()) {
      uint32_t currentMillis = millis();
      if(currentMillis - previousMillis >= ((int32_t) MQTT_SOCKET_TIMEOUT * 1000)){
        return false;
      }
    }
    *result = _client->read();
+   _available -= 1;
    return true;
 }
 
@@ -329,7 +339,8 @@ boolean PubSubClient::loop() {
                     pingOutstanding = true;
                 }
             }
-            if (_client->available()) {
+            
+            if (available()) {
                 uint8_t llen;
                 uint16_t len = readPacket(&llen);
                 uint16_t msgId = 0;
@@ -370,10 +381,9 @@ boolean PubSubClient::loop() {
                     }
                 }
             }
-        } while (_client->available() > 0);  // can't leave data in the buffer, or subsequent publish()
-                                             // calls may fail (axTLS is only half-duplex, so a write
-                                             // would discard the read buffer; instead the write fails
-                                             // so as to not lose information)
+        } while (_available > 0);  // can't leave data in the buffer, or subsequent publish() calls
+                                   // may fail (axTLS is only half-duplex, so writes will fail, to
+                                   // avoid losing information)
         return true;
     }
     return false;
