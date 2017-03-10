@@ -106,7 +106,7 @@ boolean PubSubClient::connect(const char *id) {
 }
 
 boolean PubSubClient::connect(const char *id, const char *user, const char *pass) {
-    return connect(id,user,strlen(user),pass,strlen(pass),0,0,0,0);
+    return connect(id,user,pass,0,0,0,0);
 }
 
 boolean PubSubClient::connect(const char* id, const char* user, uint16_t userLen, const char* pass, uint16_t passLen) {
@@ -118,7 +118,7 @@ boolean PubSubClient::connect(const char *id, const char* willTopic, uint8_t wil
 }
 
 boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
-    return connect(id,user,strlen(user),pass,strlen(pass),willTopic,willQos,willRetain,willMessage);
+    return connect(id,user,user?strlen(user):0,pass,pass?strlen(pass):0,willTopic,willQos,willRetain,willMessage);
 }
 
 boolean PubSubClient::connect(const char *id, const char* user, uint16_t userLen, const char* pass, uint16_t passLen, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
@@ -351,11 +351,11 @@ boolean PubSubClient::loop() {
 }
 
 boolean PubSubClient::publish(const char* topic, const char* payload) {
-    return publish(topic,(const uint8_t*)payload,strlen(payload),false);
+    return publish(topic,payload,false);
 }
 
 boolean PubSubClient::publish(const char* topic, const char* payload, boolean retained) {
-    return publish(topic,(const uint8_t*)payload,strlen(payload),retained);
+    return publish(topic,(const uint8_t*)payload,payload?strlen(payload):0,retained);
 }
 
 boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigned int plength) {
