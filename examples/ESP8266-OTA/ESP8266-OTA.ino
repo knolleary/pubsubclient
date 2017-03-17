@@ -44,7 +44,6 @@ void receive_ota(const MQTT::Publish& pub) {
 
   Serial.setDebugOutput(true);
   if (ESP.updateSketch(*pub.payload_stream(), size, true, false)) {
-    pub.payload_stream()->stop();
     Serial.println("Clearing retained message.");
     client.publish(MQTT::Publish(pub.topic(), "")
                    .set_retain());
