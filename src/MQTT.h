@@ -53,6 +53,13 @@ namespace MQTT {
     Reserved,		// Reserved
   };
 
+  //! The Quality of Service (QoS) level is an agreement between sender and receiver of a message regarding the guarantees of delivering a message.  
+  enum Qos {
+      QOS0 = 0,  //! At most once
+      QOS1 = 1,  //! At least once
+      QOS2 = 2   //! Exactly once
+  };
+
 #ifdef _GLIBCXX_FUNCTIONAL
   typedef std::function<bool(Client&)> payload_callback_t;
 #else
