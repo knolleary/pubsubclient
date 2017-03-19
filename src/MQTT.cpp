@@ -412,7 +412,7 @@ namespace MQTT {
     _payload_len(strlen_P((PGM_P)payload)), _payload(new uint8_t[_payload_len + 1]),
     _payload_mine(true)
   {
-    strncpy((char*)_payload, (PGM_P)payload, _payload_len);
+    strncpy_P((char*)_payload, (PGM_P)payload, _payload_len);
   }
 
   Publish Publish_P(String topic, PGM_P payload, uint32_t length) {

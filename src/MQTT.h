@@ -53,6 +53,13 @@ namespace MQTT {
     Reserved,		// Reserved
   };
 
+  //! The Quality of Service (QoS) level is an agreement between sender and receiver of a message regarding the guarantees of delivering a message.  
+  enum Qos {
+      QOS0 = 0,  //! At most once
+      QOS1 = 1,  //! At least once
+      QOS2 = 2   //! Exactly once
+  };
+
 #ifdef _GLIBCXX_FUNCTIONAL
   typedef std::function<bool(Client&)> payload_callback_t;
 #else
@@ -327,6 +334,9 @@ namespace MQTT {
   //! Response to Publish when qos == 1
   class PublishAck : public Message {
   private:
+    uint32_t variable_header_length(void) const { return sizeof(_packet_id); }
+    void write_variable_header(uint8_t *buf, uint32_t& bufpos) const { write_packet_id(buf, bufpos); }
+
     //! Private constructor from a network buffer
     PublishAck(uint8_t* data, uint32_t length);
 
