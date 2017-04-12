@@ -129,11 +129,11 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             unsigned int j;
 
 #if MQTT_VERSION == MQTT_VERSION_3_1
-            uint8_t d[9] = {0x00,0x06,'M','Q','I','s','d','p', MQTT_VERSION};
 #define MQTT_HEADER_VERSION_LENGTH 9
+            uint8_t d[MQTT_HEADER_VERSION_LENGTH] = {0x00,0x06,'M','Q','I','s','d','p', MQTT_VERSION};
 #elif MQTT_VERSION == MQTT_VERSION_3_1_1
-            uint8_t d[7] = {0x00,0x04,'M','Q','T','T',MQTT_VERSION};
 #define MQTT_HEADER_VERSION_LENGTH 7
+            uint8_t d[MQTT_HEADER_VERSION_LENGTH] = {0x00,0x04,'M','Q','T','T',MQTT_VERSION};
 #endif
             for (j = 0;j<MQTT_HEADER_VERSION_LENGTH;j++) {
                 buffer[length++] = d[j];
@@ -304,12 +304,14 @@ boolean PubSubClient::loop() {
             if (len > 0) {
                 lastInActivity = t;
                 uint8_t type = buffer[0]&0xF0;
+		
                 if (type == MQTTPUBLISH) {
                     if (callback) {
                         uint16_t tl = (buffer[llen+1]<<8)+buffer[llen+2]; /* topic length in bytes */
                         memmove(buffer+llen+2,buffer+llen+3,tl); /* move topic inside buffer 1 byte to front */
                         buffer[llen+2+tl] = 0; /* end the topic as a 'C' string with \x00 */
                         char *topic = (char*) buffer+llen+2;
+			
                         // msgId only present for QOS>0
                         if ((buffer[0]&0x06) == MQTTQOS1) {
                             msgId = (buffer[llen+3+tl]<<8)+buffer[llen+3+tl+1];
@@ -322,19 +324,23 @@ boolean PubSubClient::loop() {
                             buffer[3] = (msgId & 0xFF);
                             _client->write(buffer,4);
                             lastOutActivity = t;
-
                         } else {
                             payload = buffer+llen+3+tl;
                             callback(topic,payload,len-llen-3-tl);
-                        }
-                    }
+                        } 
+                    } //if (callback)
                 } else if (type == MQTTPINGREQ) {
                     buffer[0] = MQTTPINGRESP;
                     buffer[1] = 0;
                     _client->write(buffer,2);
                 } else if (type == MQTTPINGRESP) {
                     pingOutstanding = false;
-                }
+                } else if (type == MQTTPUBACK) {
+		   char topic[] = "puback";
+		   memmove(buffer, buffer+2, 2);
+		   payload = buffer;
+		   callback(topic,payload,2);
+		}
             }
         }
         return true;
@@ -371,6 +377,32 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
         if (retained) {
             header |= 1;
         }
+        return write(header,buffer,length-5);
+    }
+    return false;
+}
+
+boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained, 
+			      uint8_t qos, boolean dup, uint8_t messIdMsb, uint8_t messIdLsb) {
+    if (connected()) {
+        if (MQTT_MAX_PACKET_SIZE < 5 + 2 + strlen(topic) + plength + 2) {
+            // Too long
+            return false;
+        }
+        // Leave room in the buffer for header and variable length field
+        uint16_t length = 5;
+        length = writeString(topic,buffer,length);
+	buffer[length++] = messIdMsb;
+	buffer[length++] = messIdLsb;
+	
+        uint16_t i;
+        for (i=0;i<plength;i++) {
+            buffer[length++] = payload[i];
+        }
+        uint8_t header = MQTTPUBLISH;
+	header |= (dup << 3);
+        header |= (qos << 1);
+	header |= (retained << 0);
         return write(header,buffer,length-5);
     }
     return false;

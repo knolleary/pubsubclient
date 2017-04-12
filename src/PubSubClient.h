@@ -23,7 +23,7 @@
 
 // MQTT_MAX_PACKET_SIZE : Maximum packet size
 #ifndef MQTT_MAX_PACKET_SIZE
-#define MQTT_MAX_PACKET_SIZE 128
+#define MQTT_MAX_PACKET_SIZE 1024
 #endif
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
@@ -131,6 +131,8 @@ public:
    boolean publish(const char* topic, const char* payload, boolean retained);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
+   boolean publish(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained, 
+		   uint8_t qos, boolean dup, uint8_t messIdMsb, uint8_t messIdLsb);
    boolean publish_P(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
    boolean subscribe(const char* topic);
    boolean subscribe(const char* topic, uint8_t qos);
