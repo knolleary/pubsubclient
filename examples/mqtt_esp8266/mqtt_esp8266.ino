@@ -35,7 +35,8 @@ const char* mqtt_server = "broker.mqtt-dashboard.com";
 WiFiClient espClient;
 PubSubClient client(espClient);
 unsigned long lastMsg = 0;
-char msg[50];
+#define MSG_BUFFER_SIZE	(50)
+char msg[MSG_BUFFER_SIZE];
 int value = 0;
 
 void setup_wifi() {
@@ -124,7 +125,7 @@ void loop() {
   if (now - lastMsg > 2000) {
     lastMsg = now;
     ++value;
-    snprintf (msg, 75, "hello world #%ld", value);
+    snprintf (msg, MSG_BUFFER_SIZE, "hello world #%ld", value);
     Serial.print("Publish message: ");
     Serial.println(msg);
     client.publish("outTopic", msg);
