@@ -7,7 +7,7 @@
 #ifndef PubSubClient_h
 #define PubSubClient_h
 
-#ifdef ESP8266
+#if defined(ESP8266) || defined(ESP32)
 #include <functional>
 #include <pgmspace.h>
 #endif

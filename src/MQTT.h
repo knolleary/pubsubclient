@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include <stdint.h>
-#ifdef ESP8266
+#if defined(ESP8266) || defined(ESP32)
 #include <pgmspace.h>
 #include <functional>
 #endif
