@@ -21,7 +21,7 @@
 #define MQTT_VERSION MQTT_VERSION_3_1_1
 #endif
 
-// MQTT_MAX_PACKET_SIZE : Maximum packet size
+// MQTT_MAX_PACKET_SIZE : Maximum packet size. Override with setBufferSize().
 #ifndef MQTT_MAX_PACKET_SIZE
 #define MQTT_MAX_PACKET_SIZE 128
 #endif
@@ -83,7 +83,8 @@
 class PubSubClient {
 private:
    Client* _client;
-   uint8_t buffer[MQTT_MAX_PACKET_SIZE];
+   uint8_t* buffer;
+   uint16_t buffer_size;
    uint16_t nextMsgId;
    unsigned long lastOutActivity;
    unsigned long lastInActivity;
@@ -115,6 +116,8 @@ public:
    PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
    PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
 
+   ~PubSubClient();
+
    PubSubClient& setServer(IPAddress ip, uint16_t port);
    PubSubClient& setServer(uint8_t * ip, uint16_t port);
    PubSubClient& setServer(const char * domain, uint16_t port);
@@ -138,6 +141,8 @@ public:
    boolean loop();
    boolean connected();
    int state();
+   boolean setBufferSize(uint16_t size);
+   uint16_t getBufferSize();
 };
 
 

@@ -12,12 +12,16 @@ PubSubClient::PubSubClient() {
     this->_client = NULL;
     this->stream = NULL;
     setCallback(NULL);
+    this->buffer_size = MQTT_MAX_PACKET_SIZE;
+    this->buffer = (uint8_t*)malloc(MQTT_MAX_PACKET_SIZE);
 }
 
 PubSubClient::PubSubClient(Client& client) {
     this->_state = MQTT_DISCONNECTED;
     setClient(client);
     this->stream = NULL;
+    this->buffer_size = MQTT_MAX_PACKET_SIZE;
+    this->buffer = (uint8_t*)malloc(MQTT_MAX_PACKET_SIZE);
 }
 
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client) {
@@ -25,12 +29,16 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client) {
     setServer(addr, port);
     setClient(client);
     this->stream = NULL;
+    this->buffer_size = MQTT_MAX_PACKET_SIZE;
+    this->buffer = (uint8_t*)malloc(MQTT_MAX_PACKET_SIZE);
 }
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
     setServer(addr,port);
     setClient(client);
     setStream(stream);
+    this->buffer_size = MQTT_MAX_PACKET_SIZE;
+    this->buffer = (uint8_t*)malloc(MQTT_MAX_PACKET_SIZE);
 }
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
     this->_state = MQTT_DISCONNECTED;
@@ -38,6 +46,8 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATUR
     setCallback(callback);
     setClient(client);
     this->stream = NULL;
+    this->buffer_size = MQTT_MAX_PACKET_SIZE;
+    this->buffer = (uint8_t*)malloc(MQTT_MAX_PACKET_SIZE);
 }
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
@@ -45,6 +55,8 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATUR
     setCallback(callback);
     setClient(client);
     setStream(stream);
+    this->buffer_size = MQTT_MAX_PACKET_SIZE;
+    this->buffer = (uint8_t*)malloc(MQTT_MAX_PACKET_SIZE);
 }
 
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client) {
@@ -52,12 +64,16 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client) {
     setServer(ip, port);
     setClient(client);
     this->stream = NULL;
+    this->buffer_size = MQTT_MAX_PACKET_SIZE;
+    this->buffer = (uint8_t*)malloc(MQTT_MAX_PACKET_SIZE);
 }
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
     setServer(ip,port);
     setClient(client);
     setStream(stream);
+    this->buffer_size = MQTT_MAX_PACKET_SIZE;
+    this->buffer = (uint8_t*)malloc(MQTT_MAX_PACKET_SIZE);
 }
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
     this->_state = MQTT_DISCONNECTED;
@@ -65,6 +81,8 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, 
     setCallback(callback);
     setClient(client);
     this->stream = NULL;
+    this->buffer_size = MQTT_MAX_PACKET_SIZE;
+    this->buffer = (uint8_t*)malloc(MQTT_MAX_PACKET_SIZE);
 }
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
@@ -72,6 +90,8 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, 
     setCallback(callback);
     setClient(client);
     setStream(stream);
+    this->buffer_size = MQTT_MAX_PACKET_SIZE;
+    this->buffer = (uint8_t*)malloc(MQTT_MAX_PACKET_SIZE);
 }
 
 PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client) {
@@ -79,12 +99,16 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client) {
     setServer(domain,port);
     setClient(client);
     this->stream = NULL;
+    this->buffer_size = MQTT_MAX_PACKET_SIZE;
+    this->buffer = (uint8_t*)malloc(MQTT_MAX_PACKET_SIZE);
 }
 PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
     setServer(domain,port);
     setClient(client);
     setStream(stream);
+    this->buffer_size = MQTT_MAX_PACKET_SIZE;
+    this->buffer = (uint8_t*)malloc(MQTT_MAX_PACKET_SIZE);
 }
 PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
     this->_state = MQTT_DISCONNECTED;
@@ -92,6 +116,8 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
     setCallback(callback);
     setClient(client);
     this->stream = NULL;
+    this->buffer_size = MQTT_MAX_PACKET_SIZE;
+    this->buffer = (uint8_t*)malloc(MQTT_MAX_PACKET_SIZE);
 }
 PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
@@ -99,6 +125,12 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
     setCallback(callback);
     setClient(client);
     setStream(stream);
+    this->buffer_size = MQTT_MAX_PACKET_SIZE;
+    this->buffer = (uint8_t*)malloc(MQTT_MAX_PACKET_SIZE);
+}
+
+PubSubClient::~PubSubClient() {
+  free(this->buffer);
 }
 
 boolean PubSubClient::connect(const char *id) {
@@ -266,13 +298,13 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
                 this->stream->write(digit);
             }
         }
-        if (len < MQTT_MAX_PACKET_SIZE) {
+        if (len < this->buffer_size) {
             buffer[len] = digit;
         }
         len++;
     }
 
-    if (!this->stream && len > MQTT_MAX_PACKET_SIZE) {
+    if (!this->stream && len > this->buffer_size) {
         len = 0; // This will cause the packet to be ignored.
     }
 
@@ -356,7 +388,7 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
 
 boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained) {
     if (connected()) {
-        if (MQTT_MAX_PACKET_SIZE < 5 + 2+strlen(topic) + plength) {
+        if (this->buffer_size < 5 + 2+strlen(topic) + plength) {
             // Too long
             return false;
         }
@@ -471,7 +503,7 @@ boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
     if (qos < 0 || qos > 1) {
         return false;
     }
-    if (MQTT_MAX_PACKET_SIZE < 9 + strlen(topic)) {
+    if (this->buffer_size < 9 + strlen(topic)) {
         // Too long
         return false;
     }
@@ -492,7 +524,7 @@ boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
 }
 
 boolean PubSubClient::unsubscribe(const char* topic) {
-    if (MQTT_MAX_PACKET_SIZE < 9 + strlen(topic)) {
+    if (this->buffer_size < 9 + strlen(topic)) {
         // Too long
         return false;
     }
@@ -585,4 +617,14 @@ PubSubClient& PubSubClient::setStream(Stream& stream){
 
 int PubSubClient::state() {
     return this->_state;
+}
+
+boolean PubSubClient::setBufferSize(uint16_t size) {
+  this->buffer = (uint8_t*)realloc(this->buffer, size);
+  this->buffer_size = size;
+  return (this->buffer == NULL);
+}
+
+uint16_t PubSubClient::getBufferSize() {
+  return this->buffer_size;
 }
