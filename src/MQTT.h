@@ -162,6 +162,7 @@ namespace MQTT {
   //! Parser
   /*!
     remember to free the object once you're finished with it
+    \return A pointer to an object derived from the Message class, representing the packet. If no complete packet was available, nullptr is returned.
   */
   Message* readPacket(Client& client);
 

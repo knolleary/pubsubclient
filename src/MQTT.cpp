@@ -179,29 +179,37 @@ namespace MQTT {
 
   // Parser
   Message* readPacket(Client& client) {
-    // Read type and flags
-    uint8_t type = read<uint8_t>(client);
-    uint8_t flags = type & 0x0f;
-    type >>= 4;
+    static uint8_t parser_state = 0;
+    static uint8_t flags, type;
+    static uint32_t remaining_length, to_read;
+    static uint8_t *remaining_data, *read_point;
 
-    // Read the remaining length
-    uint32_t remaining_length = 0;
-    {
-      uint8_t lenbuf[4], lenlen = 0;
-      uint8_t shifter = 0;
-      uint8_t digit;
-      do {
-	digit = read<uint8_t>(client);
-	lenbuf[lenlen++] = digit;
-	remaining_length += (digit & 0x7f) << shifter;
-	shifter += 7;
-      } while (digit & 0x80);
-    }
+    switch (parser_state) {
+    case 0: // Read the fixed header
+      if (client.available() < 5)
+	break;
 
-    // Read variable header and/or payload
-    uint8_t *remaining_data = nullptr;
-    if (remaining_length > 0) {
+      // Read type and flags
+      {
+	uint8_t type_flags = read<uint8_t>(client);
+	flags = type_flags & 0x0f;
+	type = type_flags >> 4;
+      }
+
+      // Read remaining length of packet
+      {
+	remaining_length = 0;
+	uint8_t digit, shifter = 0;
+	do {
+	  digit = read<uint8_t>(client);
+	  remaining_length += (digit & 0x7f) << shifter;
+	  shifter += 7;
+	} while (digit & 0x80);
+      }
+
+      // If the packet is too big, only allow streaming it
       if (remaining_length > MQTT_TOO_BIG) {
+	parser_state = 0;	// Reset the parser
 	switch (type) {
 	case PUBLISH:
 	  return new Publish(flags, client, remaining_length);
@@ -212,68 +220,85 @@ namespace MQTT {
 	}
       }
 
-      remaining_data = new uint8_t[remaining_length];
+      // Otherwise, allocate a buffer to read the data
+      if (remaining_length > 0)
+	remaining_data = new uint8_t[remaining_length];
+      else
+	remaining_data = nullptr;
+      read_point = remaining_data;
+      to_read = remaining_length;
+
+      parser_state++;
+
+    case 1: // Read variable header and/or payload
+      while ((to_read > 0) && (client.available() > 0)) {
+	int read_size = client.read(read_point, to_read);
+	if (read_size == -1)
+	  break;
+	to_read -= read_size;
+	read_point += read_size;
+      }
+
+      // Come around again if we haven't read everything
+      if (to_read > 0)
+	break;
+
+      parser_state++;
+
+    case 2: // Use the type value to return an object of the appropriate class
       {
-	uint8_t *read_point = remaining_data;
-	uint32_t rem = remaining_length;
-	while (client.available() && rem) {
-	  int read_size = client.read(read_point, rem);
-	  if (read_size == -1)
-	    continue;
-	  rem -= read_size;
-	  read_point += read_size;
+	Message *obj;
+	switch (type) {
+	case CONNACK:
+	  obj = new ConnectAck(remaining_data, remaining_length);
+	  break;
+
+	case PUBLISH:
+	  obj = new Publish(flags, remaining_data, remaining_length);
+	  break;
+
+	case PUBACK:
+	  obj = new PublishAck(remaining_data, remaining_length);
+	  break;
+
+	case PUBREC:
+	  obj = new PublishRec(remaining_data, remaining_length);
+	  break;
+
+	case PUBREL:
+	  obj = new PublishRel(remaining_data, remaining_length);
+	  break;
+
+	case PUBCOMP:
+	  obj = new PublishComp(remaining_data, remaining_length);
+	  break;
+
+	case SUBACK:
+	  obj = new SubscribeAck(remaining_data, remaining_length);
+	  break;
+
+	case UNSUBACK:
+	  obj = new UnsubscribeAck(remaining_data, remaining_length);
+	  break;
+
+	case PINGREQ:
+	  obj = new Ping;
+	  break;
+
+	case PINGRESP:
+	  obj = new PingResp;
+	  break;
+
 	}
+	if (remaining_data != nullptr)
+	  delete [] remaining_data;
+
+	parser_state = 0;	// Ready for next packet
+	return obj;
       }
     }
 
-    // Use the type value to return an object of the appropriate class
-    Message *obj;
-    switch (type) {
-    case CONNACK:
-      obj = new ConnectAck(remaining_data, remaining_length);
-      break;
-
-    case PUBLISH:
-      obj = new Publish(flags, remaining_data, remaining_length);
-      break;
-
-    case PUBACK:
-      obj = new PublishAck(remaining_data, remaining_length);
-      break;
-
-    case PUBREC:
-      obj = new PublishRec(remaining_data, remaining_length);
-      break;
-
-    case PUBREL:
-      obj = new PublishRel(remaining_data, remaining_length);
-      break;
-
-    case PUBCOMP:
-      obj = new PublishComp(remaining_data, remaining_length);
-      break;
-
-    case SUBACK:
-      obj = new SubscribeAck(remaining_data, remaining_length);
-      break;
-
-    case UNSUBACK:
-      obj = new UnsubscribeAck(remaining_data, remaining_length);
-      break;
-
-    case PINGREQ:
-      obj = new Ping;
-      break;
-
-    case PINGRESP:
-      obj = new PingResp;
-      break;
-
-    }
-    if (remaining_data != nullptr)
-      delete [] remaining_data;
-
-    return obj;
+    return nullptr;
   }
 
 
