@@ -80,8 +80,8 @@ namespace MQTT {
     Message(message_type t, uint8_t f = 0) :
       _type(t), _flags(f),
       _packet_id(0), _need_packet_id(false),
-      _stream_client(NULL),
-      _payload_callback(NULL)
+      _stream_client(nullptr),
+      _payload_callback(nullptr)
     {}
 
     //! Virtual destructor
@@ -150,7 +150,7 @@ namespace MQTT {
     uint16_t packet_id(void) const { return _packet_id; }
 
     //! Does this message have a network stream for reading the (large) payload?
-    bool has_stream(void) const { return _stream_client != NULL; }
+    bool has_stream(void) const { return _stream_client != nullptr; }
 
   };
 

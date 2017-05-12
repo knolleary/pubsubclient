@@ -41,7 +41,7 @@ private:
 
    //! Receive a message from the client
    /*!
-     \return Pointer to message object, NULL if no message has been received
+     \return Pointer to message object, nullptr if no message has been received
     */
    MQTT::Message* _recv_message(void);
 
@@ -99,7 +99,7 @@ public:
    //! Set the callback function
    PubSubClient& set_callback(callback_t cb) { _callback = cb; return *this; }
    //! Unset the callback function
-   PubSubClient& unset_callback(void) { _callback = NULL; return * this; }
+   PubSubClient& unset_callback(void) { _callback = nullptr; return * this; }
 
    //! Set the maximum number of retries when waiting for response packets
    PubSubClient& set_max_retries(uint8_t mr) { _max_retries = mr; return *this; }

@@ -31,12 +31,12 @@ namespace MQTT {
       _will_qos = willQos;
       _will_retain = willRetain;
 
-      if (_will_message != NULL)
+      if (_will_message != nullptr)
 	delete [] _will_message;
 
       _will_message_len = willMessage.measureLength() + 1;
       _will_message = new uint8_t[_will_message_len];
-      if (_will_message != NULL)
+      if (_will_message != nullptr)
 	willMessage.printTo((char*)_will_message, _will_message_len);
 
       return *this;
@@ -53,10 +53,10 @@ namespace MQTT {
     */
     template <typename J>
     PublishJSON(String topic, ArduinoJson::Internals::JsonPrintable<J>& object) :
-      Publish(topic, NULL, object.measureLength() + 1)
+      Publish(topic, nullptr, object.measureLength() + 1)
     {
       _payload = new uint8_t[_payload_len];
-      if (_payload != NULL)
+      if (_payload != nullptr)
 	object.printTo((char*)_payload, _payload_len);
     }
 

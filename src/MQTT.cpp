@@ -151,7 +151,7 @@ namespace MQTT {
     uint32_t variable_header_len = variable_header_length();
     uint32_t remaining_length = variable_header_len + payload_length();
     uint32_t packet_length = fixed_header_length(remaining_length);
-    if (_payload_callback == NULL)
+    if (_payload_callback == nullptr)
       packet_length += remaining_length;
     else
       packet_length += variable_header_len;
@@ -169,7 +169,7 @@ namespace MQTT {
     if (sent != packet_length)
       return false;
 
-    if (_payload_callback != NULL)
+    if (_payload_callback != nullptr)
       return _payload_callback(client);
 
     return true;
@@ -198,7 +198,7 @@ namespace MQTT {
     }
 
     // Read variable header and/or payload
-    uint8_t *remaining_data = NULL;
+    uint8_t *remaining_data = nullptr;
     if (remaining_length > 0) {
       if (remaining_length > 1024) {
 	switch (type) {
@@ -207,7 +207,7 @@ namespace MQTT {
 	case SUBACK:
 	  return new SubscribeAck(client, remaining_length);
 	default:
-	  return NULL;
+	  return nullptr;
 	}
       }
 
@@ -267,7 +267,7 @@ namespace MQTT {
       break;
 
     }
-    if (remaining_data != NULL)
+    if (remaining_data != nullptr)
       delete [] remaining_data;
 
     return obj;
@@ -279,7 +279,7 @@ namespace MQTT {
     Message(CONNECT),
     _clean_session(true),
     _clientid(cid),
-    _will_message(NULL), _will_message_len(0),
+    _will_message(nullptr), _will_message_len(0),
     _keepalive(MQTT_KEEPALIVE)
   {}
 
@@ -288,7 +288,7 @@ namespace MQTT {
     _will_qos = willQos;
     _will_retain = willRetain;
 
-    if (_will_message != NULL)
+    if (_will_message != nullptr)
       delete [] _will_message;
 
     _will_message_len = willMessage.length();
@@ -303,7 +303,7 @@ namespace MQTT {
     _will_qos = willQos;
     _will_retain = willRetain;
 
-    if (_will_message != NULL)
+    if (_will_message != nullptr)
       delete [] _will_message;
 
     _will_message_len = willMessageLength;
@@ -314,7 +314,7 @@ namespace MQTT {
   }
 
   Connect::~Connect() {
-    if (_will_message != NULL)
+    if (_will_message != nullptr)
       delete [] _will_message;
   }
 
@@ -395,7 +395,7 @@ namespace MQTT {
   Publish::Publish(String topic, String payload) :
     Message(PUBLISH),
     _topic(topic),
-    _payload(NULL), _payload_len(0),
+    _payload(nullptr), _payload_len(0),
     _payload_mine(false)
   {
     if (payload.length() > 0) {
@@ -423,7 +423,7 @@ namespace MQTT {
 
   Publish::Publish(uint8_t flags, uint8_t* data, uint32_t length) :
     Message(PUBLISH, flags),
-    _payload(NULL), _payload_len(0),
+    _payload(nullptr), _payload_len(0),
     _payload_mine(false)
   {
     uint32_t pos = 0;
@@ -443,14 +443,14 @@ namespace MQTT {
     Message(PUBLISH),
     _topic(topic),
     _payload_len(length),
-    _payload(NULL), _payload_mine(false)
+    _payload(nullptr), _payload_mine(false)
   {
     _payload_callback = pcb;
   }
 
   Publish::Publish(uint8_t flags, Client& client, uint32_t remaining_length) :
     Message(PUBLISH, flags),
-    _payload(NULL), _payload_len(remaining_length),
+    _payload(nullptr), _payload_len(remaining_length),
     _payload_mine(false)
   {
     _stream_client = &client;
@@ -469,7 +469,7 @@ namespace MQTT {
   }
 
   Publish::~Publish() {
-    if ((_payload_mine) && (_payload != NULL))
+    if ((_payload_mine) && (_payload != nullptr))
       delete [] _payload;
   }
 
@@ -509,7 +509,7 @@ namespace MQTT {
   }
 
   void Publish::write_payload(uint8_t *buf, uint32_t& bufpos) const {
-    if (_payload != NULL)
+    if (_payload != nullptr)
       write_bare_payload(buf, bufpos, _payload, _payload_len);
   }
 
@@ -612,14 +612,14 @@ namespace MQTT {
   // Subscribe class
   Subscribe::Subscribe() :
     Message(SUBSCRIBE),
-    _buffer(NULL), _buflen(0)
+    _buffer(nullptr), _buflen(0)
   {
     _need_packet_id = true;
   }
 
   Subscribe::Subscribe(String topic, uint8_t qos) :
     Message(SUBSCRIBE),
-    _buffer(NULL), _buflen(0)
+    _buffer(nullptr), _buflen(0)
   {
     _need_packet_id = true;
     _buffer = new uint8_t[2 + topic.length() + 1];
@@ -651,7 +651,7 @@ namespace MQTT {
   }
 
   void Subscribe::write_payload(uint8_t *buf, uint32_t& bufpos) const {
-    if (_buffer != NULL)
+    if (_buffer != nullptr)
       write_bare_payload(buf, bufpos, _buffer, _buflen);
   }
 
@@ -659,7 +659,7 @@ namespace MQTT {
   // SubscribeAck class
   SubscribeAck::SubscribeAck(uint8_t* data, uint32_t length) :
     Message(SUBACK),
-    _rcs(NULL)
+    _rcs(nullptr)
   {
     uint32_t pos = 0;
     _packet_id = read<uint16_t>(data, pos);
@@ -674,7 +674,7 @@ namespace MQTT {
 
   SubscribeAck::SubscribeAck(Client& client, uint32_t remaining_length) :
     Message(SUBACK),
-    _rcs(NULL),
+    _rcs(nullptr),
     _num_rcs(remaining_length - 2)
   {
     _stream_client = &client;
@@ -686,7 +686,7 @@ namespace MQTT {
   }
 
   SubscribeAck::~SubscribeAck() {
-    if (_rcs != NULL)
+    if (_rcs != nullptr)
       delete [] _rcs;
   }
 
@@ -698,14 +698,14 @@ namespace MQTT {
   // Unsubscribe class
   Unsubscribe::Unsubscribe() :
     Message(UNSUBSCRIBE),
-    _buffer(NULL), _buflen(0)
+    _buffer(nullptr), _buflen(0)
   {
     _need_packet_id = true;
   }
 
   Unsubscribe::Unsubscribe(String topic) :
     Message(UNSUBSCRIBE),
-    _buffer(NULL), _buflen(0)
+    _buffer(nullptr), _buflen(0)
   {
     _need_packet_id = true;
     _buffer = (uint8_t*)malloc(2 + topic.length());
@@ -736,7 +736,7 @@ namespace MQTT {
   }
 
   void Unsubscribe::write_payload(uint8_t *buf, uint32_t& bufpos) const {
-    if (_buffer != NULL)
+    if (_buffer != nullptr)
       write_bare_payload(buf, bufpos, _buffer, _buflen);
   }
 

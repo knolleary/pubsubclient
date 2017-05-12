@@ -8,14 +8,14 @@
 #include <string.h>
 
 PubSubClient::PubSubClient(Client& c) :
-  _callback(NULL),
+  _callback(nullptr),
   _client(&c),
   _max_retries(10),
   isSubAckFound(false)
 {}
 
 PubSubClient::PubSubClient(Client& c, IPAddress &ip, uint16_t port) :
-  _callback(NULL),
+  _callback(nullptr),
   _client(&c),
   _max_retries(10),
   isSubAckFound(false),
@@ -24,7 +24,7 @@ PubSubClient::PubSubClient(Client& c, IPAddress &ip, uint16_t port) :
 {}
 
 PubSubClient::PubSubClient(Client& c, String hostname, uint16_t port) :
-  _callback(NULL),
+  _callback(nullptr),
   _client(&c),
   _max_retries(10),
   isSubAckFound(false),
@@ -47,7 +47,7 @@ PubSubClient& PubSubClient::set_server(String hostname, uint16_t port) {
 
 MQTT::Message* PubSubClient::_recv_message(void) {
   MQTT::Message *msg = MQTT::readPacket(*_client);
-  if (msg != NULL)
+  if (msg != nullptr)
     lastInActivity = millis();
   return msg;
 }
@@ -133,7 +133,7 @@ bool PubSubClient::_wait_for(MQTT::message_type match_type, uint16_t match_pid) 
   while (millis() < lastInActivity + (keepalive * 1000)) {
     // Read the packet and check it
     MQTT::Message *msg = _recv_message();
-    if (msg != NULL) {
+    if (msg != nullptr) {
       if (msg->type() == match_type) {
 		uint16_t pid = msg->packet_id();
 		delete msg;
@@ -225,7 +225,7 @@ bool PubSubClient::loop() {
   if (_client->available()) {
     // Read the packet and check it
     MQTT::Message *msg = _recv_message();
-    if (msg != NULL) {
+    if (msg != nullptr) {
       _process_message(msg);
       delete msg;
     }
