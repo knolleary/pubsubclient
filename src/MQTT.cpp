@@ -216,7 +216,9 @@ namespace MQTT {
 	uint8_t *read_point = remaining_data;
 	uint32_t rem = remaining_length;
 	while (client.available() && rem) {
-	  uint32_t read_size = client.read(read_point, rem);
+	  int read_size = client.read(read_point, rem);
+	  if (read_size == -1)
+	    continue;
 	  rem -= read_size;
 	  read_point += read_size;
 	}
