@@ -624,13 +624,13 @@ namespace MQTT {
     _buffer(nullptr), _buflen(0)
   {
     _need_packet_id = true;
-    _buffer = new uint8_t[2 + topic.length() + 1];
+    _buffer = (uint8_t*)malloc(2 + topic.length() + 1);
     write(_buffer, _buflen, topic);
     _buffer[_buflen++] = qos;
   }
 
   Subscribe::~Subscribe() {
-    delete [] _buffer;
+    free(_buffer);
   }
 
   Subscribe& Subscribe::add_topic(String topic, uint8_t qos) {
