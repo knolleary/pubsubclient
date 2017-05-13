@@ -29,6 +29,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
 #define MQTT_KEEPALIVE 15
 
+// Packets larger than this can only be streamed
+#ifndef MQTT_TOO_BIG
+#define MQTT_TOO_BIG 4096
+#endif
+
 class PubSubClient;
 
 //! namespace for classes representing MQTT messages

@@ -200,7 +200,7 @@ namespace MQTT {
     // Read variable header and/or payload
     uint8_t *remaining_data = nullptr;
     if (remaining_length > 0) {
-      if (remaining_length > 1024) {
+      if (remaining_length > MQTT_TOO_BIG) {
 	switch (type) {
 	case PUBLISH:
 	  return new Publish(flags, client, remaining_length);
