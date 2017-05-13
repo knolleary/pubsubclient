@@ -10,6 +10,7 @@
 PubSubClient::PubSubClient(Client& c) :
   _callback(nullptr),
   _client(c),
+  _parser(c),
   _max_retries(10),
   isSubAckFound(false)
 {}
@@ -17,6 +18,7 @@ PubSubClient::PubSubClient(Client& c) :
 PubSubClient::PubSubClient(Client& c, IPAddress &ip, uint16_t port) :
   _callback(nullptr),
   _client(c),
+  _parser(c),
   _max_retries(10),
   isSubAckFound(false),
   server_ip(ip),
@@ -26,6 +28,7 @@ PubSubClient::PubSubClient(Client& c, IPAddress &ip, uint16_t port) :
 PubSubClient::PubSubClient(Client& c, String hostname, uint16_t port) :
   _callback(nullptr),
   _client(c),
+  _parser(c),
   _max_retries(10),
   isSubAckFound(false),
   server_port(port),
@@ -46,7 +49,7 @@ PubSubClient& PubSubClient::set_server(String hostname, uint16_t port) {
 }
 
 MQTT::Message* PubSubClient::_recv_message(void) {
-  MQTT::Message *msg = MQTT::readPacket(_client);
+  MQTT::Message *msg = _parser.parse();
   if (msg != nullptr)
     lastInActivity = millis();
   return msg;

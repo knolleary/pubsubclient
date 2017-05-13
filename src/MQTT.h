@@ -159,12 +159,29 @@ namespace MQTT {
 
   };
 
-  //! Parser
+  //! Packet parser
+  class PacketParser {
+  private:
+    Client &_client;
+    uint8_t _state;
+    uint8_t _flags, _type;
+    uint32_t _remaining_length, _to_read;
+    uint8_t *_remaining_data, *_read_point;
+    Message *_msg;
+
+    bool _read_header(void);
+    bool _read_remaining(void);
+    bool _construct_object(void);
+
+  public:
+    PacketParser(Client& client);
+
   /*!
     remember to free the object once you're finished with it
     \return A pointer to an object derived from the Message class, representing the packet. If no complete packet was available, nullptr is returned.
   */
-  Message* readPacket(Client& client);
+    Message* parse(void);
+  };
 
 
   //! Message sent when connecting to a broker
@@ -229,7 +246,7 @@ namespace MQTT {
     //! Private constructor from a network buffer
     ConnectAck(uint8_t* data, uint32_t length);
 
-    friend Message* readPacket(Client& client);
+    friend PacketParser;
   };
 
 
@@ -262,7 +279,7 @@ namespace MQTT {
     //! Private constructor from a network stream
     Publish(uint8_t flags, Client& client, uint32_t remaining_length);
 
-    friend Message* readPacket(Client& client);
+    friend PacketParser;
 
   public:
     //! Constructor from string payload
@@ -346,7 +363,7 @@ namespace MQTT {
     //! Private constructor from a network buffer
     PublishAck(uint8_t* data, uint32_t length);
 
-    friend Message* readPacket(Client& client);
+    friend PacketParser;
 
   public:
     //! Constructor from a packet id
@@ -366,7 +383,7 @@ namespace MQTT {
     //! Private constructor from a network buffer
     PublishRec(uint8_t* data, uint32_t length);
 
-    friend Message* readPacket(Client& client);
+    friend PacketParser;
 
   public:
     //! Constructor from a packet id
@@ -386,7 +403,7 @@ namespace MQTT {
     //! Private constructor from a network buffer
     PublishRel(uint8_t* data, uint32_t length);
 
-    friend Message* readPacket(Client& client);
+    friend PacketParser;
 
   public:
     //! Constructor from a packet id
@@ -404,7 +421,7 @@ namespace MQTT {
     //! Private constructor from a network buffer
     PublishComp(uint8_t* data, uint32_t length);
 
-    friend Message* readPacket(Client& client);
+    friend PacketParser;
 
   public:
     //! Constructor from a packet id
@@ -453,7 +470,7 @@ namespace MQTT {
     //! Private constructor from a network stream
     SubscribeAck(Client& client, uint32_t remaining_length);
 
-    friend Message* readPacket(Client& client);
+    friend PacketParser;
 
   public:
     ~SubscribeAck();
@@ -504,7 +521,7 @@ namespace MQTT {
     //! Private constructor from a network buffer
     UnsubscribeAck(uint8_t* data, uint32_t length);
 
-    friend Message* readPacket(Client& client);
+    friend PacketParser;
 
   };
 

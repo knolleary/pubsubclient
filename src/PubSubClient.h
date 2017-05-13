@@ -32,6 +32,7 @@ private:
    callback_t _callback;
 
    Client &_client;
+   MQTT::PacketParser _parser;
    uint16_t nextMsgId, keepalive;
    uint8_t _max_retries;
    unsigned long lastOutActivity;
