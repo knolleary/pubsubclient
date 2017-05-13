@@ -31,7 +31,7 @@ private:
    uint16_t server_port;
    callback_t _callback;
 
-   Client *_client;
+   Client &_client;
    uint16_t nextMsgId, keepalive;
    uint8_t _max_retries;
    unsigned long lastOutActivity;

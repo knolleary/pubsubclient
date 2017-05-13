@@ -9,14 +9,14 @@
 
 PubSubClient::PubSubClient(Client& c) :
   _callback(nullptr),
-  _client(&c),
+  _client(c),
   _max_retries(10),
   isSubAckFound(false)
 {}
 
 PubSubClient::PubSubClient(Client& c, IPAddress &ip, uint16_t port) :
   _callback(nullptr),
-  _client(&c),
+  _client(c),
   _max_retries(10),
   isSubAckFound(false),
   server_ip(ip),
@@ -25,7 +25,7 @@ PubSubClient::PubSubClient(Client& c, IPAddress &ip, uint16_t port) :
 
 PubSubClient::PubSubClient(Client& c, String hostname, uint16_t port) :
   _callback(nullptr),
-  _client(&c),
+  _client(c),
   _max_retries(10),
   isSubAckFound(false),
   server_port(port),
@@ -46,7 +46,7 @@ PubSubClient& PubSubClient::set_server(String hostname, uint16_t port) {
 }
 
 MQTT::Message* PubSubClient::_recv_message(void) {
-  MQTT::Message *msg = MQTT::readPacket(*_client);
+  MQTT::Message *msg = MQTT::readPacket(_client);
   if (msg != nullptr)
     lastInActivity = millis();
   return msg;
@@ -60,7 +60,7 @@ bool PubSubClient::_send_message(MQTT::Message& msg, bool need_reply) {
 
   uint8_t retries = 0;
  send:
-  if (!msg.send(*_client)) {
+  if (!msg.send(_client)) {
     if (retries < _max_retries) {
       retries++;
       goto send;
@@ -124,7 +124,7 @@ void PubSubClient::_process_message(MQTT::Message* msg) {
 }
 
 bool PubSubClient::_wait_for(MQTT::message_type match_type, uint16_t match_pid) {
-  while (!_client->available()) {
+  while (!_client.available()) {
     if (millis() - lastInActivity > keepalive * 1000UL)
       return false;
     yield();
@@ -182,12 +182,12 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
   int result = 0;
 
   if (server_hostname.length() > 0)
-    result = _client->connect(server_hostname.c_str(), server_port);
+    result = _client.connect(server_hostname.c_str(), server_port);
   else
-    result = _client->connect(server_ip, server_port);
+    result = _client.connect(server_ip, server_port);
 
   if (!result) {
-    _client->stop();
+    _client.stop();
     return false;
   }
 
@@ -197,7 +197,7 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
   keepalive = conn.keepalive();	// Store the keepalive period from this connection
 
   if (!_send_message(conn, true)) {
-    _client->stop();
+    _client.stop();
     return false;
   }
 
@@ -211,7 +211,7 @@ bool PubSubClient::loop() {
   unsigned long t = millis();
   if ((t - lastInActivity > keepalive * 1000UL) || (t - lastOutActivity > keepalive * 1000UL)) {
     if (pingOutstanding) {
-      _client->stop();
+      _client.stop();
       return false;
     } else {
       MQTT::Ping ping;
@@ -222,7 +222,7 @@ bool PubSubClient::loop() {
       pingOutstanding = true;
     }
   }
-  if (_client->available()) {
+  if (_client.available()) {
     // Read the packet and check it
     MQTT::Message *msg = _recv_message();
     if (msg != nullptr) {
@@ -331,13 +331,13 @@ void PubSubClient::disconnect() {
    MQTT::Disconnect discon;
    if (_send_message(discon))
      lastInActivity = lastOutActivity;
-   _client->stop();
+   _client.stop();
 }
 
 bool PubSubClient::connected() {
-   bool rc = _client->connected();
+   bool rc = _client.connected();
    if (!rc)
-     _client->stop();
+     _client.stop();
 
    return rc;
 }
