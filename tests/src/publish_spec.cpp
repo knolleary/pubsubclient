@@ -21,7 +21,7 @@ int test_publish() {
     
     PubSubClient client(shimClient, server, 1883);
     client.set_callback(callback);
-    int rc = client.connect((char*)"client_test1");
+    int rc = client.connect("client_test1");
     IS_TRUE(rc);
     
     byte publish[] = {0x30,0xe,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
@@ -49,7 +49,7 @@ int test_publish_bytes() {
     
     PubSubClient client(shimClient, server, 1883);
     client.set_callback(callback);
-    int rc = client.connect((char*)"client_test1");
+    int rc = client.connect("client_test1");
     IS_TRUE(rc);
     
     byte publish[] = {0x30,0xc,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x1,0x2,0x3,0x0,0x5};
@@ -77,7 +77,7 @@ int test_publish_retained() {
     
     PubSubClient client(shimClient, server, 1883);
     client.set_callback(callback);
-    int rc = client.connect((char*)"client_test1");
+    int rc = client.connect("client_test1");
     IS_TRUE(rc);
     
     byte publish[] = {0x31,0xc,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x1,0x2,0x3,0x0,0x5};
@@ -118,7 +118,7 @@ int test_publish_P() {
     shimClient.respond(connack,4);
     
     PubSubClient client(shimClient, server, 1883);
-    int rc = client.connect((char*)"client_test1");
+    int rc = client.connect("client_test1");
     IS_TRUE(rc);
     
     byte publish[] = {0x31,0xc,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x1,0x2,0x3,0x0,0x5};

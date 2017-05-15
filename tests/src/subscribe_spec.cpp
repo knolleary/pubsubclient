@@ -23,7 +23,7 @@ int test_subscribe_no_qos() {
     
     PubSubClient client(shimClient,server, 1883);
     client.set_callback(callback);
-    int rc = client.connect((char*)"client_test1");
+    int rc = client.connect("client_test1");
     IS_TRUE(rc);
 
     byte subscribe[] = { 0x82,0xa,0x0,0x2,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x0 };
@@ -49,7 +49,7 @@ int test_subscribe_qos_1() {
     
     PubSubClient client(shimClient,server, 1883);
     client.set_callback(callback);
-    int rc = client.connect((char*)"client_test1");
+    int rc = client.connect("client_test1");
     IS_TRUE(rc);
 
     byte subscribe[] = { 0x82,0xa,0x0,0x2,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x1 };
@@ -90,7 +90,7 @@ int test_subscribe_invalid_qos() {
     
     PubSubClient client(shimClient,server, 1883);
     client.set_callback(callback);
-    int rc = client.connect((char*)"client_test1");
+    int rc = client.connect("client_test1");
     IS_TRUE(rc);
     
     rc = client.subscribe((char*)"topic",2);
@@ -113,7 +113,7 @@ int test_unsubscribe() {
     
     PubSubClient client(shimClient,server, 1883);
     client.set_callback(callback);
-    int rc = client.connect((char*)"client_test1");
+    int rc = client.connect("client_test1");
     IS_TRUE(rc);
 
     byte unsubscribe[] = { 0xA2,0x9,0x0,0x2,0x0,0x5,0x74,0x6f,0x70,0x69,0x63 };
