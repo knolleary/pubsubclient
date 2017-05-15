@@ -162,8 +162,16 @@ namespace MQTT {
   //! Packet parser
   class PacketParser {
   private:
+    enum class State {
+      Start,
+	ReadHeader = 0,
+	ReadContents,
+	CreateObject,
+	HaveObject,
+    };
+
     Client &_client;
-    uint8_t _state;
+    State _state;
     uint8_t _flags, _type;
     uint32_t _remaining_length, _to_read;
     uint8_t *_remaining_data, *_read_point;

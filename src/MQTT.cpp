@@ -180,7 +180,8 @@ namespace MQTT {
   // Packet parser
   PacketParser::PacketParser(Client& client) :
     _client(client),
-    _state(0)
+    _state(State::Start),
+    _msg(nullptr)
   {}
 
   bool PacketParser::_read_header(void) {
@@ -206,7 +207,7 @@ namespace MQTT {
 
     // If the packet is too big, only allow streaming it
     if (_remaining_length > MQTT_TOO_BIG) {
-      _state = 2;
+      _state = State::CreateObject;
       return true;
     }
 
@@ -217,7 +218,7 @@ namespace MQTT {
       _remaining_data = nullptr;
     _read_point = _remaining_data;
 
-    _state++;
+    _state = State::ReadContents;
 
     return true;
   }
@@ -235,7 +236,7 @@ namespace MQTT {
     if (_to_read > 0)
       return false;
 
-    _state++;
+    _state = State::CreateObject;
     return true;
   }
 
@@ -253,7 +254,7 @@ namespace MQTT {
       default:
 	_msg = nullptr;
       }
-      _state = 3;
+      _state = State::HaveObject;
       return true;
     }
 
@@ -302,26 +303,26 @@ namespace MQTT {
     if (_remaining_data != nullptr)
       delete [] _remaining_data;
 
-    _state = 3;
+    _state = State::HaveObject;
     return true;
   }
 
   Message* PacketParser::parse(void) {
-    while (_state != 3) {
+    while (_state != State::HaveObject) {
       switch (_state) {
-      case 0:
+      case State::ReadHeader:
 	if (!_read_header())
 	  return nullptr;
 
 	break;
 
-      case 1:
+      case State::ReadContents:
 	if (!_read_remaining())
 	  return nullptr;
 
 	break;
 
-      case 2:
+      case State::CreateObject:
 	if (!_construct_object())
 	  return nullptr;
 
@@ -329,7 +330,7 @@ namespace MQTT {
       }
     }
 
-    _state = 0;	// Reset the parser state machine
+    _state = State::Start;	// Reset the parser state machine
     return _msg;
   }
 
