@@ -8,7 +8,7 @@
 IPAddress server(172, 16, 0, 2);
 
 bool callback_called = false;
-char lastTopic[1024];
+String lastTopic;
 char lastPayload[1024];
 unsigned int lastLength;
 
@@ -19,11 +19,11 @@ void reset_callback() {
     lastLength = 0;
 }
 
-void callback(char* topic, byte* payload, unsigned int length) {
+void callback(const MQTT::Publish& pub) {
     callback_called = true;
-    strcpy(lastTopic,topic);
-    memcpy(lastPayload,payload,length);
-    lastLength = length;
+    lastTopic = pub.topic();
+    memcpy(lastPayload, pub.payload(), pub.payload_len());
+    lastLength = pub.payload_len();
 }
 
 int test_receive_callback() {

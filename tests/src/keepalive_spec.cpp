@@ -7,7 +7,7 @@
 
 IPAddress server(172, 16, 0, 2);
 
-void callback(char* topic, byte* payload, unsigned int length) {
+void callback(const MQTT::Publish& pub) {
   // handle message arrived
 }
 
