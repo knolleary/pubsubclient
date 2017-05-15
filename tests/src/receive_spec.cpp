@@ -36,7 +36,8 @@ int test_receive_callback() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
     
-    PubSubClient client(server, 1883, callback, shimClient);
+    PubSubClient client(shimClient,server, 1883);
+    client.set_callback(callback);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     
@@ -70,7 +71,8 @@ int test_receive_stream() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
     
-    PubSubClient client(server, 1883, callback, shimClient, stream);
+    PubSubClient client(shimClient, server, 1883); // stream?
+    client.set_callback(callback);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     
@@ -101,7 +103,8 @@ int test_receive_max_sized_message() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
     
-    PubSubClient client(server, 1883, callback, shimClient);
+    PubSubClient client(shimClient,server, 1883);
+    client.set_callback(callback);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     
@@ -137,7 +140,8 @@ int test_receive_oversized_message() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
     
-    PubSubClient client(server, 1883, callback, shimClient);
+    PubSubClient client(shimClient,server, 1883);
+    client.set_callback(callback);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     
@@ -172,7 +176,8 @@ int test_receive_oversized_stream_message() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
     
-    PubSubClient client(server, 1883, callback, shimClient, stream);
+    PubSubClient client(shimClient, server, 1883); // stream?
+    client.set_callback(callback);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     
@@ -211,7 +216,8 @@ int test_receive_qos1() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
     
-    PubSubClient client(server, 1883, callback, shimClient);
+    PubSubClient client(shimClient,server, 1883);
+    client.set_callback(callback);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     

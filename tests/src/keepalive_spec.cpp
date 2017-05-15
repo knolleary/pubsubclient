@@ -21,7 +21,8 @@ int test_keepalive_pings_idle() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
     
-    PubSubClient client(server, 1883, callback, shimClient);
+    PubSubClient client(shimClient,server, 1883);
+    client.set_callback(callback);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     
@@ -50,7 +51,8 @@ int test_keepalive_pings_with_outbound_qos0() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
     
-    PubSubClient client(server, 1883, callback, shimClient);
+    PubSubClient client(shimClient,server, 1883);
+    client.set_callback(callback);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     
@@ -86,7 +88,8 @@ int test_keepalive_pings_with_inbound_qos0() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
     
-    PubSubClient client(server, 1883, callback, shimClient);
+    PubSubClient client(shimClient,server, 1883);
+    client.set_callback(callback);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     
@@ -119,7 +122,8 @@ int test_keepalive_no_pings_inbound_qos1() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
     
-    PubSubClient client(server, 1883, callback, shimClient);
+    PubSubClient client(shimClient,server, 1883);
+    client.set_callback(callback);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     
@@ -147,7 +151,8 @@ int test_keepalive_disconnects_hung() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
     
-    PubSubClient client(server, 1883, callback, shimClient);
+    PubSubClient client(shimClient,server, 1883);
+    client.set_callback(callback);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     

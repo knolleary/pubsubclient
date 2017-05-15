@@ -19,7 +19,8 @@ int test_publish() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
     
-    PubSubClient client(server, 1883, callback, shimClient);
+    PubSubClient client(shimClient, server, 1883);
+    client.set_callback(callback);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     
@@ -46,7 +47,8 @@ int test_publish_bytes() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
     
-    PubSubClient client(server, 1883, callback, shimClient);
+    PubSubClient client(shimClient, server, 1883);
+    client.set_callback(callback);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     
@@ -73,7 +75,8 @@ int test_publish_retained() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
     
-    PubSubClient client(server, 1883, callback, shimClient);
+    PubSubClient client(shimClient, server, 1883);
+    client.set_callback(callback);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     
@@ -92,7 +95,7 @@ int test_publish_not_connected() {
     IT("publish fails when not connected");
     ShimClient shimClient;
     
-    PubSubClient client(server, 1883, callback, shimClient);
+    PubSubClient client(shimClient, server, 1883);
     
     int rc = client.publish((char*)"topic",(char*)"payload");
     IS_FALSE(rc);
@@ -114,7 +117,7 @@ int test_publish_P() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
     
-    PubSubClient client(server, 1883, callback, shimClient);
+    PubSubClient client(shimClient, server, 1883);
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
     
