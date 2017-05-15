@@ -50,7 +50,7 @@ int test_receive_callback() {
     IS_TRUE(rc);
     
     IS_TRUE(callback_called);
-    IS_TRUE(strcmp(lastTopic,"topic")==0);
+    IS_TRUE(lastTopic == "topic");
     IS_TRUE(memcmp(lastPayload,"payload",7)==0);
     IS_TRUE(lastLength == 7);
     
@@ -85,7 +85,7 @@ int test_receive_stream() {
     IS_TRUE(rc);
     
     IS_TRUE(callback_called);
-    IS_TRUE(strcmp(lastTopic,"topic")==0);
+    IS_TRUE(lastTopic == "topic");
     IS_TRUE(lastLength == 7);
     
     IS_FALSE(stream.error());
@@ -122,7 +122,7 @@ int test_receive_max_sized_message() {
     IS_TRUE(rc);
     
     IS_TRUE(callback_called);
-    IS_TRUE(strcmp(lastTopic,"topic")==0);
+    IS_TRUE(lastTopic == "topic");
     IS_TRUE(lastLength == length-9);
     IS_TRUE(memcmp(lastPayload,bigPublish+9,lastLength)==0);
     
@@ -198,7 +198,7 @@ int test_receive_oversized_stream_message() {
     IS_TRUE(rc);
     
     IS_TRUE(callback_called);
-    IS_TRUE(strcmp(lastTopic,"topic")==0);
+    IS_TRUE(lastTopic == "topic");
     IS_TRUE(lastLength == length-9);
     
     IS_FALSE(stream.error());
@@ -233,7 +233,7 @@ int test_receive_qos1() {
     IS_TRUE(rc);
     
     IS_TRUE(callback_called);
-    IS_TRUE(strcmp(lastTopic,"topic")==0);
+    IS_TRUE(lastTopic == "topic");
     IS_TRUE(memcmp(lastPayload,"payload",7)==0);
     IS_TRUE(lastLength == 7);
     
