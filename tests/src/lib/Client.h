@@ -1,6 +1,9 @@
 #ifndef client_h
 #define client_h
+
+#include <stddef.h>
 #include "IPAddress.h"
+
 
 class Client {
 public:
