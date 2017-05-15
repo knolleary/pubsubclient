@@ -6,17 +6,17 @@
 
 class Stream {
 private:
-    Buffer* expectBuffer;
-    bool _error;
-    uint16_t _written;
+  Buffer* _expectBuffer;
+  bool _error;
+  uint16_t _written;
 
 public:
-    Stream();
-    virtual size_t write(uint8_t);
+  Stream();
+  virtual size_t write(uint8_t);
     
-    virtual bool error();
-    virtual void expect(uint8_t *buf, size_t size);
-    virtual uint16_t length();
+  virtual bool error(void) const { return _error; }
+  virtual void expect(uint8_t *buf, size_t size) { _expectBuffer->add(buf, size); }
+  virtual uint16_t length(void) const { return _written; }
 };
 
 #endif
