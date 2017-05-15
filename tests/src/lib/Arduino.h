@@ -1,11 +1,13 @@
 #ifndef Arduino_h
 #define Arduino_h
 
+#include <string>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
+typedef std::string String;
 
 extern "C"{
     typedef uint8_t byte ;
