@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "PubSubClient.h"
 #include "ShimClient.h"
 #include "Buffer.h"
