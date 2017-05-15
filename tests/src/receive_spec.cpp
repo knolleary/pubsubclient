@@ -5,7 +5,7 @@
 #include "trace.h"
 
 
-byte server[] = { 172, 16, 0, 2 };
+IPAddress server(172, 16, 0, 2);
 
 bool callback_called = false;
 char lastTopic[1024];

@@ -26,7 +26,7 @@ int ShimClient::connect(IPAddress ip, uint16_t port) {
     _connected = true;
 
   if (_expectedPort != 0) {
-    if (memcmp(ip, _expectedIP,4) != 0) {
+    if (ip != _expectedIP) {
       TRACE( "ip mismatch\n");
       _error = true;
     }
