@@ -1,6 +1,7 @@
 #include "PubSubClient.h"
 #include "ShimClient.h"
 #include "Buffer.h"
+#include "Stream.h"
 #include "BDDTest.h"
 #include "trace.h"
 
