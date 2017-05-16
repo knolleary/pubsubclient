@@ -77,7 +77,7 @@ size_t ShimClient::write(const uint8_t *buf, size_t size)  {
   _received += size;
 
   TRACE( "[" << std::dec << (unsigned int)(size) << "] ");
-  for (uint16_t i = 0; i < size; i++) {
+  for (size_t i = 0; i < size; i++) {
     if (i > 0)
       TRACE(":");
     TRACE(std::hex << (unsigned int)(buf[i]));
@@ -98,7 +98,7 @@ size_t ShimClient::write(const uint8_t *buf, size_t size)  {
 }
 
 int ShimClient::read(uint8_t *buf, size_t size) { 
-  for (uint16_t i = 0; i < size; i++)
+  for (size_t i = 0; i < size; i++)
     buf[i] = read();
   return size;
 }

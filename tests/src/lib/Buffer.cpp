@@ -13,6 +13,6 @@ uint8_t Buffer::next() {
 }
 
 void Buffer::add(uint8_t* buf, size_t size) {
-  for (uint16_t i = 0;i < size; i++)
+  for (size_t i = 0;i < size; i++)
     _buffer[_length++] = buf[i];
 }

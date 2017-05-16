@@ -15,7 +15,7 @@ private:
   bool _connected;
   bool _expectAnything;
   bool _error;
-  uint16_t _received;
+  size_t _received;
   IPAddress _expectedIP;
   uint16_t _expectedPort;
   const char* _expectedHost;
@@ -41,7 +41,7 @@ public:
   virtual void expectConnect(IPAddress ip, uint16_t port);
   virtual void expectConnect(const char *host, uint16_t port);
   
-  virtual uint16_t received(void) const { return _received; }
+  virtual size_t received(void) const { return _received; }
   virtual bool error(void) const { return _error; }
   
   virtual void setAllowConnect(bool b) { _allowConnect = b; }

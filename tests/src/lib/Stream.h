@@ -8,7 +8,7 @@ class Stream {
 private:
   Buffer* _expectBuffer;
   bool _error;
-  uint16_t _written;
+  size_t _written;
 
 public:
   Stream();
@@ -16,7 +16,7 @@ public:
     
   virtual bool error(void) const { return _error; }
   virtual void expect(uint8_t *buf, size_t size) { _expectBuffer->add(buf, size); }
-  virtual uint16_t length(void) const { return _written; }
+  virtual size_t length(void) const { return _written; }
 };
 
 #endif

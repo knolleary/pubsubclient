@@ -6,7 +6,7 @@
 class Buffer {
 private:
   uint8_t _buffer[1024];
-  uint16_t _pos, _length;
+  size_t _pos, _length;
     
 public:
   Buffer();
