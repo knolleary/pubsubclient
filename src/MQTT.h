@@ -257,6 +257,10 @@ namespace MQTT {
     ConnectAck(uint8_t* data, uint32_t length);
 
     friend PacketParser;
+
+  public:
+    uint8_t rc(void) const { return _rc; }
+
   };
 
 

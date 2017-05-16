@@ -222,7 +222,17 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
     return false;
   }
 
-  return true;
+  bool ret = true;
+  if (response->type() == MQTT::CONNACK) {
+    MQTT::ConnectAck *ack = static_cast<MQTT::ConnectAck*>(response);
+    if (ack->rc() > 0) {
+      _client.stop();
+      ret = false;
+    }
+  }
+  delete response;
+
+  return ret;
 }
 
 bool PubSubClient::loop() {
