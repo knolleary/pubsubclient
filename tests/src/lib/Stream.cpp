@@ -9,6 +9,10 @@ Stream::Stream() :
   _written(0)
 {}
 
+Stream::~Stream() {
+  delete _expectBuffer;
+}
+
 size_t Stream::write(uint8_t b)  {
   _written++;
 

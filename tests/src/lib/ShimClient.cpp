@@ -21,6 +21,11 @@ ShimClient::ShimClient() :
   _expectedPort(0)
 {}
 
+ShimClient::~ShimClient() {
+  delete _responseBuffer;
+  delete _expectBuffer;
+}
+
 int ShimClient::connect(IPAddress ip, uint16_t port) {
   if (_allowConnect)
     _connected = true;

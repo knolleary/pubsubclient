@@ -12,6 +12,8 @@ private:
 
 public:
   Stream();
+  virtual ~Stream();
+
   virtual size_t write(uint8_t);
     
   virtual bool error(void) const { return _error; }
