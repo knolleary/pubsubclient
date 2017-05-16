@@ -113,8 +113,8 @@ int test_receive_max_sized_message() {
     uint32_t length = MQTT_MAX_PACKET_SIZE;
     byte publish[] = {0x30,length-2,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
     byte bigPublish[length];
-    memset(bigPublish,'A',length);
-    bigPublish[length] = 'B';
+    memset(bigPublish,'A',length - 1);
+    bigPublish[length - 1] = 'B';
     memcpy(bigPublish,publish,16);
     shimClient.respond(bigPublish,length);
     
@@ -150,8 +150,8 @@ int test_receive_oversized_message() {
     uint32_t length = MQTT_MAX_PACKET_SIZE+1;
     byte publish[] = {0x30,length-2,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
     byte bigPublish[length];
-    memset(bigPublish,'A',length);
-    bigPublish[length] = 'B';
+    memset(bigPublish,'A',length - 1);
+    bigPublish[length - 1] = 'B';
     memcpy(bigPublish,publish,16);
     shimClient.respond(bigPublish,length);
     
@@ -187,8 +187,8 @@ int test_receive_oversized_stream_message() {
     byte publish[] = {0x30,length-2,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
     
     byte bigPublish[length];
-    memset(bigPublish,'A',length);
-    bigPublish[length] = 'B';
+    memset(bigPublish,'A',length - 1);
+    bigPublish[length - 1] = 'B';
     memcpy(bigPublish,publish,16);
     
     shimClient.respond(bigPublish,length);
