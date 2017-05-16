@@ -184,8 +184,8 @@ namespace MQTT {
     _msg(nullptr)
   {}
 
-  bool PacketParser::_read_header(void) {
-    if (_client.available() < 5)
+  bool PacketParser::_read_type_flags(void) {
+    if (_client.available() < 1)
       return false;
 
     // Read type and flags
@@ -193,14 +193,24 @@ namespace MQTT {
     _flags = type_flags & 0x0f;
     _type = type_flags >> 4;
 
-    // Read remaining length of packet
+    _state = State::ReadLength;
     _remaining_length = 0;
+    _length_shifter = 0;
+
+    return true;
+  }
+
+  bool PacketParser::_read_length(void) {
+    // Read remaining length of packet
     {
-      uint8_t digit, shifter = 0;
+      uint8_t digit;
       do {
+	if (_client.available() < 1)
+	  return false;
+
 	digit = read<uint8_t>(_client);
-	_remaining_length += (digit & 0x7f) << shifter;
-	shifter += 7;
+	_remaining_length += (digit & 0x7f) << _length_shifter;
+	_length_shifter += 7;
       } while (digit & 0x80);
     }
     _to_read = _remaining_length;
@@ -310,8 +320,14 @@ namespace MQTT {
   Message* PacketParser::parse(void) {
     while (_state != State::HaveObject) {
       switch (_state) {
-      case State::ReadHeader:
-	if (!_read_header())
+      case State::ReadTypeFlags:
+	if (!_read_type_flags())
+	  return nullptr;
+
+	break;
+
+      case State::ReadLength:
+	if (!_read_length())
 	  return nullptr;
 
 	break;

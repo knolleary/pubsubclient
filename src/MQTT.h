@@ -164,7 +164,8 @@ namespace MQTT {
   private:
     enum class State {
       Start,
-	ReadHeader = 0,
+	ReadTypeFlags = 0,
+	ReadLength,
 	ReadContents,
 	CreateObject,
 	HaveObject,
@@ -172,12 +173,13 @@ namespace MQTT {
 
     Client &_client;
     State _state;
-    uint8_t _flags, _type;
+    uint8_t _flags, _type, _length_shifter;
     uint32_t _remaining_length, _to_read;
     uint8_t *_remaining_data, *_read_point;
     Message *_msg;
 
-    bool _read_header(void);
+    bool _read_type_flags(void);
+    bool _read_length(void);
     bool _read_remaining(void);
     bool _construct_object(void);
 
