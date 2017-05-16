@@ -12,7 +12,7 @@ public:
   Buffer();
   Buffer(uint8_t* buf, size_t size) { add(buf, size); }
     
-  virtual bool available() const { return _pos < _length; }
+  virtual int available() const { return _length - _pos; }
   virtual uint8_t next();
   virtual void reset() { _pos = 0; }
     
