@@ -5,7 +5,7 @@
 #include "BDDTest.h"
 #include "trace.h"
 
-#define MQTT_MAX_PACKET_SIZE 256
+#define MQTT_MAX_PACKET_SIZE 1024
 
 IPAddress server(172, 16, 0, 2);
 
@@ -26,6 +26,28 @@ void callback(const MQTT::Publish& pub) {
     lastTopic = pub.topic();
     memcpy(lastPayload, pub.payload(), pub.payload_len());
     lastLength = pub.payload_len();
+}
+
+uint8_t remaining_length_length(uint32_t remaining_length) {
+    if (remaining_length < 128)
+      return 1;
+    else if (remaining_length < 16384)
+      return 2;
+    else if (remaining_length < 2097152)
+      return 3;
+    else
+      return 4;
+}
+
+void add_remaining_length(uint8_t* packet, uint32_t remaining_length) {
+    uint32_t pos = 1;
+    do {
+          uint8_t digit = remaining_length & 0x7f;
+	  remaining_length >>= 7;
+	  if (remaining_length)
+	      digit |= 0x80;
+	  packet[pos++] = digit;
+    } while (remaining_length);
 }
 
 int test_receive_callback() {
@@ -111,7 +133,13 @@ int test_receive_max_sized_message() {
     IS_TRUE(rc);
     
     uint32_t length = MQTT_MAX_PACKET_SIZE;
-    byte publish[] = {0x30,length-2,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
+    byte length_length = remaining_length_length(length - 2);
+    byte payload[] = {0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
+    byte publish[1 + length_length + sizeof(payload)];
+    publish[0] = 0x30;
+    add_remaining_length(publish, length - 2);
+    memcpy(publish + 1 + length_length, payload, sizeof(payload));
+
     byte bigPublish[length];
     memset(bigPublish,'A',length - 1);
     bigPublish[length - 1] = 'B';
@@ -125,7 +153,7 @@ int test_receive_max_sized_message() {
     IS_TRUE(callback_called);
     IS_TRUE(lastTopic == "topic");
     IS_TRUE(lastLength == length-9);
-    IS_TRUE(memcmp(lastPayload,bigPublish+9,lastLength)==0);
+    IS_TRUE(memcmp(lastPayload, payload, lastLength)==0);
     
     IS_FALSE(shimClient.error());
 
@@ -148,7 +176,13 @@ int test_receive_oversized_message() {
     IS_TRUE(rc);
     
     uint32_t length = MQTT_MAX_PACKET_SIZE+1;
-    byte publish[] = {0x30,length-2,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
+    uint8_t length_length = remaining_length_length(length - 2);
+    byte payload[] = {0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
+    byte publish[1 + length_length + sizeof(payload)];
+    publish[0] = 0x30;
+    add_remaining_length(publish, length - 2);
+    memcpy(publish + 1 + length_length, payload, sizeof(payload));
+
     byte bigPublish[length];
     memset(bigPublish,'A',length - 1);
     bigPublish[length - 1] = 'B';
@@ -184,15 +218,20 @@ int test_receive_oversized_stream_message() {
     IS_TRUE(rc);
     
     uint32_t length = MQTT_MAX_PACKET_SIZE+1;
-    byte publish[] = {0x30,length-2,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
-    
+    uint8_t length_length = remaining_length_length(length - 2);
+    byte payload[] = {0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
+    byte publish[1 + length_length + sizeof(payload)];
+    publish[0] = 0x30;
+    add_remaining_length(publish, length - 2);
+    memcpy(publish + 1 + length_length, payload, sizeof(payload));
+
     byte bigPublish[length];
     memset(bigPublish,'A',length - 1);
     bigPublish[length - 1] = 'B';
     memcpy(bigPublish,publish,16);
     
-    shimClient.respond(bigPublish,length);
-    stream.expect(bigPublish+9,length-9);
+    shimClient.respond(bigPublish, length);
+    stream.expect(payload, sizeof(payload));
     
     rc = client.loop();
     
