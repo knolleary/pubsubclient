@@ -46,12 +46,19 @@ private:
     */
    MQTT::Message* _recv_message(void);
 
+   //! Send a message with no response
+   /*!
+     \param msg The message to send
+     \return Did the message send successfully?
+    */
+   bool _send_message(MQTT::Message& msg);
+
    //! Send a message and wait for its response message (if it has one)
    /*!
      \param msg The message to send
-     \param need_reply Do we wait for the reply message?
+     \return The response message
     */
-   bool _send_message(MQTT::Message& msg, bool need_reply = false);
+   MQTT::Message* _send_message_with_response(MQTT::Message& msg);
 
    //! Process incoming messages
    /*!

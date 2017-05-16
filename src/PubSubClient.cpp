@@ -55,9 +55,7 @@ MQTT::Message* PubSubClient::_recv_message(void) {
   return msg;
 }
 
-bool PubSubClient::_send_message(MQTT::Message& msg, bool need_reply) {
-  MQTT::message_type r_type = msg.response_type();
-
+bool PubSubClient::_send_message(MQTT::Message& msg) {
   if (msg.need_packet_id())
     msg.set_packet_id(_next_packet_id());
 
@@ -72,21 +70,34 @@ bool PubSubClient::_send_message(MQTT::Message& msg, bool need_reply) {
   }
   lastOutActivity = millis();
 
-  if (!need_reply || (r_type == MQTT::None))
-    return true;
+  return true;
+}
 
-  MQTT::Message *response = _wait_for(r_type, msg.packet_id());
+MQTT::Message* PubSubClient::_send_message_with_response(MQTT::Message& msg) {
+  if (msg.need_packet_id())
+    msg.set_packet_id(_next_packet_id());
+
+  uint8_t retries = 0;
+ send:
+  if (!msg.send(_client)) {
+    if (retries < _max_retries) {
+      retries++;
+      goto send;
+    }
+    return nullptr;
+  }
+  lastOutActivity = millis();
+
+  MQTT::Message *response = _wait_for(msg.response_type(), msg.packet_id());
   if (response == nullptr) {
     if (retries < _max_retries) {
       retries++;
       goto send;
     }
-    return false;
+    return nullptr;
   }
 
-  delete response;
-
-  return true;
+  return response;
 }
 
 void PubSubClient::_process_message(MQTT::Message* msg) {
@@ -106,8 +117,10 @@ void PubSubClient::_process_message(MQTT::Message* msg) {
 
 	{
 	  MQTT::PublishRec pubrec(pub->packet_id());
-	  if (!_send_message(pubrec, true))
+	  MQTT::Message *response = _send_message_with_response(pubrec);
+	  if (response == nullptr)
 	    return;
+	  delete response;
 	}
 
 	{
@@ -203,7 +216,8 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
   lastInActivity = millis();	// Init this so that _wait_for() doesn't think we've already timed-out
   keepalive = conn.keepalive();	// Store the keepalive period from this connection
 
-  if (!_send_message(conn, true)) {
+  MQTT::Message *response = _send_message_with_response(conn);
+  if (response == nullptr) {
     _client.stop();
     return false;
   }
@@ -279,20 +293,34 @@ bool PubSubClient::publish(MQTT::Publish &pub) {
   if (!connected())
     return false;
 
+  MQTT::Message *response;
   switch (pub.qos()) {
   case 0:
     return _send_message(pub);
 
   case 1:
-    return _send_message(pub, true);
+    response = _send_message_with_response(pub);
+    if (response == nullptr)
+      return false;
+
+    delete response;
+    return true;
 
   case 2:
     {
-      if (!_send_message(pub, true))
+      response =_send_message_with_response(pub);
+      if (response == nullptr)
 	return false;
 
+      delete response;
+
       MQTT::PublishRel pubrel(pub.packet_id());
-      return _send_message(pubrel, true);
+      response = _send_message_with_response(pubrel);
+      if (response == nullptr)
+	return false;
+
+      delete response;
+      return true;
     }
   }
   return false;
@@ -313,7 +341,12 @@ bool PubSubClient::subscribe(MQTT::Subscribe &sub) {
   if (!connected())
     return false;
 
-  return _send_message(sub, true);
+  MQTT::Message *response = _send_message_with_response(sub);
+  if (response == nullptr)
+    return false;
+
+  delete response;
+  return true;
 }
 
 bool PubSubClient::unsubscribe(String topic) {
@@ -328,7 +361,12 @@ bool PubSubClient::unsubscribe(MQTT::Unsubscribe &unsub) {
   if (!connected())
     return false;
 
-  return _send_message(unsub, true);
+  MQTT::Message *response = _send_message_with_response(unsub);
+  if (response == nullptr)
+    return false;
+
+  delete response;
+  return true;
 }
 
 void PubSubClient::disconnect() {
