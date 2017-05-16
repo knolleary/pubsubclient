@@ -75,13 +75,17 @@ bool PubSubClient::_send_message(MQTT::Message& msg, bool need_reply) {
   if (!need_reply || (r_type == MQTT::None))
     return true;
 
-  if (!_wait_for(r_type, msg.packet_id())) {
+  MQTT::Message *response = _wait_for(r_type, msg.packet_id());
+  if (response == nullptr) {
     if (retries < _max_retries) {
       retries++;
       goto send;
     }
     return false;
   }
+
+  delete response;
+
   return true;
 }
 
@@ -126,10 +130,10 @@ void PubSubClient::_process_message(MQTT::Message* msg) {
   }
 }
 
-bool PubSubClient::_wait_for(MQTT::message_type match_type, uint16_t match_pid) {
+MQTT::Message* PubSubClient::_wait_for(MQTT::message_type wait_type, uint16_t wait_pid) {
   while (!_client.available()) {
     if (millis() - lastInActivity > keepalive * 1000UL)
-      return false;
+      return nullptr;
     yield();
   }
 
@@ -137,13 +141,13 @@ bool PubSubClient::_wait_for(MQTT::message_type match_type, uint16_t match_pid) 
     // Read the packet and check it
     MQTT::Message *msg = _recv_message();
     if (msg != nullptr) {
-      if (msg->type() == match_type) {
-		uint16_t pid = msg->packet_id();
-		delete msg;
-		if (match_pid)
-			return pid == match_pid;
-		return true;
-      }else if(msg->type() == MQTT::SUBACK){ // if the current message is not the one we want
+      if (msg->type() == wait_type) {
+	if ((wait_pid > 0) && (msg->packet_id() != wait_pid)) {
+	  delete msg;
+	  return nullptr;
+	}
+	return msg;
+      } else if (msg->type() == MQTT::SUBACK) { // if the current message is not the one we want
         // Signal that we found a SUBACK message
         isSubAckFound = true;
       }
@@ -151,10 +155,10 @@ bool PubSubClient::_wait_for(MQTT::message_type match_type, uint16_t match_pid) 
       _process_message(msg);
 
       // After having proceeded new incoming packets, we check if our response as not already been processed
-      if(match_type == MQTT::SUBACK && isSubAckFound){
+      if ((wait_type == MQTT::SUBACK) && isSubAckFound) {
         isSubAckFound = false;
         // Return false will cause a resend of a SUBSCRIBE message (and so a new chance to get a SUBACK)
-        return false; 
+        return nullptr;
       }
 
       delete msg;
@@ -163,7 +167,7 @@ bool PubSubClient::_wait_for(MQTT::message_type match_type, uint16_t match_pid) 
     yield();
   }
 
-  return false;
+  return nullptr;
 }
 
 bool PubSubClient::connect(String id) {

@@ -67,9 +67,9 @@ private:
      Other packets are handed over to _process_message()
      \param wait_type	Message type to match on
      \param wait_pid	Message packet id to match on
-     \return True if we received the packet we wanted
+     \return The packet we wanted, or nullptr if it didn't arrive
     */
-   bool _wait_for(MQTT::message_type wait_type, uint16_t wait_pid = 0);
+   MQTT::Message*_wait_for(MQTT::message_type wait_type, uint16_t wait_pid = 0);
 
    //! Return the next packet id
    uint16_t _next_packet_id(void) {
