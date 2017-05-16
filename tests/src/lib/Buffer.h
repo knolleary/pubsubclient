@@ -2,18 +2,19 @@
 #define buffer_h
 
 #include "Arduino.h"
+#include <string>
 
 class Buffer {
 private:
-  uint8_t _buffer[1024];
-  size_t _pos, _length;
+  std::string _buffer;
+  size_t _pos;
     
 public:
   Buffer();
   Buffer(uint8_t* buf, size_t size) { add(buf, size); }
     
-  virtual int available() const { return _length - _pos; }
-  virtual uint8_t next();
+  virtual size_t available() const { return _buffer.length() - _pos; }
+  virtual int next();
   virtual void reset() { _pos = 0; }
     
   virtual void add(uint8_t* buf, size_t size);
