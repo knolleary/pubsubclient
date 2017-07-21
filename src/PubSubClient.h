@@ -83,6 +83,7 @@
 class PubSubClient {
 private:
    Client* _client;
+   // This buffer is to contain sending message and received message
    uint8_t buffer[MQTT_MAX_PACKET_SIZE];
    uint16_t nextMsgId;
    unsigned long lastOutActivity;
