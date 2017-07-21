@@ -251,7 +251,6 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
     if (isPublish) {
         // Read in topic length to calculate bytes to skip over for Stream writing
         if(!readByte(buffer, &len)) return 0;
-        if(!readByte(buffer, &len)) return 0;
         skip = (buffer[*lengthLength+1]<<8)+buffer[*lengthLength+2];
         start = 2;
         if (buffer[0]&MQTTQOS1) {
