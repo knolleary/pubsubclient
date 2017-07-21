@@ -373,7 +373,7 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
         if (retained) {
             header |= 1;
         }
-        success = write(header,buffer,length-5);
+        success = write(header, buffer, length-5);
         // Reset the buffer, for receiving message later, if subscribed
         memset(buffer, 0, MQTT_MAX_PACKET_SIZE);
         return success;
