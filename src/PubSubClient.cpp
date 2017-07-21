@@ -4,6 +4,7 @@
   http://knolleary.net
 */
 
+#include <string.h>
 #include "PubSubClient.h"
 #include "Arduino.h"
 
@@ -364,6 +365,7 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
         uint16_t length = 5;
         length = writeString(topic,buffer,length);
         uint16_t i;
+        boolean success = false;
         for (i=0;i<plength;i++) {
             buffer[length++] = payload[i];
         }
@@ -371,7 +373,10 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
         if (retained) {
             header |= 1;
         }
-        return write(header,buffer,length-5);
+        success = write(header, buffer, length-5);
+        // Reset the buffer, for receiving message later, if subscribed
+        memset(buffer, 0, MQTT_MAX_PACKET_SIZE);
+        return success;
     }
     return false;
 }
