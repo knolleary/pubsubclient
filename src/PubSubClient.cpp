@@ -232,6 +232,8 @@ boolean PubSubClient::readByte(uint8_t * result, uint16_t * index){
 
 uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
     uint16_t len = 0;
+    // Try resetting buffer before reading
+    memset(buffer, 0, MQTT_MAX_PACKET_SIZE);
     if(!readByte(buffer, &len)) return 0;
     bool isPublish = (buffer[0]&0xF0) == MQTTPUBLISH;
     uint32_t multiplier = 1;
