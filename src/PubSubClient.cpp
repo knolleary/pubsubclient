@@ -208,11 +208,8 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 // reads a byte into result
 boolean PubSubClient::readByte(uint8_t * result) {
    uint32_t previousMillis = millis();
-   while(!_client->available()) {
-     uint32_t currentMillis = millis();
-     if(currentMillis - previousMillis >= ((int32_t) MQTT_SOCKET_TIMEOUT * 1000)){
+   if(!_client->available()) {
        return false;
-     }
    }
    *result = _client->read();
    return true;
