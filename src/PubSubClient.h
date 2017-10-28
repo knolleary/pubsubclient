@@ -11,6 +11,8 @@
 #include "IPAddress.h"
 #include "Client.h"
 #include "Stream.h"
+#include <map>
+#include <cstring>
 
 #define MQTT_VERSION_3_1      3
 #define MQTT_VERSION_3_1_1    4
@@ -78,8 +80,10 @@
 
 #if defined(ESP8266) || defined(ESP32)
 #include <functional>
+typedef std::function<void(char*, uint8_t*, unsigned int)> mqtt_cbtype;
 #define MQTT_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, unsigned int)> callback
 #else
+typedef void(*mqtt_cbtype)(char*, uint8_t*, unsigned int);
 #define MQTT_CALLBACK_SIGNATURE void (*callback)(char*, uint8_t*, unsigned int)
 #endif
 
@@ -112,6 +116,17 @@ private:
    uint16_t port;
    Stream* stream;
    int _state;
+#ifdef PUBSUB_FUNC_API
+   struct cmp_str
+   {
+      bool operator()(char const *a, char const *b)
+      {
+         return strcmp(a, b) < 0;
+      }
+   };
+   std::map<const char*, mqtt_cbtype, cmp_str> subscriptions;
+   std::map<const char*, uint8_t, cmp_str> tqos;
+#endif
 public:
    PubSubClient();
    PubSubClient(Client& client);
@@ -173,6 +188,11 @@ public:
    virtual size_t write(const uint8_t *buffer, size_t size);
    boolean subscribe(const char* topic);
    boolean subscribe(const char* topic, uint8_t qos);
+#ifdef PUBSUB_FUNC_API
+   boolean subscribe(const char* topic, MQTT_CALLBACK_SIGNATURE);
+   boolean subscribe(const char* topic, MQTT_CALLBACK_SIGNATURE, uint8_t qos);
+   boolean resubscribe();
+#endif
    boolean unsubscribe(const char* topic);
    boolean loop();
    boolean connected();
