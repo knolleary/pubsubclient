@@ -19,6 +19,7 @@ Full API documentation is available here: http://pubsubclient.knolleary.net
    via `MQTT_KEEPALIVE` in `PubSubClient.h`.
  - The client uses MQTT 3.1.1 by default. It can be changed to use MQTT 3.1 by
    changing value of `MQTT_VERSION` in `PubSubClient.h`.
+ - Currently, there is no way to disable clean session.
 
 
 ## Compatible Hardware
