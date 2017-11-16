@@ -418,7 +418,7 @@ boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsig
 
     lastOutActivity = millis();
 
-    return rc == tlen + 4 + plength;
+    return rc == tlen + 3 + llen + plength;
 }
 
 boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
