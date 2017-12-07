@@ -244,8 +244,7 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
         if(!readByte(&digit)) return 0;
         buffer[len++] = digit;
         length += (digit & 127) * multiplier;
-        //multiplier *= 128; replace by multiplier <<=7;
-        multiplier <<=7;
+        multiplier <<=7; //multiplier *= 128
     } while ((digit & 128) != 0);
     *lengthLength = len-1;
 
@@ -401,11 +400,8 @@ boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsig
     buffer[pos++] = header;
     len = plength + 2 + tlen;
     do {
-        //digit = len %128; replace by digit = len  & 127;
-        digit = len  & 127;
-
-        //len = len / 128; replace by len >>= 7;
-        len >>= 7;
+        digit = len  & 127; //digit = len %128
+        len >>= 7; //len = len / 128
         if (len > 0) {
             digit |= 0x80;
         }
@@ -434,11 +430,9 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
     uint16_t rc;
     uint16_t len = length;
     do {
-        //digit = len %128; replace by digit = len  & 127;
-        digit = len  & 127;
 
-        //len = len / 128; replace by len >>= 7;
-        len >>= 7;
+        digit = len  & 127; //digit = len %128
+        len >>= 7; //len = len / 128
         if (len > 0) {
             digit |= 0x80;
         }
