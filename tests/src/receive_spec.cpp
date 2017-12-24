@@ -105,7 +105,7 @@ int test_receive_max_sized_message() {
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
 
-    int length = MQTT_MAX_PACKET_SIZE;
+    int length = 128; // Default packet size
     byte publish[] = {0x30,length-2,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
     byte bigPublish[length];
     memset(bigPublish,'A',length);
@@ -141,7 +141,7 @@ int test_receive_oversized_message() {
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
 
-    int length = MQTT_MAX_PACKET_SIZE+1;
+    int length = 128+1;
     byte publish[] = {0x30,length-2,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
     byte bigPublish[length];
     memset(bigPublish,'A',length);
@@ -176,7 +176,7 @@ int test_receive_oversized_stream_message() {
     int rc = client.connect((char*)"client_test1");
     IS_TRUE(rc);
 
-    int length = MQTT_MAX_PACKET_SIZE+1;
+    int length = 128+1;
     byte publish[] = {0x30,length-2,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
 
     byte bigPublish[length];
