@@ -122,6 +122,7 @@ int test_receive_max_sized_message() {
     IT("after shimClient respond");
 
     rc = client.loop();
+    IT("after client loop");
 
     IS_TRUE(rc);
 
@@ -131,6 +132,7 @@ int test_receive_max_sized_message() {
     IS_TRUE(memcmp(lastPayload,bigPublish+9,lastLength)==0);
 
     IS_FALSE(shimClient.error());
+    IT("end");
 
     END_IT
 }
