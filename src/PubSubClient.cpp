@@ -7,10 +7,6 @@
 #include "PubSubClient.h"
 #include "Arduino.h"
 
-#ifndef MQTT_DEFAULT_MAX_PACKET_SIZE
-#define MQTT_DEFAULT_MAX_PACKET_SIZE 128
-#endif
-
 PubSubClient::PubSubClient()
   :PubSubClient(NULL, NULL, NULL, MQTT_DEFAULT_MAX_PACKET_SIZE) {}
 
@@ -21,7 +17,7 @@ PubSubClient::PubSubClient(uint16_t bufSize)
   :PubSubClient(NULL, NULL, NULL, bufSize) {}
 
 PubSubClient::PubSubClient(Client& client)
-  :PubSubClient(NULL, &client, NULL, MQTT_DEFAULT_MAX_PACKET_SIZE) {}
+  :PubSubClient(NULL, &client, NULL, MQTT_MAX_PACKET_SIZE) {}
 
 
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client)
@@ -65,17 +61,17 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
 
 
 PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE,Client* client, Stream* stream) 
-  :PubSubClient(callback, client, stream, MQTT_DEFAULT_MAX_PACKET_SIZE) {
+  :PubSubClient(callback, client, stream, MQTT_MAX_PACKET_SIZE) {
   setServer(domain, port);
 }
 
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE,Client* client, Stream*)
-  :PubSubClient(callback, client, stream, MQTT_DEFAULT_MAX_PACKET_SIZE) {
+  :PubSubClient(callback, client, stream, MQTT_MAX_PACKET_SIZE) {
   setServer(ip, port);
 }
 
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE,Client* client, Stream*)
-  :PubSubClient(callback, client, stream, MQTT_DEFAULT_MAX_PACKET_SIZE) {
+  :PubSubClient(callback, client, stream, MQTT_MAX_PACKET_SIZE) {
   setServer(addr, port);
 }
 
