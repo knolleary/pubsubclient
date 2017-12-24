@@ -21,21 +21,6 @@
 #define MQTT_VERSION MQTT_VERSION_3_1_1
 #endif
 
-// MQTT_MAX_PACKET_SIZE : Maximum packet size
-#ifndef MQTT_MAX_PACKET_SIZE
-#define MQTT_MAX_PACKET_SIZE 128
-#endif
-
-// MQTT_KEEPALIVE : keepAlive interval in Seconds
-#ifndef MQTT_KEEPALIVE
-#define MQTT_KEEPALIVE 15
-#endif
-
-// MQTT_SOCKET_TIMEOUT: socket timeout interval in Seconds
-#ifndef MQTT_SOCKET_TIMEOUT
-#define MQTT_SOCKET_TIMEOUT 15
-#endif
-
 // MQTT_MAX_TRANSFER_SIZE : limit how much data is passed to the network client
 //  in each write call. Needed for the Arduino Wifi Shield. Leave undefined to
 //  pass the entire MQTT packet in each write call.
@@ -83,7 +68,10 @@
 class PubSubClient {
 private:
    Client* _client;
-   uint8_t buffer[MQTT_MAX_PACKET_SIZE];
+   uint8_t* buffer;
+   uint16_t bufSize;
+   uint16_t keepAlive;
+   uint16_t socketTimeout;
    uint16_t nextMsgId;
    unsigned long lastOutActivity;
    unsigned long lastInActivity;
@@ -101,26 +89,42 @@ private:
    int _state;
 public:
    PubSubClient();
+
+   PubSubClient(uint16_t bufSize);
    PubSubClient(Client& client);
+   PubSubClient(Client& client, uint16_t bufSize);
+
    PubSubClient(IPAddress, uint16_t, Client& client);
    PubSubClient(IPAddress, uint16_t, Client& client, Stream&);
    PubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
    PubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
+
    PubSubClient(uint8_t *, uint16_t, Client& client);
    PubSubClient(uint8_t *, uint16_t, Client& client, Stream&);
    PubSubClient(uint8_t *, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
    PubSubClient(uint8_t *, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
+
    PubSubClient(const char*, uint16_t, Client& client);
    PubSubClient(const char*, uint16_t, Client& client, Stream&);
    PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
    PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
 
+private:
+   PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client*, Stream*);
+   PubSubClient(uint8_t *, uint16_t, MQTT_CALLBACK_SIGNATURE,Client* client, Stream*);
+   PubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE,Client* client, Stream*);
+   PubSubClient(MQTT_CALLBACK_SIGNATURE, Client* client, Stream* stream, uint16_t bufSize);
+
+public:
    PubSubClient& setServer(IPAddress ip, uint16_t port);
    PubSubClient& setServer(uint8_t * ip, uint16_t port);
    PubSubClient& setServer(const char * domain, uint16_t port);
    PubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE);
    PubSubClient& setClient(Client& client);
    PubSubClient& setStream(Stream& stream);
+   PubSubClient& setKeepAlive(uint16_t keepAlive);
+   PubSubClient& setSocketTimeout(uint16_t socketTimeout);
+   PubSubClient& setBufSize(uint16_t bufsize);
 
    boolean connect(const char* id);
    boolean connect(const char* id, const char* user, const char* pass);
