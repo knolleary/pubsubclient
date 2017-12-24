@@ -8,7 +8,7 @@
 #include "Arduino.h"
 
 PubSubClient::PubSubClient()
-  :PubSubClient(NULL, NULL, NULL, MQTT_DEFAULT_MAX_PACKET_SIZE) {}
+  :PubSubClient(NULL, NULL, NULL, MQTT_MAX_PACKET_SIZE) {}
 
 PubSubClient::PubSubClient(Client& client, uint16_t bufSize)
   :PubSubClient(NULL, &client, NULL, bufSize) {}
