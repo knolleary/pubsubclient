@@ -101,28 +101,19 @@ int test_receive_max_sized_message() {
     byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
     shimClient.respond(connack,4);
 
-    IT("before create client");
     PubSubClient client(server, 1883, callback, shimClient);
-    IT("after create client");
     int rc = client.connect((char*)"client_test1");
-    IT("after connect");
     IS_TRUE(rc);
 
     int length = MQTT_MAX_PACKET_SIZE;
     byte publish[] = {0x30,length-2,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
     byte bigPublish[length+1];
-    IT("after bigPublish alloc");
     memset(bigPublish,'A',length);
-    IT("after bigPublish memset");
     bigPublish[length] = 'B';
-    IT("after bigPublish B set");
     memcpy(bigPublish,publish,16);
-    IT("after bigPublish memset 2");
     shimClient.respond(bigPublish,length);
-    IT("after shimClient respond");
 
     rc = client.loop();
-    IT("after client loop");
 
     IS_TRUE(rc);
 
@@ -132,7 +123,6 @@ int test_receive_max_sized_message() {
     IS_TRUE(memcmp(lastPayload,bigPublish+9,lastLength)==0);
 
     IS_FALSE(shimClient.error());
-    IT("end");
 
     END_IT
 }
