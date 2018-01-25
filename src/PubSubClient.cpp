@@ -65,12 +65,12 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
   setServer(domain, port);
 }
 
-PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE,Client* client, Stream*)
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE,Client* client, Stream* stream)
   :PubSubClient(callback, client, stream, MQTT_MAX_PACKET_SIZE) {
   setServer(ip, port);
 }
 
-PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE,Client* client, Stream*)
+PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE,Client* client, Stream* stream)
   :PubSubClient(callback, client, stream, MQTT_MAX_PACKET_SIZE) {
   setServer(addr, port);
 }
