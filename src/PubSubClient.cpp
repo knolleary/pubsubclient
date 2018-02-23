@@ -468,7 +468,7 @@ boolean PubSubClient::subscribe(const char* topic) {
 }
 
 boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
-    if (qos < 0 || qos > 1) {
+    if (qos > 1) {
         return false;
     }
     if (MQTT_MAX_PACKET_SIZE < 9 + strlen(topic)) {
