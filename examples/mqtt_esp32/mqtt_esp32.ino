@@ -102,7 +102,7 @@ void loop()
 
 void connectmqtt()
 {
-  client.connect("ESP32_clientID");  // nodemcu will connect to mqtt broker with clientID
+  client.connect("ESP32_clientID");  // ESP will connect to mqtt broker with clientID
   {
     Serial.println("connected to MQTT");
     // Once connected, publish an announcement...
