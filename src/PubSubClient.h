@@ -99,6 +99,8 @@ private:
    uint16_t port;
    Stream* stream;
    int _state;
+   uint16_t keepAlive;
+   uint16_t socketTimeout;
 public:
    PubSubClient();
    PubSubClient(Client& client);
@@ -121,11 +123,12 @@ public:
    PubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE);
    PubSubClient& setClient(Client& client);
    PubSubClient& setStream(Stream& stream);
+   PubSubClient& setTimeout(uint16_t socketTimeout);
 
-   boolean connect(const char* id);
-   boolean connect(const char* id, const char* user, const char* pass);
-   boolean connect(const char* id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
-   boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
+   boolean connect(const char* id, uint16_t keepAlive=MQTT_KEEPALIVE, uint16_t socketTimeout=MQTT_SOCKET_TIMEOUT);
+   boolean connect(const char* id, const char* user, const char* pass, uint16_t keepAlive=MQTT_KEEPALIVE, uint16_t socketTimeout=MQTT_SOCKET_TIMEOUT);
+   boolean connect(const char* id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, uint16_t keepAlive=MQTT_KEEPALIVE, uint16_t socketTimeout=MQTT_SOCKET_TIMEOUT);
+   boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, uint16_t keepAlive=MQTT_KEEPALIVE, uint16_t socketTimeout=MQTT_SOCKET_TIMEOUT);
    void disconnect();
    boolean publish(const char* topic, const char* payload);
    boolean publish(const char* topic, const char* payload, boolean retained);
