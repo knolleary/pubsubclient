@@ -255,6 +255,12 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
     uint8_t start = 0;
 
     do {
+        if (len == 6) {
+            // Invalid remaining length encoding - kill the connection
+            _state = MQTT_DISCONNECTED;
+            _client->stop();
+            return 0;
+        }
         if(!readByte(&digit)) return 0;
         buffer[len++] = digit;
         length += (digit & 127) * multiplier;
@@ -350,6 +356,9 @@ boolean PubSubClient::loop() {
                 } else if (type == MQTTPINGRESP) {
                     pingOutstanding = false;
                 }
+            } else if (!connected()) {
+                // readPacket has closed the connection
+                return false;
             }
         }
         return true;
@@ -483,7 +492,7 @@ boolean PubSubClient::subscribe(const char* topic) {
 }
 
 boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
-    if (qos < 0 || qos > 1) {
+    if (qos > 1) {
         return false;
     }
     if (MQTT_MAX_PACKET_SIZE < 9 + strlen(topic)) {
