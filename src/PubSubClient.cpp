@@ -529,15 +529,14 @@ void PubSubClient::disconnect() {
 }
 
 uint16_t PubSubClient::writeString(const char* string, uint8_t* buf, uint16_t pos) {
-    const char* idp = string;
-    uint16_t i = 0;
-    pos += 2;
-    while (*idp) {
-        buf[pos++] = *idp++;
-        i++;
+    uint16_t len = strlen(string);
+    uint16_t avail = MQTT_MAX_PACKET_SIZE - pos - 2; // two bytes for length
+    uint16_t size = len > avail ? avail : len;
+    buf[pos++] = (size >> 8);
+    buf[pos++] = (size & 0xFF);
+    for(int i = 0; i < size; i++) {
+      buf[pos++] = string[i];
     }
-    buf[pos-i-2] = (i >> 8);
-    buf[pos-i-1] = (i & 0xFF);
     return pos;
 }
 
