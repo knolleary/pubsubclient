@@ -83,7 +83,7 @@
 #define MQTT_CALLBACK_SIGNATURE void (*callback)(char*, uint8_t*, unsigned int)
 #endif
 
-class PubSubClient {
+class PubSubClient : public Print {
 private:
    Client* _client;
    uint8_t buffer[MQTT_MAX_PACKET_SIZE];
@@ -153,10 +153,10 @@ public:
    // Returns 1 if the packet was sent successfully, 0 if there was an error
    int endPublish();
    // Write a single byte of payload (only to be used with beginPublish/endPublish)
-   size_t write(uint8_t);
+   virtual size_t write(uint8_t);
    // Write size bytes from buffer into the payload (only to be used with beginPublish/endPublish)
    // Returns the number of bytes written
-   size_t write(const uint8_t *buffer, size_t size);
+   virtual size_t write(const uint8_t *buffer, size_t size);
    boolean subscribe(const char* topic);
    boolean subscribe(const char* topic, uint8_t qos);
    boolean unsubscribe(const char* topic);
