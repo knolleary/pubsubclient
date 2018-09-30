@@ -94,6 +94,7 @@ private:
    boolean readByte(uint8_t * result, uint16_t * index);
    boolean write(uint8_t header, uint8_t* buf, uint16_t length);
    uint16_t writeString(const char* string, uint8_t* buf, uint16_t pos);
+   uint16_t writeArray(const char* input, uint16_t len, uint8_t* buf, uint16_t pos);
    IPAddress ip;
    const char* domain;
    uint16_t port;
@@ -124,8 +125,10 @@ public:
 
    boolean connect(const char* id);
    boolean connect(const char* id, const char* user, const char* pass);
+   boolean connect(const char* id, const char* user, uint16_t userLen, const char* pass, uint16_t passLen);
    boolean connect(const char* id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
    boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
+   boolean connect(const char* id, const char* user, uint16_t userLen, const char* pass, uint16_t passLen, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
    void disconnect();
    boolean publish(const char* topic, const char* payload);
    boolean publish(const char* topic, const char* payload, boolean retained);

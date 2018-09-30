@@ -102,18 +102,26 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
 }
 
 boolean PubSubClient::connect(const char *id) {
-    return connect(id,NULL,NULL,0,0,0,0);
+    return connect(id,NULL,0,NULL,0,0,0,0,0);
 }
 
 boolean PubSubClient::connect(const char *id, const char *user, const char *pass) {
     return connect(id,user,pass,0,0,0,0);
 }
 
+boolean PubSubClient::connect(const char* id, const char* user, uint16_t userLen, const char* pass, uint16_t passLen) {
+    return connect(id,user,userLen,pass,passLen,0,0,0,0);
+}
+   
 boolean PubSubClient::connect(const char *id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
-    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage);
+    return connect(id,NULL,0,NULL,0,willTopic,willQos,willRetain,willMessage);
 }
 
 boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
+    return connect(id,user,user?strlen(user):0,pass,pass?strlen(pass):0,willTopic,willQos,willRetain,willMessage);
+}
+
+boolean PubSubClient::connect(const char *id, const char* user, uint16_t userLen, const char* pass, uint16_t passLen, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
     if (!connected()) {
         int result = 0;
 
@@ -165,9 +173,9 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             }
 
             if(user != NULL) {
-                length = writeString(user,buffer,length);
+                length = writeArray(user,userLen,buffer,length);
                 if(pass != NULL) {
-                    length = writeString(pass,buffer,length);
+                    length = writeArray(pass,passLen,buffer,length);
                 }
             }
 
@@ -352,11 +360,11 @@ boolean PubSubClient::loop() {
 }
 
 boolean PubSubClient::publish(const char* topic, const char* payload) {
-    return publish(topic,(const uint8_t*)payload,strlen(payload),false);
+    return publish(topic,payload,false);
 }
 
 boolean PubSubClient::publish(const char* topic, const char* payload, boolean retained) {
-    return publish(topic,(const uint8_t*)payload,strlen(payload),retained);
+    return publish(topic,(const uint8_t*)payload,payload?strlen(payload):0,retained);
 }
 
 boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigned int plength) {
@@ -528,6 +536,17 @@ void PubSubClient::disconnect() {
     lastInActivity = lastOutActivity = millis();
 }
 
+uint16_t PubSubClient::writeArray(const char* input, uint16_t len, uint8_t* buf, uint16_t pos) {
+    const char* idp = input;
+    uint16_t i = 0;
+    buf[pos++] = (len >> 8);
+    buf[pos++] = (len & 0xFF);
+    for (int i = 0 ; i < len ; i++) {
+        buf[pos++] = *idp++;
+    }
+    return pos;
+}
+
 uint16_t PubSubClient::writeString(const char* string, uint8_t* buf, uint16_t pos) {
     const char* idp = string;
     uint16_t i = 0;
@@ -540,7 +559,6 @@ uint16_t PubSubClient::writeString(const char* string, uint8_t* buf, uint16_t po
     buf[pos-i-1] = (i & 0xFF);
     return pos;
 }
-
 
 boolean PubSubClient::connected() {
     boolean rc;
