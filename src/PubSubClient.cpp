@@ -141,7 +141,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 
             uint8_t v;
             if (willTopic) {
-                v = 0x06|(willQos<<3)|(willRetain<<5);
+                v = 0x04|(willQos<<3)|(willRetain<<5);
             } else {
                 v = 0;
             }
