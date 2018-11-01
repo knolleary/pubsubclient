@@ -331,6 +331,9 @@ boolean PubSubClient::loop() {
                         memmove(buffer+llen+2,buffer+llen+3,tl); /* move topic inside buffer 1 byte to front */
                         buffer[llen+2+tl] = 0; /* end the topic as a 'C' string with \x00 */
                         char *topic = (char*) buffer+llen+2;
+                        if (len<MQTT_MAX_PACKET_SIZE) {
+                            buffer[len] = '\0';                 
+                        }
                         // msgId only present for QOS>0
                         if ((buffer[0]&0x06) == MQTTQOS1) {
                             msgId = (buffer[llen+3+tl]<<8)+buffer[llen+3+tl+1];
