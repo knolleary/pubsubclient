@@ -561,6 +561,7 @@ void PubSubClient::disconnect() {
     buffer[1] = 0;
     _client->write(buffer,2);
     _state = MQTT_DISCONNECTED;
+    _client->flush();
     _client->stop();
     lastInActivity = lastOutActivity = millis();
 }
