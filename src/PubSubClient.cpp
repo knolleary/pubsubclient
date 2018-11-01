@@ -102,18 +102,18 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
 }
 
 boolean PubSubClient::connect(const char *id) {
-    return connect(id,NULL,NULL,0,0,0,0,1);
+    return connect(id,NULL,NULL,0,0,0,0);
 }
 
 boolean PubSubClient::connect(const char *id, const char *user, const char *pass) {
-    return connect(id,user,pass,0,0,0,0,1);
+    return connect(id,user,pass,0,0,0,0);
 }
 
 boolean PubSubClient::connect(const char *id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
-    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage,1);
+    return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage);
 }
 
-boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, boolean cleanSession) {
+boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
     if (!connected()) {
         int result = 0;
 
@@ -141,13 +141,10 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 
             uint8_t v;
             if (willTopic) {
-                v = 0x04|(willQos<<3)|(willRetain<<5);
+                v = 0x06|(willQos<<3)|(willRetain<<5);
             } else {
-                v = 0;
+                v = 0x02;
             }
-
-            if (cleanSession)
-                v = v|0x02;
 
             if(user != NULL) {
                 v = v|0x80;
