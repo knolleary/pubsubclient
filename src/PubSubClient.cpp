@@ -244,7 +244,7 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
     uint8_t start = 0;
 
     do {
-        if (len == 6) {
+        if (len == 5) {
             // Invalid remaining length encoding - kill the connection
             _state = MQTT_DISCONNECTED;
             _client->stop();
