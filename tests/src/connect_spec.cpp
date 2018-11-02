@@ -283,20 +283,20 @@ int test_connect_disconnect_connect() {
 int main()
 {
     SUITE("Connect");
-    test_connect_non_clean_session();
 
-    // test_connect_fails_no_network();
-    // test_connect_fails_on_no_response();
-    //
-    // test_connect_properly_formatted();
-    // test_connect_accepts_username_password();
-    // test_connect_fails_on_bad_rc();
-    // test_connect_properly_formatted_hostname();
-    //
-    // test_connect_accepts_username_no_password();
-    // test_connect_ignores_password_no_username();
-    // test_connect_with_will();
-    // test_connect_with_will_username_password();
-    // test_connect_disconnect_connect();
+    test_connect_fails_no_network();
+    test_connect_fails_on_no_response();
+
+    test_connect_properly_formatted();
+    test_connect_non_clean_session();
+    test_connect_accepts_username_password();
+    test_connect_fails_on_bad_rc();
+    test_connect_properly_formatted_hostname();
+
+    test_connect_accepts_username_no_password();
+    test_connect_ignores_password_no_username();
+    test_connect_with_will();
+    test_connect_with_will_username_password();
+    test_connect_disconnect_connect();
     FINISH
 }
