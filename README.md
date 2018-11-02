@@ -8,7 +8,7 @@ a server that supports MQTT.
 The library comes with a number of example sketches. See File > Examples > PubSubClient
 within the Arduino application.
 
-Full API documentation is available here: http://pubsubclient.knolleary.net
+Full API documentation is available here: https://pubsubclient.knolleary.net
 
 ## Limitations
 
