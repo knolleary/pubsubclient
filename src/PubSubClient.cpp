@@ -165,15 +165,21 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 
             buffer[length++] = ((MQTT_KEEPALIVE) >> 8);
             buffer[length++] = ((MQTT_KEEPALIVE) & 0xFF);
+
+            CHECK_STRING_LENGTH(length,id)
             length = writeString(id,buffer,length);
             if (willTopic) {
+                CHECK_STRING_LENGTH(length,willTopic)
                 length = writeString(willTopic,buffer,length);
+                CHECK_STRING_LENGTH(length,willMessage)
                 length = writeString(willMessage,buffer,length);
             }
 
             if(user != NULL) {
+                CHECK_STRING_LENGTH(length,user)
                 length = writeString(user,buffer,length);
                 if(pass != NULL) {
+                    CHECK_STRING_LENGTH(length,pass)
                     length = writeString(pass,buffer,length);
                 }
             }
