@@ -16,12 +16,17 @@ title: API Documentation
         <li><a href="#connect2"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, willTopic, willQoS, willRetain, willMessage)</span></a></li>
         <li><a href="#connect3"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password)</span></a></li>
         <li><a href="#connect4"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password, willTopic, willQoS, willRetain, willMessage)</span></a></li>
+        <li><a href="#connect5"><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password, willTopic, willQoS, willRetain, willMessage, cleanSession)</span></a></li>
         <li><a href="#disconnect"><span class="methodreturn">void</span> <span class="methodname">disconnect</span> <span class="methodparams">()</span></a></li>
         <li><a href="#publish1"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload)</span></a></li>
         <li><a href="#publish2"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, retained)</span></a></li>
         <li><a href="#publish3"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, length)</span></a></li>
         <li><a href="#publish4"><span class="methodreturn">int</span> <span class="methodname">publish</span> <span class="methodparams">(topic, payload, length, retained)</span></a></li>
         <li><a href="#publish5"><span class="methodreturn">int</span> <span class="methodname">publish_P</span> <span class="methodparams">(topic, payload, length, retained)</span></a></li>
+        <li><a href="#beginPublish"><span class="methodreturn">boolean</span> <span class="methodname">beginPublish</span> <span class="methodparams">(topic, payloadLength, retained)</span></a></li>
+        <li><a href="#write1"><span class="methodreturn">size_t</span> <span class="methodname">write</span> <span class="methodparams">(uint8_t)</span></a></li>
+        <li><a href="#write2"><span class="methodreturn">size_t</span> <span class="methodname">write</span> <span class="methodparams">(payload, length)</span></a></li>
+        <li><a href="#endPublish"><span class="methodreturn">boolean</span> <span class="methodname">beginPublish</span> <span class="methodparams">()</span></a></li>
         <li><a href="#subscribe"><span class="methodreturn">boolean</span> <span class="methodname">subscribe</span> <span class="methodparams">(topic, [qos])</span></a></li>
         <li><a href="#unsubscribe"><span class="methodreturn">boolean</span> <span class="methodname">unsubscribe</span> <span class="methodparams">(topic)</span></a></li>
         <li><a href="#loop"><span class="methodreturn">boolean</span> <span class="methodname">loop</span> <span class="methodparams">()</span></a></li>
@@ -153,6 +158,29 @@ void setup() {
     </ul>
 </section>
 
+<section class="method" id="connect5">
+    <h4><span class="methodreturn">boolean</span> <span class="methodname">connect</span> <span class="methodparams">(clientID, username, password, willTopic, willQoS, willRetain, willMessage, cleanSession)</span></h4>
+    <p>Connects the client with a Will message, username, password and clean-session flag specified.</p>
+    <p><b>Note</b> : even if the <code>cleanSession</code> is set to <code>false</code>/<code>0</code> the client
+    will <i>not</i> retry failed qos 1 publishes. This flag is only of use to maintain subscriptions on the broker.</p>
+    <h5>Parameters</h5>
+    <ul>
+        <li><span class="methodparams">clientID</span> : the client ID to use when connecting to the server.</li>
+        <li><span class="methodparams">username</span> : the username to use. If NULL, no username or password is used (const char[])</li>
+        <li><span class="methodparams">password</span> : the password to use. If NULL, no password is used (const char[])</li>
+        <li><span class="methodparams">willTopic</span> : the topic to be used by the will message (const char[])</li>
+        <li><span class="methodparams">willQoS</span> : the quality of service to be used by the will message (int :  0,1 or 2)</li>
+        <li><span class="methodparams">willRetain</span> : whether the will should be published with the retain flag (int : 0 or 1)</li>
+        <li><span class="methodparams">willMessage</span> : the payload of the will message (const char[])</li>
+        <li><span class="methodparams">cleanSession</span> : whether to connect clean-session or not (boolean)</li>
+    </ul>
+    <h5>Returns</h5>
+    <ul>
+        <li>false - connection failed.</li>
+        <li>true - connection succeeded.</li>
+    </ul>
+</section>
+
 <section class="method" id="disconnect">
     <h4><span class="methodreturn">void</span> <span class="methodname">disconnect</span> <span class="methodparams">()</span></h4>
     <p>Disconnects the client.</p>
@@ -247,6 +275,66 @@ void setup() {
             </ul>
         </li>
     </ul>
+    <h5>Returns</h5>
+    <ul>
+        <li>false - publish failed</li>
+        <li>true - publish succeeded</li>
+    </ul>
+</section>
+
+<section class="method" id="beginPublish">
+    <h4><span class="methodreturn">boolean</span> <span class="methodname">beginPublish</span> <span class="methodparams">(topic, payloadLength, retained)</span></h4>
+    <p>Begins sending a publish message. The payload of the message is provided by one or more calls to <code>write</code> followed by a call to <code>endPublish</code>.</p>
+    <h5>Parameters</h5>
+    <ul>
+        <li>topic - the topic to publish to (const char[])</li>
+        <li>payloadLength - the length of the message to publish</li>
+        <li>retained - whether the message should be retained (boolean)
+            <ul>
+                <li>false - not retained</li>
+                <li>true - retained</li>
+            </ul>
+        </li>
+    </ul>
+    <h5>Returns</h5>
+    <ul>
+        <li>false - publish failed</li>
+        <li>true - publish succeeded</li>
+    </ul>
+</section>
+
+<section class="method" id="write1">
+    <h4><span class="methodreturn">size_t</span> <span class="methodname">write</span> <span class="methodparams">(uint8_t)</span></h4>
+    <p>Writes a byte as a component of a publish started with a call to <code>beginPublish</code>.</p>
+    <h5>Parameters</h5>
+    <ul>
+        <li>uint8_t - the byte to write</li>
+    </ul>
+    <h5>Returns</h5>
+    <ul>
+        <li>false - publish failed</li>
+        <li>true - publish succeeded</li>
+    </ul>
+</section>
+
+<section class="method" id="write2">
+    <h4><span class="methodreturn">size_t</span> <span class="methodname">write</span> <span class="methodparams">(payload, length)</span></h4>
+    <p>Writes an array of bytes as a component of a publish started with a call to <code>beginPublish</code>.</p>
+    <h5>Parameters</h5>
+    <ul>
+        <li>payload - the bytes to write (byte[])</li>
+        <li>length - the length of the byte array (byte)</li>
+    </ul>
+    <h5>Returns</h5>
+    <ul>
+        <li>false - publish failed</li>
+        <li>true - publish succeeded</li>
+    </ul>
+</section>
+
+<section class="method" id="endPublish">
+    <h4><span class="methodreturn">boolean</span> <span class="methodname">beginPublish</span> <span class="methodparams">()</span></h4>
+    <p>Finishing sending a message that was started with a call to <code>beginPublish</code>.</p>
     <h5>Returns</h5>
     <ul>
         <li>false - publish failed</li>

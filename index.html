@@ -31,6 +31,7 @@ title: Arduino Client for MQTT
             <li>Sparkfun WiFly Shield – when used with <a href="https://github.com/dpslwk/WiFly">this library</a></li>
             <li>Intel Galileo/Edison</li>
             <li>ESP8266</li>
+            <li>ESP32</li>
         </ul>
         <p>
             The library cannot currently be used with hardware based on the ENC28J60 chip –
@@ -51,91 +52,16 @@ title: Arduino Client for MQTT
       <h2>Change History</h2>
       <p>The complete change history is available on <a href="https://github.com/knolleary/pubsubclient/commits/master">GitHub</a>.</p>
       <dl>
-         <dt>2.0</dt>
-         <dd>
-            <ul>
-               <li>Add (and default to) MQTT 3.1.1 support</li>
-               <li>Fix PROGMEM handling for Intel Galileo/ESP8266</li>
-               <li>Add overloaded constructors for convenience</li>
-               <li>Add chainable setters for server/callback/client/stream</li>
-               <li>Add state function to return connack return code</li>
-            </ul>
-         </dd>
-         <dt>1.9</dt>
-         <dd>
-            <ul>
-               <li>Do not split MQTT packets over multiple calls to <code>_client->write()</code></li>
-               <li><b><i>API change</i></b>: All constructors now require an instance of Client to be passed in.</li>
-               <li>Fixed example to match 1.8 api changes - dpslwk</li>
-               <li>Added username/password support - WilHall</li>
-               <li>Added <code>publish_P</code> - publishes messages from <code>PROGMEM</code> - jobytaffey</li>
-            </ul>
-         </dd>
-         <dt>1.8</dt>
-         <dd>
-            <ul>
-               <li>KeepAlive interval is configurable in <code>PubSubClient.h</code></li>
-               <li>Maximum packet size is configurable in <code>PubSubClient.h</code></li>
-               <li><b><i>API change</i></b>: Return <code>boolean</code> rather than <code>int</code> from various functions</li>
-               <li><b><i>API change</i></b>: Length parameter in message callback changed from <code>int</code> to <code>unsigned int</code>
-               <li>Various internal tidy-ups around types</li>
-               <li>Able to specify server address by DNS name</li>
-            </ul>
-         </dd>
-         <dt>1.7</dt>
-         <dd>
-            <ul>
-               <li>Improved keepalive handling</li>
-               <li>Updated to the Arduino-1.0 API</li>
-            </ul>
-         </dd>
-         <dt>1.6</dt>
-         <dd>
-            <ul>
-               <li>Added ability to publish retained messages</li>
-            </ul>
-         </dd>
-         <dt>1.5</dt>
-         <dd>
-            <ul>
-               <li>Added default constructor</li>
-               <li>Fixed compile error when used with arduino-0021 or later</li>
-            </ul>
-         </dd>
-         <dt>1.4</dt>
-         <dd>
-            <ul>
-               <li>Fixed connection lost handling</li>
-            </ul>
-         </dd>
-         <dt>1.3</dt>
-         <dd>
-            <ul>
-               <li>Fixed packet reading bug</li>
-            </ul>
-         </dd>
-         <dt>1.2</dt>
-         <dd>
-            <ul>
-               <li>Fixed compile error when used with arduino-0016 or later</li>
-            </ul>
-         </dd>
-         <dt>1.1</dt>
-         <dd>
-            <ul>
-               <li>Reduced size of library</li>
-               <li>Added support for Will messages</li?
-               <li>Clarified licensing &#8211; see LICENSE.txt</li>
-            </ul>
-         </dd>
-         <dt>1.0</dt>
-         <dd>
-            <ul>
-               <li>Only Quality of Service (QOS) 0 messaging is supported</li>
-               <li>The maximum message size, including header, is 128 bytes</li>
-               <li>The keepalive interval is set to 30 seconds</li>
-               <li>No support for Will messages</li>
-            </ul>
-         </dd>
+          <dt>2.7</dt>
+          <dd>
+              <ul>
+                  <li>Fix remaining-length handling to prevent buffer overrun</li>
+                  <li>Add large-payload API - beginPublish/write/publish/endPublish</li>
+                  <li>Add yield call to improve reliability on ESP</li>
+                  <li>Add Clean Session flag to connect options</li>
+                  <li>Add ESP32 support for functional callback signature</li>
+                  <li>Various other fixes</li>
+              </ul>
+          </dd>
       </dl>
-   </section>
+  </section>
