@@ -26,7 +26,7 @@ title: API Documentation
         <li><a href="#beginPublish"><span class="methodreturn">boolean</span> <span class="methodname">beginPublish</span> <span class="methodparams">(topic, payloadLength, retained)</span></a></li>
         <li><a href="#write1"><span class="methodreturn">size_t</span> <span class="methodname">write</span> <span class="methodparams">(uint8_t)</span></a></li>
         <li><a href="#write2"><span class="methodreturn">size_t</span> <span class="methodname">write</span> <span class="methodparams">(payload, length)</span></a></li>
-        <li><a href="#endPublish"><span class="methodreturn">boolean</span> <span class="methodname">beginPublish</span> <span class="methodparams">()</span></a></li>
+        <li><a href="#endPublish"><span class="methodreturn">boolean</span> <span class="methodname">endPublish</span> <span class="methodparams">()</span></a></li>
         <li><a href="#subscribe"><span class="methodreturn">boolean</span> <span class="methodname">subscribe</span> <span class="methodparams">(topic, [qos])</span></a></li>
         <li><a href="#unsubscribe"><span class="methodreturn">boolean</span> <span class="methodname">unsubscribe</span> <span class="methodparams">(topic)</span></a></li>
         <li><a href="#loop"><span class="methodreturn">boolean</span> <span class="methodname">loop</span> <span class="methodparams">()</span></a></li>
@@ -333,7 +333,7 @@ void setup() {
 </section>
 
 <section class="method" id="endPublish">
-    <h4><span class="methodreturn">boolean</span> <span class="methodname">beginPublish</span> <span class="methodparams">()</span></h4>
+    <h4><span class="methodreturn">boolean</span> <span class="methodname">endPublish</span> <span class="methodparams">()</span></h4>
     <p>Finishing sending a message that was started with a call to <code>beginPublish</code>.</p>
     <h5>Returns</h5>
     <ul>
