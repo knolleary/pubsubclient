@@ -197,7 +197,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
                 }
             }
             uint8_t llen;
-            uint16_t len = readPacket(&llen);
+            uint32_t len = readPacket(&llen);
 
             if (len == 4) {
                 if (buffer[3] == 0) {
@@ -243,12 +243,12 @@ boolean PubSubClient::readByte(uint8_t * result, uint16_t * index){
   return false;
 }
 
-uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
+uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
     uint16_t len = 0;
     if(!readByte(buffer, &len)) return 0;
     bool isPublish = (buffer[0]&0xF0) == MQTTPUBLISH;
     uint32_t multiplier = 1;
-    uint16_t length = 0;
+    uint32_t length = 0;
     uint8_t digit = 0;
     uint16_t skip = 0;
     uint8_t start = 0;
@@ -279,20 +279,22 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
         }
     }
 
-    for (uint16_t i = start;i<length;i++) {
+    uint32_t idx = len;
+    for (uint32_t i = start;i<length;i++) {
         if(!readByte(&digit)) return 0;
         if (this->stream) {
-            if (isPublish && len-*lengthLength-2>skip) {
+            if (isPublish && idx-*lengthLength-2>skip) {
                 this->stream->write(digit);
             }
         }
         if (len < MQTT_MAX_PACKET_SIZE) {
             buffer[len] = digit;
+            len++;
         }
-        len++;
+        idx++;
     }
 
-    if (!this->stream && len > MQTT_MAX_PACKET_SIZE) {
+    if (!this->stream && idx > MQTT_MAX_PACKET_SIZE) {
         len = 0; // This will cause the packet to be ignored.
     }
 
