@@ -412,6 +412,7 @@ boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsig
     unsigned int i;
     uint8_t header;
     unsigned int len;
+    int expectedLength;
 
     if (!connected()) {
         return false;
@@ -445,7 +446,9 @@ boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsig
 
     lastOutActivity = millis();
 
-    return rc == tlen + 4 + plength;
+    expectedLength = 1 + llen + 2 + tlen + plength;
+
+    return (rc == expectedLength);
 }
 
 boolean PubSubClient::beginPublish(const char* topic, unsigned int plength, boolean retained) {
