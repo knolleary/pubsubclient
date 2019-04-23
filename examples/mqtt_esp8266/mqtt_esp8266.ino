@@ -34,7 +34,7 @@ const char* mqtt_server = "broker.mqtt-dashboard.com";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-long lastMsg = 0;
+unsigned long lastMsg = 0;
 char msg[50];
 int value = 0;
 
