@@ -120,7 +120,11 @@ void loop() {
   }
   client.loop();
 
-  long now = millis();
+  unsigned long now = millis();
+
+  if (lastMsg < now)
+    lastMsg = 0;
+
   if (now - lastMsg > 2000) {
     lastMsg = now;
     ++value;
