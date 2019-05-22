@@ -28,7 +28,7 @@
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
 #ifndef MQTT_KEEPALIVE
-#define MQTT_KEEPALIVE 15
+#define MQTT_KEEPALIVE 30
 #endif
 
 // MQTT_SOCKET_TIMEOUT: socket timeout interval in Seconds
@@ -139,11 +139,11 @@ public:
    boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, boolean cleanSession);
    void disconnect();
    boolean publish(const char* topic, const char* payload);
-   boolean publish(const char* topic, const char* payload, boolean retained);
+   boolean publish(const char* topic, const char* payload, uint8_t qos, boolean retained);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength);
-   boolean publish(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
-   boolean publish_P(const char* topic, const char* payload, boolean retained);
-   boolean publish_P(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
+   boolean publish(const char* topic, const uint8_t * payload, unsigned int plength, uint8_t qos, boolean retained);
+   boolean publish_P(const char* topic, const uint8_t * payload, unsigned int plength, uint8_t qos, boolean retained);
+   boolean publish_P(const char* topic, const char* payload, uint8_t qos, boolean retained);
    // Start to publish a message.
    // This API:
    //   beginPublish(...)
