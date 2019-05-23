@@ -94,9 +94,9 @@ private:
    unsigned long lastInActivity;
    bool pingOutstanding;
    MQTT_CALLBACK_SIGNATURE;
-   uint16_t readPacket(uint8_t*);
+   uint32_t readPacket(uint8_t*);
    boolean readByte(uint8_t * result);
-   boolean readByte(uint8_t * result, uint16_t * index);
+   boolean readByte(uint8_t * result, uint32_t * index);
    boolean write(uint8_t header, uint8_t* buf, uint16_t length);
    uint16_t writeString(const char* string, uint8_t* buf, uint16_t pos);
    // Build up the header ready to send

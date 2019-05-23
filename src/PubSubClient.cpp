@@ -233,8 +233,8 @@ boolean PubSubClient::readByte(uint8_t * result) {
 }
 
 // reads a byte into result[*index] and increments index
-boolean PubSubClient::readByte(uint8_t * result, uint16_t * index){
-  uint16_t current_index = *index;
+boolean PubSubClient::readByte(uint8_t * result, uint32_t * index){
+  uint32_t current_index = *index;
   uint8_t * write_address = &(result[current_index]);
   if(readByte(write_address)){
     *index = current_index + 1;
@@ -243,14 +243,14 @@ boolean PubSubClient::readByte(uint8_t * result, uint16_t * index){
   return false;
 }
 
-uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
-    uint16_t len = 0;
+uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
+    uint32_t len = 0;
     if(!readByte(buffer, &len)) return 0;
     bool isPublish = (buffer[0]&0xF0) == MQTTPUBLISH;
     uint32_t multiplier = 1;
-    uint16_t length = 0;
+    uint32_t length = 0;
     uint8_t digit = 0;
-    uint16_t skip = 0;
+    uint32_t skip = 0;
     uint8_t start = 0;
 
     do {
@@ -279,7 +279,7 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
         }
     }
 
-    for (uint16_t i = start;i<length;i++) {
+    for (uint32_t i = start;i<length;i++) {
         if(!readByte(&digit)) return 0;
         if (this->stream) {
             if (isPublish && len-*lengthLength-2>skip) {
@@ -453,6 +453,7 @@ boolean PubSubClient::beginPublish(const char* topic, unsigned int plength, bool
         // Send the header and variable length field
         uint16_t length = MQTT_MAX_HEADER_SIZE;
         length = writeString(topic,buffer,length);
+        uint16_t i;
         uint8_t header = MQTTPUBLISH;
         if (retained) {
             header |= 1;
