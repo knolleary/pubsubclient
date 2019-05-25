@@ -79,8 +79,10 @@
 #if defined(ESP8266) || defined(ESP32)
 #include <functional>
 #define MQTT_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, unsigned int)> callback
+#define MQTT_CALLBACK_SIGNATURE_WITH_ARG std::function<void(char*, uint8_t*, unsigned int, void*)> callbackWithArg
 #else
 #define MQTT_CALLBACK_SIGNATURE void (*callback)(char*, uint8_t*, unsigned int)
+#define MQTT_CALLBACK_SIGNATURE_WITH_ARG void (*callbackWithArg)(char*, uint8_t*, unsigned int, void*)
 #endif
 
 #define CHECK_STRING_LENGTH(l,s) if (l+2+strlen(s) > MQTT_MAX_PACKET_SIZE) {_client->stop();return false;}
@@ -93,7 +95,9 @@ private:
    unsigned long lastOutActivity;
    unsigned long lastInActivity;
    bool pingOutstanding;
-   MQTT_CALLBACK_SIGNATURE;
+   MQTT_CALLBACK_SIGNATURE;  
+   MQTT_CALLBACK_SIGNATURE_WITH_ARG; 
+   void* arg;
    uint16_t readPacket(uint8_t*);
    boolean readByte(uint8_t * result);
    boolean readByte(uint8_t * result, uint16_t * index);
@@ -114,21 +118,28 @@ public:
    PubSubClient(Client& client);
    PubSubClient(IPAddress, uint16_t, Client& client);
    PubSubClient(IPAddress, uint16_t, Client& client, Stream&);
-   PubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
-   PubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
+   PubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE, Client& client);
+   PubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE, Client& client, Stream&);
+   PubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE_WITH_ARG, void* arg, Client& client);
+   PubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE_WITH_ARG, void* arg, Client& client, Stream&);
    PubSubClient(uint8_t *, uint16_t, Client& client);
    PubSubClient(uint8_t *, uint16_t, Client& client, Stream&);
-   PubSubClient(uint8_t *, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
-   PubSubClient(uint8_t *, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
+   PubSubClient(uint8_t *, uint16_t, MQTT_CALLBACK_SIGNATURE, Client& client);
+   PubSubClient(uint8_t *, uint16_t, MQTT_CALLBACK_SIGNATURE, Client& client, Stream&);
+   PubSubClient(uint8_t *, uint16_t, MQTT_CALLBACK_SIGNATURE_WITH_ARG, void* arg, Client& client);
+   PubSubClient(uint8_t *, uint16_t, MQTT_CALLBACK_SIGNATURE_WITH_ARG, void* arg, Client& client, Stream&);
    PubSubClient(const char*, uint16_t, Client& client);
    PubSubClient(const char*, uint16_t, Client& client, Stream&);
-   PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
-   PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
+   PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE, Client& client);
+   PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE, Client& client, Stream&);
+   PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE_WITH_ARG, void* arg, Client& client);
+   PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE_WITH_ARG, void* arg, Client& client, Stream&);
 
    PubSubClient& setServer(IPAddress ip, uint16_t port);
    PubSubClient& setServer(uint8_t * ip, uint16_t port);
    PubSubClient& setServer(const char * domain, uint16_t port);
    PubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE);
+   PubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE_WITH_ARG, void* arg);
    PubSubClient& setClient(Client& client);
    PubSubClient& setStream(Stream& stream);
 
