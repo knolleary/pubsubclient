@@ -34,7 +34,7 @@ const char* mqtt_server = "broker.mqtt-dashboard.com";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-long lastMsg = 0;
+unsigned long lastMsg = 0;
 char msg[50];
 int value = 0;
 
@@ -120,7 +120,11 @@ void loop() {
   }
   client.loop();
 
-  long now = millis();
+  unsigned long now = millis();
+
+  if (now < lastMsg)
+    lastMsg = 0;
+
   if (now - lastMsg > 2000) {
     lastMsg = now;
     ++value;
