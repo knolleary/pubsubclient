@@ -340,8 +340,9 @@ boolean PubSubClient::loop() {
                             buffer[1] = 2;
                             buffer[2] = (msgId >> 8);
                             buffer[3] = (msgId & 0xFF);
-                            _client->write(buffer,4);
-                            lastOutActivity = t;
+                            if (_client->write(buffer,4) != 0) {
+                              lastOutActivity = t;
+                            }
 
                         } else {
                             payload = buffer+llen+3+tl;
