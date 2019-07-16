@@ -42,6 +42,7 @@
 //#define MQTT_MAX_TRANSFER_SIZE 80
 
 // Possible values for client.state()
+#define MQTT_CONNECT_INPROGRESS     -5
 #define MQTT_CONNECTION_TIMEOUT     -4
 #define MQTT_CONNECTION_LOST        -3
 #define MQTT_CONNECT_FAILED         -2
@@ -137,6 +138,20 @@ public:
    boolean connect(const char* id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
    boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
    boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, boolean cleanSession);
+   
+   /* non-blocking CONNECT functions, they do not wait for CONNACK. 
+      Return true if the TCP connection was made and CONNECT was sent successfully, false otherwise */
+   boolean beginConnect(const char* id);
+   boolean beginConnect(const char* id, const char* user, const char* pass);
+   boolean beginConnect(const char* id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
+   boolean beginConnect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
+   boolean beginConnect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, boolean cleanSession);
+   
+   /* call this regularly to check the result of a non-blocking CONNECT.
+      Returns the current state().
+      MQTT_CONNECT_INPROGRESS will be returned until CONNACK is received or a timeout occurs */
+   int connectStatus(void);
+   
    void disconnect();
    boolean publish(const char* topic, const char* payload);
    boolean publish(const char* topic, const char* payload, boolean retained);
