@@ -76,6 +76,10 @@
 // Maximum size of fixed header and variable length size header
 #define MQTT_MAX_HEADER_SIZE 5
 
+#define MQTT_BEGINEND_NONE 		0 // beginPublish not called
+#define MQTT_BEGINEND_MULTIPACKET 	1 // beginPublish called with pre-calculated payload length
+#define MQTT_BEGINEND_SINGLEPACKET 	2 // beginPublish called with no payload length
+
 #if defined(ESP8266) || defined(ESP32)
 #include <functional>
 #define MQTT_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, unsigned int)> callback
@@ -113,6 +117,8 @@ private:
    uint16_t port;
    Stream* stream;
    int _state;
+   uint8_t beginEndType;
+   uint16_t bufferOffset; // Index of next free buffer pos
 public:
    PubSubClient();
    PubSubClient(Client& client);
@@ -168,6 +174,9 @@ public:
    // a new buffer and held in memory at one time
    // Returns 1 if the message was started successfully, 0 if there was an error
    boolean beginPublish(const char* topic, unsigned int plength, boolean retained);
+   // As above however headers/payload are all buffered and entire message is sent as a single packet
+   // from endPublish once the lengths have been calculated and set
+   boolean beginPublish(const char* topic, boolean retained);
    // Finish off this publish message (started with beginPublish)
    // Returns 1 if the packet was sent successfully, 0 if there was an error
    int endPublish();
