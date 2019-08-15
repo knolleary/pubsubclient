@@ -300,7 +300,8 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
 }
 
 boolean PubSubClient::loop() {
-    if (connected()) {
+    if (connected()) {   
+   
         unsigned long t = millis();
         if ((t - lastInActivity > MQTT_KEEPALIVE*1000UL) || (t - lastOutActivity > MQTT_KEEPALIVE*1000UL)) {
             if (pingOutstanding) {
@@ -317,6 +318,12 @@ boolean PubSubClient::loop() {
             }
         }
         if (_client->available()) {
+          
+          //clean the buffer		
+          for(int a=0;a<MQTT_MAX_PACKET_SIZE;a++){
+		          buffer[a]=0;
+	            }
+          
             uint8_t llen;
             uint16_t len = readPacket(&llen);
             uint16_t msgId = 0;
