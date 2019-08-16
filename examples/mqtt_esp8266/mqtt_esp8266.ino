@@ -62,6 +62,9 @@ void setup_wifi() {
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
+ //payload extract
+ payload[length] = '\0';
+ 
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
