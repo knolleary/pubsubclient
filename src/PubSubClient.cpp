@@ -366,11 +366,11 @@ boolean PubSubClient::loop() {
 }
 
 boolean PubSubClient::publish(const char* topic, const char* payload) {
-    return publish(topic,(const uint8_t*)payload,strlen(payload),false);
+    return publish(topic,(const uint8_t*)payload,strnlen(payload, MQTT_MAX_PACKET_SIZE),false);
 }
 
 boolean PubSubClient::publish(const char* topic, const char* payload, boolean retained) {
-    return publish(topic,(const uint8_t*)payload,strlen(payload),retained);
+    return publish(topic,(const uint8_t*)payload,strnlen(payload, MQTT_MAX_PACKET_SIZE),retained);
 }
 
 boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigned int plength) {
@@ -379,7 +379,7 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
 
 boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained) {
     if (connected()) {
-        if (MQTT_MAX_PACKET_SIZE < MQTT_MAX_HEADER_SIZE + 2+strlen(topic) + plength) {
+        if (MQTT_MAX_PACKET_SIZE < MQTT_MAX_HEADER_SIZE + 2+strnlen(topic, MQTT_MAX_PACKET_SIZE) + plength) {
             // Too long
             return false;
         }
@@ -400,7 +400,7 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
 }
 
 boolean PubSubClient::publish_P(const char* topic, const char* payload, boolean retained) {
-    return publish_P(topic, (const uint8_t*)payload, strlen(payload), retained);
+    return publish_P(topic, (const uint8_t*)payload, strnlen(payload, MQTT_MAX_PACKET_SIZE), retained);
 }
 
 boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained) {
@@ -417,7 +417,7 @@ boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsig
         return false;
     }
 
-    tlen = strlen(topic);
+    tlen = strnlen(topic, MQTT_MAX_PACKET_SIZE);
 
     header = MQTTPUBLISH;
     if (retained) {
@@ -534,7 +534,7 @@ boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
     if (qos > 1) {
         return false;
     }
-    if (MQTT_MAX_PACKET_SIZE < 9 + strlen(topic)) {
+    if (MQTT_MAX_PACKET_SIZE < 9 + strnlen(topic, MQTT_MAX_PACKET_SIZE)) {
         // Too long
         return false;
     }
@@ -555,7 +555,7 @@ boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
 }
 
 boolean PubSubClient::unsubscribe(const char* topic) {
-    if (MQTT_MAX_PACKET_SIZE < 9 + strlen(topic)) {
+    if (MQTT_MAX_PACKET_SIZE < 9 + strnlen(topic, MQTT_MAX_PACKET_SIZE)) {
         // Too long
         return false;
     }
