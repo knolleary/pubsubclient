@@ -649,8 +649,7 @@ size_t PubSubClient::write(const uint8_t *data, size_t size) {
     {
         case MQTT_BEGINEND_MULTIPACKET:
             lastOutActivity = millis();
-            return _client->write(data);
-
+            return _client->write(data, size);
         case MQTT_BEGINEND_SINGLEPACKET:
             if (bufferOffset + size >= MQTT_MAX_PACKET_SIZE) {
                 return 0;
