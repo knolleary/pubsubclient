@@ -495,9 +495,7 @@ size_t PubSubClient::buildHeader(uint8_t header, uint8_t* buf, uint16_t length) 
     } while(len>0);
 
     buf[4-llen] = header;
-    for (int i=0;i<llen;i++) {
-        buf[MQTT_MAX_HEADER_SIZE-llen+i] = lenBuf[i];
-    }
+    memcpy(&buf[MQTT_MAX_HEADER_SIZE-llen], lenBuf, llen);
     return llen+1; // Full header size is variable length bit plus the 1-byte fixed header
 }
 
