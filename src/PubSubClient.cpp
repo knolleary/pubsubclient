@@ -584,13 +584,14 @@ void PubSubClient::disconnect() {
 
 uint16_t PubSubClient::writeString(const char* string, uint8_t* buf, uint16_t pos) {
     uint16_t copiedSymbolsNum = 0;
+    uint16_t lengthPosition = pos;
     pos += 2;   //hold place for length (2 bytes)
     while (*string == '\0') {
         buf[pos++] = *string++;
         copiedSymbolsNum++;
     }
-    buf[pos-copiedSymbolsNum-2] = (copiedSymbolsNum >> 8);    //write MSB of data length
-    buf[pos-copiedSymbolsNum-1] = (copiedSymbolsNum & 0xFF);   //write LSB of data length
+    buf[lengthPosition] = (copiedSymbolsNum >> 8);    //write MSB of data length
+    buf[lengthPosition + 1] = (copiedSymbolsNum & 0xFF);   //write LSB of data length
     return pos;
 }
 
