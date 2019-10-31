@@ -23,12 +23,12 @@
 
 // MQTT_MAX_PACKET_SIZE : Maximum packet size
 #ifndef MQTT_MAX_PACKET_SIZE
-#define MQTT_MAX_PACKET_SIZE 128
+#define MQTT_MAX_PACKET_SIZE 1024
 #endif
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
 #ifndef MQTT_KEEPALIVE
-#define MQTT_KEEPALIVE 15
+#define MQTT_KEEPALIVE 64
 #endif
 
 // MQTT_SOCKET_TIMEOUT: socket timeout interval in Seconds

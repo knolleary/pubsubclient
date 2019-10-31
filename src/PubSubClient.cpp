@@ -195,6 +195,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
                     _client->stop();
                     return false;
                 }
+                yield();
             }
             uint8_t llen;
             uint16_t len = readPacket(&llen);
@@ -412,6 +413,7 @@ boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsig
     unsigned int i;
     uint8_t header;
     unsigned int len;
+    int expectedLength;
 
     if (!connected()) {
         return false;
@@ -444,8 +446,8 @@ boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsig
     }
 
     lastOutActivity = millis();
-
-    return rc == tlen + 4 + plength;
+    expectedLength = 1 + llen + 2 + tlen + plength;
+    return (rc == expectedLength);
 }
 
 boolean PubSubClient::beginPublish(const char* topic, unsigned int plength, boolean retained) {
@@ -512,6 +514,7 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
     uint8_t bytesToWrite;
     boolean result = true;
     while((bytesRemaining > 0) && result) {
+        yield();
         bytesToWrite = (bytesRemaining > MQTT_MAX_TRANSFER_SIZE)?MQTT_MAX_TRANSFER_SIZE:bytesRemaining;
         rc = _client->write(writeBuf,bytesToWrite);
         result = (rc == bytesToWrite);
