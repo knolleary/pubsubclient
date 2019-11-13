@@ -189,8 +189,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             lastInActivity = lastOutActivity = millis();
 
             while (!_client->available()) {
-                unsigned long t = millis();
-                if (t-lastInActivity >= ((int32_t) MQTT_SOCKET_TIMEOUT*1000UL)) {
+                if (millis()-lastInActivity >= ((int32_t) MQTT_SOCKET_TIMEOUT*1000UL)) {
                     _state = MQTT_CONNECTION_TIMEOUT;
                     _client->stop();
                     return false;
@@ -384,8 +383,7 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
             return false;
         }
         // Leave room in the buffer for header and variable length field
-        uint16_t length = MQTT_MAX_HEADER_SIZE;
-        length = writeString(topic,buffer,length);
+        uint16_t length = writeString(topic,buffer,MQTT_MAX_HEADER_SIZE);
         uint16_t i;
         for (i=0;i<plength;i++) {
             buffer[length++] = payload[i];
@@ -496,9 +494,7 @@ size_t PubSubClient::buildHeader(uint8_t header, uint8_t* buf, uint16_t length) 
     } while(len>0);
 
     buf[4-llen] = header;
-    for (int i=0;i<llen;i++) {
-        buf[MQTT_MAX_HEADER_SIZE-llen+i] = lenBuf[i];
-    }
+    memcpy(&buf[MQTT_MAX_HEADER_SIZE-llen], lenBuf, llen);
     return llen+1; // Full header size is variable length bit plus the 1-byte fixed header
 }
 
@@ -584,15 +580,15 @@ void PubSubClient::disconnect() {
 }
 
 uint16_t PubSubClient::writeString(const char* string, uint8_t* buf, uint16_t pos) {
-    const char* idp = string;
-    uint16_t i = 0;
-    pos += 2;
-    while (*idp) {
-        buf[pos++] = *idp++;
-        i++;
+    uint16_t copiedSymbolsNum = 0;
+    uint16_t lengthPosition = pos;
+    pos += 2;   //hold place for length (2 bytes)
+    while (*string != '\0') {
+        buf[pos++] = *string++;
+        copiedSymbolsNum++;
     }
-    buf[pos-i-2] = (i >> 8);
-    buf[pos-i-1] = (i & 0xFF);
+    buf[lengthPosition] = (copiedSymbolsNum >> 8);    //write MSB of data length
+    buf[lengthPosition + 1] = (copiedSymbolsNum & 0xFF);   //write LSB of data length
     return pos;
 }
 
