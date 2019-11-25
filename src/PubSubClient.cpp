@@ -121,11 +121,17 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
     if (!connected()) {
         int result = 0;
 
-        if (domain != NULL) {
-            result = _client->connect(this->domain, this->port);
+
+        if(_client->connected()) {
+            result = 1;
         } else {
-            result = _client->connect(this->ip, this->port);
+            if (domain != NULL) {
+                result = _client->connect(this->domain, this->port);
+            } else {
+                result = _client->connect(this->ip, this->port);
+            }
         }
+        
         if (result == 1) {
             nextMsgId = 1;
             // Leave room in the buffer for header and variable length field
@@ -609,6 +615,8 @@ boolean PubSubClient::connected() {
                 _client->flush();
                 _client->stop();
             }
+        } else {
+            return this->_state == MQTT_CONNECTED;
         }
     }
     return rc;
