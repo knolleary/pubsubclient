@@ -160,8 +160,37 @@ int test_receive_oversized_message() {
     END_IT
 }
 
+int test_drop_invalid_remaining_length_message() {
+    IT("drops invalid remaining length message");
+    reset_callback();
+
+    ShimClient shimClient;
+    shimClient.setAllowConnect(true);
+
+    byte connack[] = { 0x20, 0x02, 0x00, 0x00 };
+    shimClient.respond(connack,4);
+
+    PubSubClient client(server, 1883, callback, shimClient);
+    int rc = client.connect((char*)"client_test1");
+    IS_TRUE(rc);
+
+    byte publish[] = {0x30,0x92,0x92,0x92,0x92,0x01,0x0,0x5,0x74,0x6f,0x70,0x69,0x63,0x70,0x61,0x79,0x6c,0x6f,0x61,0x64};
+    shimClient.respond(publish,20);
+
+    rc = client.loop();
+
+    IS_FALSE(rc);
+
+    IS_FALSE(callback_called);
+
+    IS_FALSE(shimClient.error());
+
+    END_IT
+}
+
+
 int test_receive_oversized_stream_message() {
-    IT("drops an oversized message");
+    IT("receive an oversized streamed message");
     reset_callback();
 
     Stream stream;
@@ -193,7 +222,7 @@ int test_receive_oversized_stream_message() {
 
     IS_TRUE(callback_called);
     IS_TRUE(strcmp(lastTopic,"topic")==0);
-    IS_TRUE(lastLength == length-9);
+    IS_TRUE(lastLength == MQTT_MAX_PACKET_SIZE-9);
 
     IS_FALSE(stream.error());
     IS_FALSE(shimClient.error());
@@ -241,6 +270,7 @@ int main()
     test_receive_callback();
     test_receive_stream();
     test_receive_max_sized_message();
+    test_drop_invalid_remaining_length_message();
     test_receive_oversized_message();
     test_receive_oversized_stream_message();
     test_receive_qos1();
