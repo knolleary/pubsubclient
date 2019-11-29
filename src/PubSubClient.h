@@ -169,5 +169,11 @@ public:
    int state();
 };
 
+#ifndef INCLUDE_CPP_FROM_PUBSUBCLIENT_H
+#define INCLUDE_CPP_FROM_PUBSUBCLIENT_H 1
+#endif
+#if INCLUDE_CPP_FROM_PUBSUBCLIENT_H
+#include "PubSubClient.cpp"
+#endif
 
 #endif

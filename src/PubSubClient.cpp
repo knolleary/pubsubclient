@@ -5,7 +5,9 @@
   http://knolleary.net
 */
 
-#include "PubSubClient.h"
+//#include "PubSubClient.h"
+#if INCLUDE_CPP_FROM_PUBSUBCLIENT_H
+
 #include "Arduino.h"
 
 PubSubClient::PubSubClient() {
@@ -669,3 +671,5 @@ PubSubClient& PubSubClient::setStream(Stream& stream){
 int PubSubClient::state() {
     return this->_state;
 }
+
+#endif // INCLUDE_CPP_FROM_PUBSUBCLIENT_H
