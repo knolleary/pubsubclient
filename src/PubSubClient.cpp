@@ -121,8 +121,8 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
   if (!this->connected()) {
     int result = 0;
 
-    if (this->_client->connect->connected()) result = 1;
-    else (NULL != domain) result = this->_client->connect(this->domain, this->port);
+    if (this->_client->connected()) result = 1;
+    else if (NULL != domain) result = this->_client->connect(this->domain, this->port);
     else result = this->_client->connect(this->ip, this->port);
 
     if (1 == result) {
@@ -264,7 +264,7 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
     if (this->buffer[0] & MQTTQOS1) skip += 2; // skip message id
   }
 
-  unit32_t idx = len;
+  uint32_t idx = len;
   for (uint16_t i = start; i < length; i++) {
     if (!this->readByte(&digit)) return 0;
     if (this->stream) {
@@ -489,7 +489,7 @@ size_t PubSubClient::buildHeader(uint8_t header, uint8_t* buf, uint16_t length) 
   } while (len > 0);
 
   buf[4 - llen] = header;
-  ::memcpy(&buf[MQTT_MAX_HEADER_SIZE - llen], lenGuf, llen);
+  ::memcpy(&buf[MQTT_MAX_HEADER_SIZE - llen], lenBuf, llen);
 
   return llen + 1; // Full header size is variable length bit plus the 1-byte fixed header
 }
