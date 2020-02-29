@@ -387,7 +387,7 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
     
   size_t topicLength = ::strlen(topic);
   if (MQTT_MAX_PACKET_SIZE < MQTT_MAX_HEADER_SIZE + 2 + topicLength + plength) {
-    ::sprintf(this->_statusMessage, "PubSubClient::publish: Payload was too long to send.  Max length %d, required length %d", MQTT_MAX_PACKET_SIZE, MQTT_MAX_HEADER_SIZE + 2 + topicLength + plength);
+    ::sprintf(this->_statusMessage, "PubSubClient::publish: Payload was too long to send.  Max length %d, required length %u", MQTT_MAX_PACKET_SIZE, MQTT_MAX_HEADER_SIZE + 2 + topicLength + plength);
     return false; 
   }
 
@@ -472,7 +472,7 @@ size_t PubSubClient::write(uint8_t data) {
 
 size_t PubSubClient::write(const uint8_t* writeBuffer, size_t size) {
   this->lastOutActivity = ::millis();
-  ::sprintf(this->_statusMessage, "Wrote %d, length %d", writeBuffer, size);
+  ::sprintf(this->_statusMessage, "Wrote %u, length %u", writeBuffer, size);
   return this->_client->write(writeBuffer, size);
 }
 
@@ -532,7 +532,7 @@ boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
   }
 
   if (MQTT_MAX_PACKET_SIZE < 9 + ::strlen(topic)) {
-    ::sprintf(this->_statusMessage, "PubSubClient::subscribe: topic length %d is greater than %d and not supported", ::strlen(topic), MQTT_MAX_PACKET_SIZE - 9);
+    ::sprintf(this->_statusMessage, "PubSubClient::subscribe: topic length %u is greater than %d and not supported", ::strlen(topic), MQTT_MAX_PACKET_SIZE - 9);
     return false; // Too long
   }
 
@@ -555,7 +555,7 @@ boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
 
 boolean PubSubClient::unsubscribe(const char* topic) {
   if (MQTT_MAX_PACKET_SIZE < 9 + ::strlen(topic)) {
-    ::sprintf(this->_statusMessage, "PubSubClient::unsubscribe: topic length %d is greater than %d and not supported", ::strlen(topic), MQTT_MAX_PACKET_SIZE - 9);
+    ::sprintf(this->_statusMessage, "PubSubClient::unsubscribe: topic length %u is greater than %d and not supported", ::strlen(topic), MQTT_MAX_PACKET_SIZE - 9);
     return false;
   }
 
