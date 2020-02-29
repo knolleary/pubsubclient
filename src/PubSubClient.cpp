@@ -4,6 +4,8 @@
   http://knolleary.net
 */
 
+#include <stdio.h>
+
 #include "PubSubClient.h"
 #include "Arduino.h"
 
