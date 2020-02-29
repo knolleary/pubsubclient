@@ -208,7 +208,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 boolean PubSubClient::readByte(uint8_t* result) {
    uint32_t previousMillis = millis();
    while (!this->_client->available()) {
-     ::yield();
+     yield();
      uint32_t currentMillis = ::millis();
      if (currentMillis - previousMillis >= ((int32_t) MQTT_SOCKET_TIMEOUT * 1000)) return false;
    }
@@ -438,7 +438,7 @@ boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsig
 
     pos = this->writeString(topic, this->buffer, pos);
     rc += this->_client->write(this->buffer, pos);
-    for (i=0; i < plength; i++) rc += this->_client->write((char)::pgm_read_byte_near(payload + i));
+    for (i=0; i < plength; i++) rc += this->_client->write((char)pgm_read_byte_near(payload + i));
 
     this->lastOutActivity = ::millis();
     int expectedLength = 1 + llen + 2 + tlen + plength;
