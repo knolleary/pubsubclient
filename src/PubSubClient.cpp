@@ -548,10 +548,14 @@ boolean PubSubClient::subscribe(const char* topic) {
 }
 
 boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
+    size_t topicLength = strlen(topic);
+    if (topic == 0) {
+        return false;
+    }
     if (qos > 1) {
         return false;
     }
-    if (MQTT_MAX_PACKET_SIZE < 9 + strlen(topic)) {
+    if (MQTT_MAX_PACKET_SIZE < 9 + topicLength) {
         // Too long
         return false;
     }
@@ -572,7 +576,11 @@ boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
 }
 
 boolean PubSubClient::unsubscribe(const char* topic) {
-    if (MQTT_MAX_PACKET_SIZE < 9 + strlen(topic)) {
+	size_t topicLength = strlen(topic);
+    if (topic == 0) {
+        return false;
+    }
+    if (MQTT_MAX_PACKET_SIZE < 9 + topicLength) {
         // Too long
         return false;
     }
