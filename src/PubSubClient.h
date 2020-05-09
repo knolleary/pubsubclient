@@ -11,6 +11,7 @@
 #include "IPAddress.h"
 #include "Client.h"
 #include "Stream.h"
+#include <avr/pgmspace.h>
 
 #define MQTT_VERSION_3_1      3
 #define MQTT_VERSION_3_1_1    4
