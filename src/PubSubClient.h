@@ -83,7 +83,7 @@
 #define MQTT_CALLBACK_SIGNATURE void (*callback)(char*, uint8_t*, unsigned int)
 #endif
 
-#define CHECK_STRING_LENGTH(l,s) if (l+2+strlen(s) > MQTT_MAX_PACKET_SIZE) {_client->stop();return false;}
+#define CHECK_STRING_LENGTH(l,s) if (l+2+strnlen(s, MQTT_MAX_PACKET_SIZE) > MQTT_MAX_PACKET_SIZE) {_client->stop();return false;}
 
 class PubSubClient : public Print {
 private:
