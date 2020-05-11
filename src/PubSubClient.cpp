@@ -117,14 +117,16 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
     return connect(id,user,pass,willTopic,willQos,willRetain,willMessage,1);
 }
 
-boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, boolean cleanSession) {
+boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, boolean cleanSession) {  
     if (connected()) {
         return true;
     }
         
     int result = 0;
 
-    if (domain != NULL) {
+    if(_client->connected()) {
+        result = 1;
+    } else if (domain != NULL) {
         result = _client->connect(this->domain, this->port);
     } else {
         result = _client->connect(this->ip, this->port);
@@ -205,7 +207,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
         }
     }
     uint8_t llen;
-    uint16_t len = readPacket(&llen);
+    uint32_t len = readPacket(&llen);
 
     if (len == 4) {
         if (buffer[3] == 0) {
@@ -245,7 +247,9 @@ boolean PubSubClient::beginConnect(const char *id, const char *user, const char 
     int result = 0;
     
     _client->stop();
-    if (domain != NULL) {
+    if(_client->connected()) {
+        result = 1;
+    } else if (domain != NULL) {
         result = _client->connect(this->domain, this->port);
     } else {
         result = _client->connect(this->ip, this->port);
@@ -380,12 +384,12 @@ boolean PubSubClient::readByte(uint8_t * result, uint16_t * index){
   return false;
 }
 
-uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
+uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
     uint16_t len = 0;
     if(!readByte(buffer, &len)) return 0;
     bool isPublish = (buffer[0]&0xF0) == MQTTPUBLISH;
     uint32_t multiplier = 1;
-    uint16_t length = 0;
+    uint32_t length = 0;
     uint8_t digit = 0;
     uint16_t skip = 0;
     uint8_t start = 0;
@@ -416,20 +420,22 @@ uint16_t PubSubClient::readPacket(uint8_t* lengthLength) {
         }
     }
 
-    for (uint16_t i = start;i<length;i++) {
+    uint32_t idx = len;
+    for (uint32_t i = start;i<length;i++) {
         if(!readByte(&digit)) return 0;
         if (this->stream) {
-            if (isPublish && len-*lengthLength-2>skip) {
+            if (isPublish && idx-*lengthLength-2>skip) {
                 this->stream->write(digit);
             }
         }
         if (len < MQTT_MAX_PACKET_SIZE) {
             buffer[len] = digit;
+            len++;
         }
-        len++;
+        idx++;
     }
 
-    if (!this->stream && len > MQTT_MAX_PACKET_SIZE) {
+    if (!this->stream && idx > MQTT_MAX_PACKET_SIZE) {
         len = 0; // This will cause the packet to be ignored.
     }
 
@@ -511,11 +517,11 @@ boolean PubSubClient::loop() {
 }
 
 boolean PubSubClient::publish(const char* topic, const char* payload) {
-    return publish(topic,(const uint8_t*)payload,strlen(payload),false);
+    return publish(topic,(const uint8_t*)payload, payload ? strnlen(payload, MQTT_MAX_PACKET_SIZE) : 0,false);
 }
 
 boolean PubSubClient::publish(const char* topic, const char* payload, boolean retained) {
-    return publish(topic,(const uint8_t*)payload,strlen(payload),retained);
+    return publish(topic,(const uint8_t*)payload, payload ? strnlen(payload, MQTT_MAX_PACKET_SIZE) : 0,retained);
 }
 
 boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigned int plength) {
@@ -531,10 +537,14 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
         // Leave room in the buffer for header and variable length field
         uint16_t length = MQTT_MAX_HEADER_SIZE;
         length = writeString(topic,buffer,length);
+        
+        // Add payload
         uint16_t i;
         for (i=0;i<plength;i++) {
             buffer[length++] = payload[i];
         }
+        
+        // Write the header
         uint8_t header = MQTTPUBLISH;
         if (retained) {
             header |= 1;
@@ -545,7 +555,7 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
 }
 
 boolean PubSubClient::publish_P(const char* topic, const char* payload, boolean retained) {
-    return publish_P(topic, (const uint8_t*)payload, strlen(payload), retained);
+    return publish_P(topic, (const uint8_t*)payload, payload ? strnlen(payload, MQTT_MAX_PACKET_SIZE) : 0, retained);
 }
 
 boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained) {
@@ -590,7 +600,9 @@ boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsig
 
     lastOutActivity = millis();
 
-    return rc == tlen + 4 + plength;
+    // Header (1 byte) + llen + identifier (2 bytes)  + topic len + payload len
+    const int expectedLength = 1 + llen + 2 + tlen + plength;
+    return (rc == expectedLength);
 }
 
 boolean PubSubClient::beginPublish(const char* topic, unsigned int plength, boolean retained) {
@@ -676,10 +688,14 @@ boolean PubSubClient::subscribe(const char* topic) {
 }
 
 boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
+    size_t topicLength = strnlen(topic, MQTT_MAX_PACKET_SIZE);
+    if (topic == 0) {
+        return false;
+    }
     if (qos > 1) {
         return false;
     }
-    if (MQTT_MAX_PACKET_SIZE < 9 + strlen(topic)) {
+    if (MQTT_MAX_PACKET_SIZE < 9 + topicLength) {
         // Too long
         return false;
     }
@@ -700,7 +716,11 @@ boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
 }
 
 boolean PubSubClient::unsubscribe(const char* topic) {
-    if (MQTT_MAX_PACKET_SIZE < 9 + strlen(topic)) {
+	size_t topicLength = strnlen(topic, MQTT_MAX_PACKET_SIZE);
+    if (topic == 0) {
+        return false;
+    }
+    if (MQTT_MAX_PACKET_SIZE < 9 + topicLength) {
         // Too long
         return false;
     }
