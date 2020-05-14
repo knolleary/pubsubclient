@@ -12,8 +12,13 @@
 #include "Client.h"
 #include "Stream.h"
 
-#define MQTT_VERSION_3_1      3
-#define MQTT_VERSION_3_1_1    4
+#define MQTT_AUTO_NEGOTIATE_FLAG		(0x8)
+
+typedef enum {
+	MQTT_VERSION_3_1      = 0x3,
+	MQTT_VERSION_3_1_1    = 0x4,
+	MQTT_AUTO_NEGOTIATE   = MQTT_AUTO_NEGOTIATE_FLAG|MQTT_VERSION_3_1_1,
+} ProtocolType;
 
 // MQTT_VERSION : Pick the version
 //#define MQTT_VERSION MQTT_VERSION_3_1
@@ -23,7 +28,7 @@
 
 // MQTT_MAX_PACKET_SIZE : Maximum packet size
 #ifndef MQTT_MAX_PACKET_SIZE
-#define MQTT_MAX_PACKET_SIZE 128
+#define MQTT_MAX_PACKET_SIZE 512
 #endif
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
@@ -109,6 +114,9 @@ private:
    uint16_t port;
    Stream* stream;
    int _state;
+   uint8_t protocolType;
+   uint8_t socketTimeout;
+   
 public:
    PubSubClient();
    PubSubClient(Client& client);
@@ -131,13 +139,15 @@ public:
    PubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE);
    PubSubClient& setClient(Client& client);
    PubSubClient& setStream(Stream& stream);
+   PubSubClient& setProtocol(const ProtocolType protocolType);
 
    boolean connect(const char* id);
    boolean connect(const char* id, const char* user, const char* pass);
    boolean connect(const char* id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
    boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
-   boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, boolean cleanSession);
+   boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, boolean cleanSession, const uint8_t socketTimeout);
    void disconnect();
+
    boolean publish(const char* topic, const char* payload);
    boolean publish(const char* topic, const char* payload, boolean retained);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength);
