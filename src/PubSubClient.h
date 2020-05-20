@@ -26,12 +26,12 @@
 #define MQTT_MAX_PACKET_SIZE 256
 #endif
 
-// MQTT_KEEPALIVE : keepAlive interval in Seconds
+// MQTT_KEEPALIVE : keepAlive interval in Seconds. Override with setKeepAlive()
 #ifndef MQTT_KEEPALIVE
 #define MQTT_KEEPALIVE 15
 #endif
 
-// MQTT_SOCKET_TIMEOUT: socket timeout interval in Seconds
+// MQTT_SOCKET_TIMEOUT: socket timeout interval in Seconds. Override with setSocketTimeout()
 #ifndef MQTT_SOCKET_TIMEOUT
 #define MQTT_SOCKET_TIMEOUT 15
 #endif
@@ -91,6 +91,7 @@ private:
    uint8_t* buffer;
    uint16_t bufferSize;
    uint16_t keepAlive;
+   uint16_t socketTimeout;
    uint16_t nextMsgId;
    unsigned long lastOutActivity;
    unsigned long lastInActivity;
@@ -136,6 +137,7 @@ public:
    PubSubClient& setClient(Client& client);
    PubSubClient& setStream(Stream& stream);
    PubSubClient& setKeepAlive(uint16_t keepAlive);
+   PubSubClient& setSocketTimeout(uint16_t timeout);
 
    boolean setBufferSize(uint16_t size);
    uint16_t getBufferSize();
