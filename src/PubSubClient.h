@@ -90,6 +90,7 @@ private:
    Client* _client;
    uint8_t* buffer;
    uint16_t bufferSize;
+   uint16_t keepAlive;
    uint16_t nextMsgId;
    unsigned long lastOutActivity;
    unsigned long lastInActivity;
@@ -134,6 +135,7 @@ public:
    PubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE);
    PubSubClient& setClient(Client& client);
    PubSubClient& setStream(Stream& stream);
+   PubSubClient& setKeepAlive(uint16_t keepAlive);
 
    boolean setBufferSize(uint16_t size);
    uint16_t getBufferSize();
