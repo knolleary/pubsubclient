@@ -1,0 +1,12 @@
+{%
+    for param in include.params
+%}<li>{%
+    if param.optionalGroup
+%}<span class="methodparams">{{param.name}}</span> - <span class="methodparamoptional">(optional)</span><ul>{% include paramsListLong.html params=param.params %}</ul>{%
+    else
+%}
+<span class="methodparams">{{param.name}}</span> {% if param.type %}<span class="methodparamstype">{{param.type}}</span> {% endif %} {% if param.optional %}<span class="methodparamoptional">(optional)</span> {%endif %} -
+{{param.description}}
+
+{% endif %}</li>{% endfor
+%}

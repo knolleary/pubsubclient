@@ -64,6 +64,9 @@ section {
 .methodname { font-weight: bold;color: #333;}
 .methodreturn { font-weight: normal; color: #777;}
 .methodparams { font-weight: normal; color: #777;}
+.methodparamstype { font-size: 13px; font-family: monospace; color: #979;}
+.methodreturnvalue { font-family: monospace; color: #979; }
+.methodparamoptional { font-size: 13px; font-style: italic; color: #777}
 ul  a {
     text-decoration: none;
 }

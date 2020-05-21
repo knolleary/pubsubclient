@@ -1,0 +1,11 @@
+{%
+    for param in include.params
+%}{%
+    if param.optionalGroup
+%}[{% include paramsList.html params=param.params %}]{%
+    else
+%}{%
+    if param.optional %}[{%endif %}{{param.name}}{% if param.optional %}]{%endif
+%}{%endif
+%}{% if forloop.last == false %}, {%endif%}{% endfor
+%}
