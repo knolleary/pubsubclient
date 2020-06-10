@@ -102,6 +102,7 @@ private:
    boolean readByte(uint8_t * result, uint16_t * index);
    boolean write(uint8_t header, uint8_t* buf, uint16_t length);
    uint16_t writeString(const char* string, uint8_t* buf, uint16_t pos);
+   uint16_t writeString(const __FlashStringHelper* string, uint8_t* buf, uint16_t pos);
    // Build up the header ready to send
    // Returns the size of the header
    // Note: the header is built at the end of the first MQTT_MAX_HEADER_SIZE bytes, so will start
@@ -152,6 +153,10 @@ public:
    boolean publish(const char* topic, const char* payload, boolean retained);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
+   boolean publish(const __FlashStringHelper* topic, const char* payload);
+   boolean publish(const __FlashStringHelper* topic, const char* payload, boolean retained);
+   boolean publish(const __FlashStringHelper* topic, const uint8_t * payload, unsigned int plength);
+   boolean publish(const __FlashStringHelper* topic, const uint8_t * payload, unsigned int plength, boolean retained);
    boolean publish_P(const char* topic, const char* payload, boolean retained);
    boolean publish_P(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
    // Start to publish a message.

@@ -471,6 +471,44 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
     return false;
 }
 
+boolean PubSubClient::publish(const __FlashStringHelper* topic, const uint8_t* payload, unsigned int plength, boolean retained) {
+    if (connected()) {
+        if (this->bufferSize < MQTT_MAX_HEADER_SIZE + 2+strnlen_P((PGM_P)topic, this->bufferSize) + plength) {
+            // Too long
+            return false;
+        }
+        // Leave room in the buffer for header and variable length field
+        uint16_t length = MQTT_MAX_HEADER_SIZE;
+        length = writeString(topic,this->buffer,length);
+
+        // Add payload
+        uint16_t i;
+        for (i=0;i<plength;i++) {
+            this->buffer[length++] = payload[i];
+        }
+
+        // Write the header
+        uint8_t header = MQTTPUBLISH;
+        if (retained) {
+            header |= 1;
+        }
+        return write(header,this->buffer,length-MQTT_MAX_HEADER_SIZE);
+    }
+    return false;
+}
+
+boolean PubSubClient::publish(const __FlashStringHelper* topic, const char* payload) {
+    return publish(topic,(const uint8_t*)payload,strlen(payload),false);
+}
+
+boolean PubSubClient::publish(const __FlashStringHelper* topic, const char* payload, boolean retained) {
+    return publish(topic,(const uint8_t*)payload,strlen(payload),retained);
+}
+
+boolean PubSubClient::publish(const __FlashStringHelper* topic, const uint8_t* payload, unsigned int plength) {
+    return publish(topic, payload, plength, false);
+}
+
 boolean PubSubClient::publish_P(const char* topic, const char* payload, boolean retained) {
     return publish_P(topic, (const uint8_t*)payload, payload ? strnlen(payload, this->bufferSize) : 0, retained);
 }
@@ -680,6 +718,19 @@ uint16_t PubSubClient::writeString(const char* string, uint8_t* buf, uint16_t po
     return pos;
 }
 
+uint16_t PubSubClient::writeString(const __FlashStringHelper* string, uint8_t* buf, uint16_t pos) {
+    const char* idp = (PGM_P)string;
+    uint16_t i = 0;
+    uint8_t b;
+    pos += 2;
+    while ((b = pgm_read_byte_near(idp +i)) != 0) {
+        buf[pos++] = b;
+        i++;
+    }
+    buf[pos-i-2] = (i >> 8);
+    buf[pos-i-1] = (i & 0xFF);
+    return pos;
+}
 
 boolean PubSubClient::connected() {
     boolean rc;
