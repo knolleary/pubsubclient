@@ -197,6 +197,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             nextMsgId = 1;
             // Leave room in the buffer for header and variable length field
             uint16_t length = MQTT_MAX_HEADER_SIZE;
+            size_t slen;
 
 #if MQTT_VERSION == MQTT_VERSION_3_1
             uint8_t d[9] = {0x00,0x06,'M','Q','I','s','d','p', MQTT_VERSION};
@@ -230,21 +231,21 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             this->buffer[length++] = ((this->keepAlive) >> 8);
             this->buffer[length++] = ((this->keepAlive) & 0xFF);
 
-            CHECK_STRING_LENGTH(length,id)
-            length = writeString(id,this->buffer,length);
+            CHECK_STRING_LENGTH(length,id,slen)
+            length = writeString(id,slen,this->buffer,length);
             if (willTopic) {
-                CHECK_STRING_LENGTH(length,willTopic)
-                length = writeString(willTopic,this->buffer,length);
-                CHECK_STRING_LENGTH(length,willMessage)
-                length = writeString(willMessage,this->buffer,length);
+                CHECK_STRING_LENGTH(length,willTopic,slen)
+                length = writeString(willTopic,slen,this->buffer,length);
+                CHECK_STRING_LENGTH(length,willMessage,slen)
+                length = writeString(willMessage,slen,this->buffer,length);
             }
 
             if(user != NULL) {
-                CHECK_STRING_LENGTH(length,user)
-                length = writeString(user,this->buffer,length);
+                CHECK_STRING_LENGTH(length,user,slen)
+                length = writeString(user,slen,this->buffer,length);
                 if(pass != NULL) {
-                    CHECK_STRING_LENGTH(length,pass)
-                    length = writeString(pass,this->buffer,length);
+                    CHECK_STRING_LENGTH(length,pass,slen)
+                    length = writeString(pass,slen,this->buffer,length);
                 }
             }
 
@@ -444,14 +445,15 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
 }
 
 boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained) {
+    const size_t topicLen = strnlen(topic, this->bufferSize);
     if (connected()) {
-        if (this->bufferSize < MQTT_MAX_HEADER_SIZE + 2+strnlen(topic, this->bufferSize) + plength) {
+        if (this->bufferSize < MQTT_MAX_HEADER_SIZE + 2+topicLen + plength) {
             // Too long
             return false;
         }
         // Leave room in the buffer for header and variable length field
         uint16_t length = MQTT_MAX_HEADER_SIZE;
-        length = writeString(topic,this->buffer,length);
+        length = writeString(topic,topicLen,this->buffer,length);
 
         // Add payload
         memcpy(this->buffer+length,payload,plength);
@@ -510,7 +512,6 @@ boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsig
     uint8_t llen = 0;
     uint8_t digit;
     unsigned int rc = 0;
-    uint16_t tlen;
     unsigned int pos = 0;
     unsigned int i;
     uint8_t header;
@@ -521,7 +522,7 @@ boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsig
         return false;
     }
 
-    tlen = strnlen(topic, this->bufferSize);
+    const size_t tlen = strnlen(topic, this->bufferSize);
 
     header = MQTTPUBLISH;
     if (retained) {
@@ -539,7 +540,7 @@ boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsig
         llen++;
     } while(len>0);
 
-    pos = writeString(topic,this->buffer,pos);
+    pos = writeString(topic,tlen,this->buffer,pos);
 
     rc += _client->write(this->buffer,pos);
 
@@ -558,7 +559,7 @@ boolean PubSubClient::beginPublish(const char* topic, unsigned int plength, bool
     if (connected()) {
         // Send the header and variable length field
         uint16_t length = MQTT_MAX_HEADER_SIZE;
-        length = writeString(topic,this->buffer,length);
+        length = writeString(topic,strnlen(topic,this->bufferSize),this->buffer,length);
         uint8_t header = MQTTPUBLISH;
         if (retained) {
             header |= 1;
@@ -636,7 +637,7 @@ boolean PubSubClient::subscribe(const char* topic) {
 }
 
 boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
-    size_t topicLength = strnlen(topic, this->bufferSize);
+    const size_t topicLength = strnlen(topic, this->bufferSize);
     if (topic == 0) {
         return false;
     }
@@ -656,7 +657,7 @@ boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
         }
         this->buffer[length++] = (nextMsgId >> 8);
         this->buffer[length++] = (nextMsgId & 0xFF);
-        length = writeString((char*)topic, this->buffer,length);
+        length = writeString(topic,topicLength,this->buffer,length);
         this->buffer[length++] = qos;
         return write(MQTTSUBSCRIBE|MQTTQOS1,this->buffer,length-MQTT_MAX_HEADER_SIZE);
     }
@@ -664,7 +665,7 @@ boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
 }
 
 boolean PubSubClient::unsubscribe(const char* topic) {
-	size_t topicLength = strnlen(topic, this->bufferSize);
+    const size_t topicLength = strnlen(topic, this->bufferSize);
     if (topic == 0) {
         return false;
     }
@@ -680,7 +681,7 @@ boolean PubSubClient::unsubscribe(const char* topic) {
         }
         this->buffer[length++] = (nextMsgId >> 8);
         this->buffer[length++] = (nextMsgId & 0xFF);
-        length = writeString(topic, this->buffer,length);
+        length = writeString(topic,topicLength,this->buffer,length);
         return write(MQTTUNSUBSCRIBE|MQTTQOS1,this->buffer,length-MQTT_MAX_HEADER_SIZE);
     }
     return false;
@@ -694,10 +695,6 @@ void PubSubClient::disconnect() {
     _client->flush();
     _client->stop();
     lastInActivity = lastOutActivity = millis();
-}
-
-uint16_t PubSubClient::writeString(const char* string, uint8_t* buf, uint16_t pos) {
-    return writeString(string, strlen(string), buf, pos);
 }
 
 uint16_t PubSubClient::writeString(const char* string, size_t stringLen, uint8_t* buf, uint16_t pos) {
