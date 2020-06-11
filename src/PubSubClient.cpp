@@ -472,14 +472,15 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
 }
 
 boolean PubSubClient::publish(const __FlashStringHelper* topic, const uint8_t* payload, unsigned int plength, boolean retained) {
+    const size_t topicLen = strnlen_P((PGM_P)topic, this->bufferSize);
     if (connected()) {
-        if (this->bufferSize < MQTT_MAX_HEADER_SIZE + 2+strnlen_P((PGM_P)topic, this->bufferSize) + plength) {
+        if (this->bufferSize < MQTT_MAX_HEADER_SIZE + 2+topicLen + plength) {
             // Too long
             return false;
         }
         // Leave room in the buffer for header and variable length field
         uint16_t length = MQTT_MAX_HEADER_SIZE;
-        length = writeString(topic,this->buffer,length);
+        length = writeString_P((PGM_P)topic,topicLen,this->buffer,length);
 
         // Add payload
         uint16_t i;
@@ -706,29 +707,24 @@ void PubSubClient::disconnect() {
 }
 
 uint16_t PubSubClient::writeString(const char* string, uint8_t* buf, uint16_t pos) {
-    const char* idp = string;
-    uint16_t i = 0;
+    return writeString(string, strlen(string), buf, pos);
+}
+
+uint16_t PubSubClient::writeString(const char* string, size_t stringLen, uint8_t* buf, uint16_t pos) {
     pos += 2;
-    while (*idp) {
-        buf[pos++] = *idp++;
-        i++;
-    }
-    buf[pos-i-2] = (i >> 8);
-    buf[pos-i-1] = (i & 0xFF);
+    memcpy(&buf[pos], string, stringLen); // length is checked before writeString() was called
+    pos += stringLen;
+    buf[pos-stringLen-2] = (stringLen >> 8);
+    buf[pos-stringLen-1] = (stringLen & 0xFF);
     return pos;
 }
 
-uint16_t PubSubClient::writeString(const __FlashStringHelper* string, uint8_t* buf, uint16_t pos) {
-    const char* idp = (PGM_P)string;
-    uint16_t i = 0;
-    uint8_t b;
+uint16_t PubSubClient::writeString_P(const char * string, size_t stringLen, uint8_t* buf, uint16_t pos) {
     pos += 2;
-    while ((b = pgm_read_byte_near(idp +i)) != 0) {
-        buf[pos++] = b;
-        i++;
-    }
-    buf[pos-i-2] = (i >> 8);
-    buf[pos-i-1] = (i & 0xFF);
+    memcpy_P(&buf[pos], string, stringLen); // length is checked before writeString() was called
+    pos += stringLen;
+    buf[pos-stringLen-2] = (stringLen >> 8);
+    buf[pos-stringLen-1] = (stringLen & 0xFF);
     return pos;
 }
 

@@ -23,6 +23,8 @@ extern "C"{
 #define pgm_read_byte_near(x) *(x)
 
 #define strnlen_P(x,y) strnlen(x,y)
+#define strncpy_P(x,y,z) strncpy(x,y,z)
+#define memcpy_P(x,y,z) memcpy(x,y,z)
 
 #define yield(x) {}
 
