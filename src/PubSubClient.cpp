@@ -393,28 +393,26 @@ boolean PubSubClient::loop() {
                 lastInActivity = t;
                 uint8_t type = this->buffer[0]&0xF0;
                 if (type == MQTTPUBLISH) {
-                    if (callback) {
-                        uint16_t tl = (this->buffer[llen+1]<<8)+this->buffer[llen+2]; /* topic length in bytes */
-                        memmove(this->buffer+llen+2,this->buffer+llen+3,tl); /* move topic inside buffer 1 byte to front */
-                        this->buffer[llen+2+tl] = 0; /* end the topic as a 'C' string with \x00 */
-                        char *topic = (char*) this->buffer+llen+2;
-                        // msgId only present for QOS>0
-                        if ((this->buffer[0]&0x06) == MQTTQOS1) {
-                            msgId = (this->buffer[llen+3+tl]<<8)+this->buffer[llen+3+tl+1];
-                            payload = this->buffer+llen+3+tl+2;
-                            callback(topic,payload,len-llen-3-tl-2);
+                    uint16_t tl = (this->buffer[llen+1]<<8)+this->buffer[llen+2]; /* topic length in bytes */
+                    memmove(this->buffer+llen+2,this->buffer+llen+3,tl); /* move topic inside buffer 1 byte to front */
+                    this->buffer[llen+2+tl] = 0; /* end the topic as a 'C' string with \x00 */
+                    char *topic = (char*) this->buffer+llen+2;
+                    // msgId only present for QOS>0
+                    if ((this->buffer[0]&0x06) == MQTTQOS1) {
+                        msgId = (this->buffer[llen+3+tl]<<8)+this->buffer[llen+3+tl+1];
+                        payload = this->buffer+llen+3+tl+2;
+                        cb_arbitrator(topic,payload,len-llen-3-tl-2);
 
-                            this->buffer[0] = MQTTPUBACK;
-                            this->buffer[1] = 2;
-                            this->buffer[2] = (msgId >> 8);
-                            this->buffer[3] = (msgId & 0xFF);
-                            _client->write(this->buffer,4);
-                            lastOutActivity = t;
+                        this->buffer[0] = MQTTPUBACK;
+                        this->buffer[1] = 2;
+                        this->buffer[2] = (msgId >> 8);
+                        this->buffer[3] = (msgId & 0xFF);
+                        _client->write(this->buffer,4);
+                        lastOutActivity = t;
 
-                        } else {
-                            payload = this->buffer+llen+3+tl;
-                            callback(topic,payload,len-llen-3-tl);
-                        }
+                    } else {
+                        payload = this->buffer+llen+3+tl;
+                        cb_arbitrator(topic,payload,len-llen-3-tl);
                     }
                 } else if (type == MQTTPINGREQ) {
                     this->buffer[0] = MQTTPINGRESP;
@@ -633,6 +631,24 @@ boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
     }
     return false;
 }
+#ifdef PUBSUB_FUNC_API
+boolean PubSubClient::subscribe(const char* topic, MQTT_CALLBACK_SIGNATURE) {
+    return subscribe(topic, callback, 0);
+}
+boolean PubSubClient::subscribe(const char* topic, MQTT_CALLBACK_SIGNATURE, uint8_t qos) {
+    subscriptions[topic] = callback;
+    tqos[topic] = qos;
+    return subscribe(topic, qos);
+}
+boolean PubSubClient::resubscribe() {
+    for(const auto p : subscriptions) {
+        if(!subscribe(p.first, tqos[p.first])) {
+            return false;
+        }
+    }
+    return true;
+}
+#endif
 
 boolean PubSubClient::unsubscribe(const char* topic) {
 	size_t topicLength = strnlen(topic, this->bufferSize);
@@ -643,6 +659,10 @@ boolean PubSubClient::unsubscribe(const char* topic) {
         // Too long
         return false;
     }
+#ifdef PUBSUB_FUNC_API
+    subscriptions.erase(topic);
+    tqos.erase(topic);
+#endif
     if (connected()) {
         uint16_t length = MQTT_MAX_HEADER_SIZE;
         nextMsgId++;
@@ -680,6 +700,17 @@ uint16_t PubSubClient::writeString(const char* string, uint8_t* buf, uint16_t po
     return pos;
 }
 
+void PubSubClient::cb_arbitrator(char* topic, byte* payload, unsigned int length) {
+#ifdef PUBSUB_FUNC_API
+    const auto cb = subscriptions.find(topic);
+    if(cb != subscriptions.end()) {
+        cb->second(topic, payload, length);
+    } else
+#endif
+    if(callback) {
+        callback(topic, payload, length);
+    }
+}
 
 boolean PubSubClient::connected() {
     boolean rc;
