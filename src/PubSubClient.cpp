@@ -197,7 +197,6 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             nextMsgId = 1;
             // Leave room in the buffer for header and variable length field
             uint16_t length = MQTT_MAX_HEADER_SIZE;
-            unsigned int j;
 
 #if MQTT_VERSION == MQTT_VERSION_3_1
             uint8_t d[9] = {0x00,0x06,'M','Q','I','s','d','p', MQTT_VERSION};
@@ -206,9 +205,8 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             uint8_t d[7] = {0x00,0x04,'M','Q','T','T',MQTT_VERSION};
 #define MQTT_HEADER_VERSION_LENGTH 7
 #endif
-            for (j = 0;j<MQTT_HEADER_VERSION_LENGTH;j++) {
-                this->buffer[length++] = d[j];
-            }
+            memcpy(this->buffer+length,d,MQTT_HEADER_VERSION_LENGTH);
+            length += MQTT_HEADER_VERSION_LENGTH;
 
             uint8_t v;
             if (willTopic) {
@@ -456,11 +454,8 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
         length = writeString(topic,this->buffer,length);
 
         // Add payload
-        uint16_t i;
-        for (i=0;i<plength;i++) {
-            this->buffer[length++] = payload[i];
-        }
-
+        memcpy(this->buffer+length,payload,plength);
+        length += plength;
         // Write the header
         uint8_t header = MQTTPUBLISH;
         if (retained) {
@@ -483,11 +478,8 @@ boolean PubSubClient::publish(const __FlashStringHelper* topic, const uint8_t* p
         length = writeString_P((PGM_P)topic,topicLen,this->buffer,length);
 
         // Add payload
-        uint16_t i;
-        for (i=0;i<plength;i++) {
-            this->buffer[length++] = payload[i];
-        }
-
+        memcpy(this->buffer+length,payload,plength);
+        length += plength;
         // Write the header
         uint8_t header = MQTTPUBLISH;
         if (retained) {
@@ -611,9 +603,7 @@ size_t PubSubClient::buildHeader(uint8_t header, uint8_t* buf, uint16_t length) 
     } while(len>0);
 
     buf[4-llen] = header;
-    for (int i=0;i<llen;i++) {
-        buf[MQTT_MAX_HEADER_SIZE-llen+i] = lenBuf[i];
-    }
+    memcpy(buf+MQTT_MAX_HEADER_SIZE-llen,lenBuf,llen);
     return llen+1; // Full header size is variable length bit plus the 1-byte fixed header
 }
 
