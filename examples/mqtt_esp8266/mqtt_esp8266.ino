@@ -108,7 +108,30 @@ void setup() {
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
+  connectmqtt();
+ 
 }
+
+void connectmqtt()
+{
+  String clientId = "ESP8266Client-";
+  clientId += String(random(0xffff), HEX);
+  client.connect(clientId.c_str()));
+  {
+      Serial.println("connected");
+      // Once connected, publish an announcement...
+     
+      // ... and resubscribe
+      client.subscribe("inTopic");
+       client.publish("outTopic", "hello world");
+
+       if (!client.connected()) 
+  {
+    reconnect();
+   }
+  }
+}
+
 
 void loop() {
 
