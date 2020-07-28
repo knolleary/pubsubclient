@@ -393,29 +393,27 @@ boolean PubSubClient::loop() {
                 lastInActivity = t;
                 uint8_t type = this->buffer[0]&0xF0;
                 if (type == MQTTPUBLISH) {
-                    if (callback) {
-                        uint16_t tl = (this->buffer[llen+1]<<8)+this->buffer[llen+2]; /* topic length in bytes */
-                        memmove(this->buffer+llen+2,this->buffer+llen+3,tl); /* move topic inside buffer 1 byte to front */
-                        this->buffer[llen+2+tl] = 0; /* end the topic as a 'C' string with \x00 */
-                        char *topic = (char*) this->buffer+llen+2;
-                        // msgId only present for QOS>0
-                        if ((this->buffer[0]&0x06) == MQTTQOS1) {
-                            msgId = (this->buffer[llen+3+tl]<<8)+this->buffer[llen+3+tl+1];
-                            payload = this->buffer+llen+3+tl+2;
-                            callback(topic,payload,len-llen-3-tl-2);
+                      uint16_t tl = (this->buffer[llen+1]<<8)+this->buffer[llen+2]; /* topic length in bytes */
+                      memmove(this->buffer+llen+2,this->buffer+llen+3,tl); /* move topic inside buffer 1 byte to front */
+                      this->buffer[llen+2+tl] = 0; /* end the topic as a 'C' string with \x00 */
+                      char *topic = (char*) this->buffer+llen+2;
+                      // msgId only present for QOS>0
+                      if ((this->buffer[0]&0x06) == MQTTQOS1) {
+                          msgId = (this->buffer[llen+3+tl]<<8)+this->buffer[llen+3+tl+1];
+                          payload = this->buffer+llen+3+tl+2;
+                          _callback(topic,payload,len-llen-3-tl-2);
 
-                            this->buffer[0] = MQTTPUBACK;
-                            this->buffer[1] = 2;
-                            this->buffer[2] = (msgId >> 8);
-                            this->buffer[3] = (msgId & 0xFF);
-                            _client->write(this->buffer,4);
-                            lastOutActivity = t;
+                          this->buffer[0] = MQTTPUBACK;
+                          this->buffer[1] = 2;
+                          this->buffer[2] = (msgId >> 8);
+                          this->buffer[3] = (msgId & 0xFF);
+                          _client->write(this->buffer,4);
+                          lastOutActivity = t;
 
-                        } else {
-                            payload = this->buffer+llen+3+tl;
-                            callback(topic,payload,len-llen-3-tl);
-                        }
-                    }
+                      } else {
+                          payload = this->buffer+llen+3+tl;
+                          _callback(topic,payload,len-llen-3-tl);
+                      }
                 } else if (type == MQTTPINGREQ) {
                     this->buffer[0] = MQTTPINGRESP;
                     this->buffer[1] = 0;
@@ -766,4 +764,21 @@ PubSubClient& PubSubClient::setKeepAlive(uint16_t keepAlive) {
 PubSubClient& PubSubClient::setSocketTimeout(uint16_t timeout) {
     this->socketTimeout = timeout;
     return *this;
+}
+
+/**
+ * This method should be overloaded. If the method is not overload the old callback will work
+ *
+ * If the method is overloaded and the parent is called both onCallback and the
+ * old style will get executed
+ */
+void PubSubClient::onCallback(char* topic, byte* payload, unsigned int len) {
+    if (callback) {
+        Serial.println("Legacy callback");
+        callback(topic, payload, len);
+    }
+}
+
+void PubSubClient::_callback(char* topic, byte* payload, unsigned int len) {
+    this->onCallback(topic, payload, len);
 }
