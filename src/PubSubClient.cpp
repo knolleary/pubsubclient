@@ -774,7 +774,6 @@ PubSubClient& PubSubClient::setSocketTimeout(uint16_t timeout) {
  */
 void PubSubClient::onCallback(char* topic, byte* payload, unsigned int len) {
     if (callback) {
-        Serial.println("Legacy callback");
         callback(topic, payload, len);
     }
 }
