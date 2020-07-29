@@ -58,6 +58,7 @@ void loop()
         lastReconnectAttempt = 0;
       }
     }
+   client.loop();
   } else {
     // Client connected
 
