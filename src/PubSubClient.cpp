@@ -257,6 +257,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             while (!_client->available()) {
                 unsigned long t = millis();
                 if (t-lastInActivity >= ((int32_t) this->socketTimeout*1000UL)) {
+                    DEBUG_PSC_PRINTF("connect aborting due to timeout\n");
                     _state = MQTT_CONNECTION_TIMEOUT;
                     _client->stop();
                     return false;
@@ -275,6 +276,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
                     _state = buffer[3];
                 }
             }
+            DEBUG_PSC_PRINTF("connect aborting due to protocol error\n");
             _client->stop();
         } else {
             _state = MQTT_CONNECT_FAILED;
@@ -323,6 +325,7 @@ uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
         if (len == 5) {
             // Invalid remaining length encoding - kill the connection
             _state = MQTT_DISCONNECTED;
+            DEBUG_PSC_PRINTF("readPacket detected packet of invalid length\n");
             _client->stop();
             return 0;
         }
@@ -332,6 +335,8 @@ uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
         multiplier <<=7; //multiplier *= 128
     } while ((digit & 128) != 0);
     *lengthLength = len-1;
+
+    DEBUG_PSC_PRINTF("readPacket received packet of length %u (isPublish = %u)", length, isPublish);
 
     if (isPublish) {
         // Read in topic length to calculate bytes to skip over for Stream writing
@@ -362,6 +367,7 @@ uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
     }
 
     if (!this->stream && idx > this->bufferSize) {
+        DEBUG_PSC_PRINTF("readPacket ignoring packet of size %d exceeding buffer of size %d\n", length, this->bufferSize);
         len = 0; // This will cause the packet to be ignored.
     }
     return len;
@@ -373,6 +379,7 @@ boolean PubSubClient::loop() {
         if ((t - lastInActivity > this->keepAlive*1000UL) || (t - lastOutActivity > this->keepAlive*1000UL)) {
             if (pingOutstanding) {
                 this->_state = MQTT_CONNECTION_TIMEOUT;
+                DEBUG_PSC_PRINTF("loop aborting due to timeout\n");
                 _client->stop();
                 return false;
             } else {
@@ -392,6 +399,7 @@ boolean PubSubClient::loop() {
             if (len > 0) {
                 lastInActivity = t;
                 uint8_t type = this->buffer[0]&0xF0;
+                DEBUG_PSC_PRINTF("received message of type %u\n", type);
                 if (type == MQTTPUBLISH) {
                     if (callback) {
                         uint16_t tl = (this->buffer[llen+1]<<8)+this->buffer[llen+2]; /* topic length in bytes */
@@ -663,6 +671,7 @@ void PubSubClient::disconnect() {
     _client->write(this->buffer,2);
     _state = MQTT_DISCONNECTED;
     _client->flush();
+    DEBUG_PSC_PRINTF("disconnect called");
     _client->stop();
     lastInActivity = lastOutActivity = millis();
 }
@@ -690,6 +699,7 @@ boolean PubSubClient::connected() {
         if (!rc) {
             if (this->_state == MQTT_CONNECTED) {
                 this->_state = MQTT_CONNECTION_LOST;
+                DEBUG_PSC_PRINTF("lost connection (client may have more details)\n");
                 _client->flush();
                 _client->stop();
             }
