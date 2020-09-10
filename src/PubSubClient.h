@@ -95,7 +95,6 @@ private:
    uint16_t nextMsgId;
    unsigned long lastOutActivity;
    unsigned long lastInActivity;
-   bool pingOutstanding;
    MQTT_CALLBACK_SIGNATURE;
    uint32_t readPacket(uint8_t*);
    boolean readByte(uint8_t * result);
@@ -178,6 +177,8 @@ public:
    boolean connected();
    int state();
 
+   bool pingOutstanding;
+   bool subscribeOutstanding;
 };
 
 

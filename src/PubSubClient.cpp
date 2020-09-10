@@ -422,6 +422,8 @@ boolean PubSubClient::loop() {
                     _client->write(this->buffer,2);
                 } else if (type == MQTTPINGRESP) {
                     pingOutstanding = false;
+                } else if (type == MQTTSUBACK) {
+                    subscribeOutstanding = false;
                 }
             } else if (!connected()) {
                 // readPacket has closed the connection
@@ -629,6 +631,7 @@ boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
         this->buffer[length++] = (nextMsgId & 0xFF);
         length = writeString((char*)topic, this->buffer,length);
         this->buffer[length++] = qos;
+        subscribeOutstanding = true;
         return write(MQTTSUBSCRIBE|MQTTQOS1,this->buffer,length-MQTT_MAX_HEADER_SIZE);
     }
     return false;
