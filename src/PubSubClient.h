@@ -179,6 +179,7 @@ public:
 
    bool pingOutstanding;
    bool subscribeOutstanding;
+   bool publishOutstanding;
 };
 
 
