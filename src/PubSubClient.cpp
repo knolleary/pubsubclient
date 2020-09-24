@@ -427,9 +427,6 @@ boolean PubSubClient::loop() {
                     subscribeOutstanding = false;
                 } else if (type == MQTTPUBACK) {
                     publishOutstanding = false;
-                } else {
-                    Serial.print("Unhandled response: ");
-                    Serial.println(type);
                 }
             } else if (!connected()) {
                 // readPacket has closed the connection
