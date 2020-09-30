@@ -39,6 +39,7 @@ boards and shields, including:
  - TI CC3000 WiFi - [library](https://github.com/sparkfun/SFE_CC3000_Library)
  - Intel Galileo/Edison
  - ESP8266
+ - ESP8285
  - ESP32
 
 The library cannot currently be used with hardware based on the ENC28J60 chip –
