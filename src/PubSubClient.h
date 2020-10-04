@@ -21,6 +21,11 @@
 #define MQTT_VERSION MQTT_VERSION_3_1_1
 #endif
 
+// MQTT_MAX_POSSIBLE_PACKET_SIZE : Maximum packet size defined by MQTT protocol.
+#ifndef MQTT_MAX_POSSIBLE_PACKET_SIZE
+#define MQTT_MAX_POSSIBLE_PACKET_SIZE 268435455 
+#endif
+
 // MQTT_MAX_PACKET_SIZE : Maximum packet size. Override with setBufferSize().
 #ifndef MQTT_MAX_PACKET_SIZE
 #define MQTT_MAX_PACKET_SIZE 256
