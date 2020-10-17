@@ -25,8 +25,7 @@ namespace MQTT {
   class ConnectJSON : public Connect {
   public:
     //! Set the "will" flag and attributes, with a JSON object "will" message
-    template <typename J>
-    Connect& set_will(String willTopic, ArduinoJson::Internals::JsonPrintable<J>& willMessage, uint8_t willQos, bool willRetain) {
+    Connect& set_will(String willTopic, const ArduinoJson::JsonDocument& willMessage, uint8_t willQos, bool willRetain) {
       _will_topic = willTopic;
       _will_qos = willQos;
       _will_retain = willRetain;
@@ -34,10 +33,10 @@ namespace MQTT {
       if (_will_message != nullptr)
 	delete [] _will_message;
 
-      _will_message_len = willMessage.measureLength() + 1;
+      _will_message_len = measureJson(willMessage) + 1;
       _will_message = new uint8_t[_will_message_len];
       if (_will_message != nullptr)
-	willMessage.printTo((char*)_will_message, _will_message_len);
+	serializeJson(willMessage, _will_message, _will_message_len);
 
       return *this;
     }
@@ -51,13 +50,12 @@ namespace MQTT {
       \param topic Topic of the message
       \param payload Object of the message
     */
-    template <typename J>
-    PublishJSON(String topic, ArduinoJson::Internals::JsonPrintable<J>& object) :
-      Publish(topic, nullptr, object.measureLength() + 1)
+    PublishJSON(String topic, const ArduinoJson::JsonDocument& object) :
+      Publish(topic, nullptr, measureJson(object) + 1)
     {
       _payload = new uint8_t[_payload_len];
       if (_payload != nullptr)
-	object.printTo((char*)_payload, _payload_len);
+	serializeJson(object, _payload, _payload_len);
     }
 
   };
