@@ -186,6 +186,9 @@ public:
    */
    bool loop();
 
+   //! Is a packet available?
+   bool available() { return connected() && _client.available(); }
+
    //! Are we connected?
    bool connected();
 
