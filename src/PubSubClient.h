@@ -180,8 +180,9 @@ public:
    //! Unsubscribe from a topic
    bool unsubscribe(String topic);
 
-   //! Wait for packets to come in, processing them
+   //! Process a packet if one is available
    /*!
+     \return False if not connected or pinging failed
      Also periodically pings the server
    */
    bool loop();
