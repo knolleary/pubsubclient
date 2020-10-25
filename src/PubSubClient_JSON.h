@@ -33,10 +33,10 @@ namespace MQTT {
       if (_will_message != nullptr)
 	delete [] _will_message;
 
-      _will_message_len = measureJson(willMessage) + 1;
-      _will_message = new uint8_t[_will_message_len];
+      _will_message_len = measureJson(willMessage);
+      _will_message = new uint8_t[_will_message_len + 1];
       if (_will_message != nullptr)
-	serializeJson(willMessage, _will_message, _will_message_len);
+	serializeJson(willMessage, _will_message, _will_message_len + 1);
 
       return *this;
     }
@@ -51,11 +51,11 @@ namespace MQTT {
       \param payload Object of the message
     */
     PublishJSON(String topic, const ArduinoJson::JsonDocument& object) :
-      Publish(topic, nullptr, measureJson(object) + 1)
+      Publish(topic, nullptr, measureJson(object))
     {
-      _payload = new uint8_t[_payload_len];
+      _payload = new uint8_t[_payload_len + 1];
       if (_payload != nullptr)
-	serializeJson(object, _payload, _payload_len);
+	serializeJson(object, _payload, _payload_len + 1);
     }
 
   };
