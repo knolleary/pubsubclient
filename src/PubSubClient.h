@@ -23,7 +23,7 @@
 
 // MQTT_MAX_PACKET_SIZE : Maximum packet size. Override with setBufferSize().
 #ifndef MQTT_MAX_PACKET_SIZE
-#define MQTT_MAX_PACKET_SIZE 256
+#define MQTT_MAX_PACKET_SIZE 512
 #endif
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds. Override with setKeepAlive()
@@ -33,9 +33,21 @@
 
 // MQTT_SOCKET_TIMEOUT: socket timeout interval in Seconds. Override with setSocketTimeout()
 #ifndef MQTT_SOCKET_TIMEOUT
-#define MQTT_SOCKET_TIMEOUT 15
+#define MQTT_SOCKET_TIMEOUT 120
 #endif
 
+
+#ifndef MQTT_QOS1_WAIT_TIME
+#define MQTT_QOS1_WAIT_TIME 200
+#endif
+
+#ifndef MQTT_QOS2_WAIT_TIME
+#define MQTT_QOS2_WAIT_TIME 1000
+#endif
+
+#ifndef MQTT_QOS2_MAX_BUFFER
+#define MQTT_QOS2_MAX_BUFFER 10
+#endif
 // MQTT_MAX_TRANSFER_SIZE : limit how much data is passed to the network client
 //  in each write call. Needed for the Arduino Wifi Shield. Leave undefined to
 //  pass the entire MQTT packet in each write call.
@@ -85,6 +97,21 @@
 
 #define CHECK_STRING_LENGTH(l,s) if (l+2+strnlen(s, this->bufferSize) > this->bufferSize) {_client->stop();return false;}
 
+
+typedef struct qos2_state
+{
+	boolean _qos2Acknowledged[MQTT_QOS2_MAX_BUFFER];
+	uint8_t* _qos2bufferID[MQTT_QOS2_MAX_BUFFER];
+	uint8_t _qos2Flag[MQTT_QOS2_MAX_BUFFER];
+	uint16_t _qos2CurrentIndex;
+	uint16_t _qos2MgsID[MQTT_QOS2_MAX_BUFFER];
+	uint16_t _qos2Plength[MQTT_QOS2_MAX_BUFFER];
+	uint32_t _qos2SentTime[MQTT_QOS2_MAX_BUFFER];
+
+} qos2_state;
+
+
+
 class PubSubClient : public Print {
 private:
    Client* _client;
@@ -112,6 +139,18 @@ private:
    uint16_t port;
    Stream* stream;
    int _state;
+   // added for QOS1 sent publish
+   uint32_t _QOS1_SENT_TIME;
+   boolean _QOS1Acknowledged;
+   int _QOS1MSGID;
+   // uint8_t _SentQOS1buffer[MQTT_MAX_PACKET_SIZE];
+   const uint8_t* _SentQOS1buffer;
+   char _SentQOS1Topic[40];
+   uint16_t _SENTQOS1Length;
+   uint8_t _QOS_TYPE;
+   uint16_t qos2MgsId;
+   uint16_t qos2ARPacketID;	// Auto Retry Packet ID
+
 public:
    PubSubClient();
    PubSubClient(Client& client);
@@ -152,8 +191,12 @@ public:
    boolean publish(const char* topic, const char* payload, boolean retained);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
+   boolean publish_Q1(const char* topic, const uint8_t * payload, unsigned int plength);
+   boolean publish_Q1(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained, boolean QOS1_MSG_Repeat);
    boolean publish_P(const char* topic, const char* payload, boolean retained);
    boolean publish_P(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
+// Added for QOS2
+   boolean qos2Response(uint8_t header, uint16_t qMgsID);
    // Start to publish a message.
    // This API:
    //   beginPublish(...)
