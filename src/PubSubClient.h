@@ -150,6 +150,7 @@ private:
    uint8_t _QOS_TYPE;
    uint16_t qos2MgsId;
    uint16_t qos2ARPacketID;	// Auto Retry Packet ID
+   uint16_t qos2IndexRetry;  //to check wheather the buffer is full or not
 
 public:
    PubSubClient();
@@ -197,6 +198,7 @@ public:
    boolean publish_P(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
 // Added for QOS2
    boolean qos2Response(uint8_t header, uint16_t qMgsID);
+   boolean qos2Emptry(void);
    // Start to publish a message.
    // This API:
    //   beginPublish(...)

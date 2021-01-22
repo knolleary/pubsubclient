@@ -608,7 +608,7 @@ boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsi
       			_qos2Packet._qos2CurrentIndex = 0;
       		}
 
-      		uint16_t qos2IndexRetry = 0;
+      		qos2IndexRetry = 0;
       		while(_qos2Packet._qos2Acknowledged[_qos2Packet._qos2CurrentIndex] == false)
       		{
       			_qos2Packet._qos2CurrentIndex++;
@@ -617,8 +617,9 @@ boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsi
       			_qos2Packet._qos2CurrentIndex = 0;
       			}
       			qos2IndexRetry++;
-      			if(qos2IndexRetry>MQTT_QOS2_MAX_BUFFER){
+      			if(qos2IndexRetry > MQTT_QOS2_MAX_BUFFER){
       				Serial.println("Buffer is full due to unseccessfull transmission.");
+      				return false;
       			}
       		}
 
@@ -665,6 +666,14 @@ boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsi
         return write(header,this->buffer,length-5);
     }
     return false;
+}
+
+boolean PubSubClient::qos2Emptry(void){
+	if(qos2IndexRetry <= MQTT_QOS2_MAX_BUFFER){
+		return true;
+	}else{
+		return false;
+	}
 }
 
 boolean PubSubClient::publish_P(const char* topic, const char* payload, boolean retained) {
