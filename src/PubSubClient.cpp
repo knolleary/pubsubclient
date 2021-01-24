@@ -631,10 +631,11 @@ boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsi
             length=length+2;
             _qos2Packet._qos2Flag[_qos2Packet._qos2CurrentIndex] = MQTTPUBLISH;
             _qos2Packet._qos2SentTime[_qos2Packet._qos2CurrentIndex]=millis();
-            _qos2Packet._qos2CurrentIndex++;
+            
             //debug
-            Serial.print("[PubSubClient]*MQQT qos2 publish MGS id:"); Serial.println(_qos2Packet._qos2MgsID[_qos2Packet._qos2CurrentIndex]); 
-      			
+            Serial.print("[PubSubClient]*MQQT qos2 publish MGS id:"); Serial.println(_qos2Packet._qos2MgsID[_qos2Packet._qos2CurrentIndex]);
+
+            _qos2Packet._qos2CurrentIndex++;      			
       	}
 
                             
@@ -674,6 +675,21 @@ boolean PubSubClient::qos2Emptry(void){
 	}else{
 		return false;
 	}
+}
+
+uint8_t* PubSubClient::qos2BufferAddr(void)
+{
+   	uint16_t tempBufID = 0;
+   	while (tempBufID < MQTT_QOS2_MAX_BUFFER)
+   	{
+   		if(_qos2Packet._qos2Acknowledged[tempBufID] == false)
+   		{
+   			return _qos2Packet._qos2bufferID[tempBufID];
+
+   		}
+   		tempBufID++;
+   	}
+   	return NULL;   	
 }
 
 boolean PubSubClient::publish_P(const char* topic, const char* payload, boolean retained) {

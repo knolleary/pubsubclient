@@ -199,6 +199,9 @@ public:
 // Added for QOS2
    boolean qos2Response(uint8_t header, uint16_t qMgsID);
    boolean qos2Emptry(void);
+   uint8_t* qos2BufferAddr(void);
+  
+
    // Start to publish a message.
    // This API:
    //   beginPublish(...)
