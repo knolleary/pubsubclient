@@ -368,7 +368,7 @@ uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
 }
 
 boolean PubSubClient::loop_read() {
-    if (_client == nullptr) {
+    if (_client == NULL) {
         return false;
     }
     if (!_client->available()) {
