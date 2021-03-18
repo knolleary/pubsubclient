@@ -299,8 +299,8 @@ boolean PubSubClient::readByte(uint8_t * result) {
 }
 
 // reads a byte into result[*index] and increments index
-boolean PubSubClient::readByte(uint8_t * result, uint16_t * index){
-  uint16_t current_index = *index;
+boolean PubSubClient::readByte(uint8_t * result, uint32_t * index){
+  uint32_t current_index = *index;
   uint8_t * write_address = &(result[current_index]);
   if(readByte(write_address)){
     *index = current_index + 1;
@@ -310,7 +310,7 @@ boolean PubSubClient::readByte(uint8_t * result, uint16_t * index){
 }
 
 uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
-    uint16_t len = 0;
+    uint32_t len = 0;
     if(!readByte(this->buffer, &len)) return 0;
     bool isPublish = (this->buffer[0]&0xF0) == MQTTPUBLISH;
     uint32_t multiplier = 1;
@@ -554,12 +554,12 @@ size_t PubSubClient::write(const uint8_t *buffer, size_t size) {
     return _client->write(buffer,size);
 }
 
-size_t PubSubClient::buildHeader(uint8_t header, uint8_t* buf, uint16_t length) {
+size_t PubSubClient::buildHeader(uint8_t header, uint8_t* buf, uint32_t length) {
     uint8_t lenBuf[4];
     uint8_t llen = 0;
     uint8_t digit;
     uint8_t pos = 0;
-    uint16_t len = length;
+    uint32_t len = length;
     do {
 
         digit = len  & 127; //digit = len %128
@@ -578,13 +578,13 @@ size_t PubSubClient::buildHeader(uint8_t header, uint8_t* buf, uint16_t length) 
     return llen+1; // Full header size is variable length bit plus the 1-byte fixed header
 }
 
-boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
-    uint16_t rc;
+boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint32_t length) {
+    uint32_t rc;
     uint8_t hlen = buildHeader(header, buf, length);
 
 #ifdef MQTT_MAX_TRANSFER_SIZE
     uint8_t* writeBuf = buf+(MQTT_MAX_HEADER_SIZE-hlen);
-    uint16_t bytesRemaining = length+hlen;  //Match the length type
+    uint32_t bytesRemaining = length+hlen;  //Match the length type
     uint8_t bytesToWrite;
     boolean result = true;
     while((bytesRemaining > 0) && result) {
