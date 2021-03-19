@@ -8,6 +8,10 @@
 #include "PubSubClient.h"
 #include "Arduino.h"
 
+#ifdef ESP32
+#include <WiFi.h>
+#endif
+
 PubSubClient::PubSubClient() {
     this->_state = MQTT_DISCONNECTED;
     this->_client = NULL;
@@ -182,14 +186,23 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
     if (!connected()) {
         int result = 0;
 
-
         if(_client->connected()) {
             result = 1;
         } else {
             if (domain != NULL) {
+#ifdef ESP32
+                WiFiClient* wfc = (WiFiClient*)_client;
+                result = wfc->connect(this->domain, this->port, ESP32_CONNECTION_TIMEOUT);
+#else
                 result = _client->connect(this->domain, this->port);
+#endif
             } else {
+#ifdef ESP32
+                WiFiClient* wfc = (WiFiClient*)_client;
+                result = wfc->connect(this->ip, this->port, ESP32_CONNECTION_TIMEOUT);
+#else
                 result = _client->connect(this->ip, this->port);
+#endif
             }
         }
 
