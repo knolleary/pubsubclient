@@ -89,7 +89,7 @@ class PubSubClient : public Print {
 private:
    Client* _client;
    uint8_t* buffer;
-   uint16_t bufferSize;
+   uint32_t bufferSize;
    uint16_t keepAlive;
    uint16_t socketTimeout;
    uint16_t nextMsgId;
@@ -139,7 +139,7 @@ public:
    PubSubClient& setKeepAlive(uint16_t keepAlive);
    PubSubClient& setSocketTimeout(uint16_t timeout);
 
-   boolean setBufferSize(uint16_t size);
+   boolean setBufferSize(uint32_t size);
    uint16_t getBufferSize();
 
    boolean connect(const char* id);

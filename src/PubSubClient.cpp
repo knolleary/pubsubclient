@@ -316,7 +316,7 @@ uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
     uint32_t multiplier = 1;
     uint32_t length = 0;
     uint8_t digit = 0;
-    uint16_t skip = 0;
+    uint32_t skip = 0;
     uint32_t start = 0;
 
     do {
@@ -386,7 +386,7 @@ boolean PubSubClient::loop() {
         }
         if (_client->available()) {
             uint8_t llen;
-            uint16_t len = readPacket(&llen);
+            uint32_t len = readPacket(&llen);
             uint16_t msgId = 0;
             uint8_t *payload;
             if (len > 0) {
@@ -394,7 +394,7 @@ boolean PubSubClient::loop() {
                 uint8_t type = this->buffer[0]&0xF0;
                 if (type == MQTTPUBLISH) {
                     if (callback) {
-                        uint16_t tl = (this->buffer[llen+1]<<8)+this->buffer[llen+2]; /* topic length in bytes */
+                        uint32_t tl = (this->buffer[llen+1]<<8)+this->buffer[llen+2]; /* topic length in bytes */
                         memmove(this->buffer+llen+2,this->buffer+llen+3,tl); /* move topic inside buffer 1 byte to front */
                         this->buffer[llen+2+tl] = 0; /* end the topic as a 'C' string with \x00 */
                         char *topic = (char*) this->buffer+llen+2;
@@ -452,11 +452,11 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
             return false;
         }
         // Leave room in the buffer for header and variable length field
-        uint16_t length = MQTT_MAX_HEADER_SIZE;
+        uint32_t length = MQTT_MAX_HEADER_SIZE;
         length = writeString(topic,this->buffer,length);
 
         // Add payload
-        uint16_t i;
+        uint32_t i;
         for (i=0;i<plength;i++) {
             this->buffer[length++] = payload[i];
         }
@@ -479,7 +479,7 @@ boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsig
     uint8_t llen = 0;
     uint8_t digit;
     unsigned int rc = 0;
-    uint16_t tlen;
+    uint32_t tlen;
     unsigned int pos = 0;
     unsigned int i;
     uint8_t header;
@@ -526,14 +526,14 @@ boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsig
 boolean PubSubClient::beginPublish(const char* topic, unsigned int plength, boolean retained) {
     if (connected()) {
         // Send the header and variable length field
-        uint16_t length = MQTT_MAX_HEADER_SIZE;
+        uint32_t length = MQTT_MAX_HEADER_SIZE;
         length = writeString(topic,this->buffer,length);
         uint8_t header = MQTTPUBLISH;
         if (retained) {
             header |= 1;
         }
         size_t hlen = buildHeader(header, this->buffer, plength+length-MQTT_MAX_HEADER_SIZE);
-        uint16_t rc = _client->write(this->buffer+(MQTT_MAX_HEADER_SIZE-hlen),length-(MQTT_MAX_HEADER_SIZE-hlen));
+        uint32_t rc = _client->write(this->buffer+(MQTT_MAX_HEADER_SIZE-hlen),length-(MQTT_MAX_HEADER_SIZE-hlen));
         lastOutActivity = millis();
         return (rc == (length-(MQTT_MAX_HEADER_SIZE-hlen)));
     }
@@ -620,7 +620,7 @@ boolean PubSubClient::subscribe(const char* topic, uint8_t qos) {
     }
     if (connected()) {
         // Leave room in the buffer for header and variable length field
-        uint16_t length = MQTT_MAX_HEADER_SIZE;
+        uint32_t length = MQTT_MAX_HEADER_SIZE;
         nextMsgId++;
         if (nextMsgId == 0) {
             nextMsgId = 1;
@@ -644,7 +644,7 @@ boolean PubSubClient::unsubscribe(const char* topic) {
         return false;
     }
     if (connected()) {
-        uint16_t length = MQTT_MAX_HEADER_SIZE;
+        uint32_t length = MQTT_MAX_HEADER_SIZE;
         nextMsgId++;
         if (nextMsgId == 0) {
             nextMsgId = 1;
@@ -737,7 +737,7 @@ int PubSubClient::state() {
     return this->_state;
 }
 
-boolean PubSubClient::setBufferSize(uint16_t size) {
+boolean PubSubClient::setBufferSize(uint32_t size) {
     if (size == 0) {
         // Cannot set it back to 0
         return false;
