@@ -308,6 +308,7 @@ boolean PubSubClient::loop() {
                         if ((this->buffer[0]&0x06) == MQTTQOS1) {
                             msgId = (this->buffer[llen+3+tl]<<8)+this->buffer[llen+3+tl+1];
                             callback(topic,_client, len);
+                            _client->flush();
 
                             this->buffer[0] = MQTTPUBACK;
                             this->buffer[1] = 2;
@@ -318,6 +319,7 @@ boolean PubSubClient::loop() {
 
                         } else {
                             callback(topic,_client, len);
+                            _client->flush();
                         }
                     }
                 } else if (type == MQTTPINGREQ) {
