@@ -307,7 +307,7 @@ boolean PubSubClient::loop() {
                         // msgId only present for QOS>0
                         if ((this->buffer[0]&0x06) == MQTTQOS1) {
                             msgId = (this->buffer[llen+3+tl]<<8)+this->buffer[llen+3+tl+1];
-                            callback(topic,_client);
+                            callback(topic,_client, len);
 
                             this->buffer[0] = MQTTPUBACK;
                             this->buffer[1] = 2;
@@ -317,7 +317,7 @@ boolean PubSubClient::loop() {
                             lastOutActivity = t;
 
                         } else {
-                            callback(topic,_client);
+                            callback(topic,_client, len);
                         }
                     }
                 } else if (type == MQTTPINGREQ) {
