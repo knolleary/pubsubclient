@@ -33,7 +33,7 @@
 
 // MQTT_SOCKET_TIMEOUT: socket timeout interval in Seconds. Override with setSocketTimeout()
 #ifndef MQTT_SOCKET_TIMEOUT
-#define MQTT_SOCKET_TIMEOUT 120
+#define MQTT_SOCKET_TIMEOUT 10
 #endif
 
 
@@ -46,7 +46,7 @@
 #endif
 
 #ifndef MQTT_QOS2_MAX_BUFFER
-#define MQTT_QOS2_MAX_BUFFER 10
+#define MQTT_QOS2_MAX_BUFFER 120
 #endif
 // MQTT_MAX_TRANSFER_SIZE : limit how much data is passed to the network client
 //  in each write call. Needed for the Arduino Wifi Shield. Leave undefined to
@@ -198,7 +198,9 @@ public:
    boolean publish_P(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
 // Added for QOS2
    boolean qos2Response(uint8_t header, uint16_t qMgsID);
-   boolean qos2Emptry(void);
+   uint16_t qos2Empty(void);
+   boolean qos2Full(void);
+   void qos2ResetBuff(void);
    uint8_t* qos2BufferAddr(void);
   
 

@@ -9,6 +9,7 @@
 #include "Arduino.h"
 
 qos2_state _qos2Packet;
+uint16_t buffPending;
 
 PubSubClient::PubSubClient() {
     this->_state = MQTT_DISCONNECTED;
@@ -405,15 +406,17 @@ boolean PubSubClient::loop() {
             }
         }
         
+        t = millis();
         if ((t - _QOS1_SENT_TIME >= MQTT_QOS1_WAIT_TIME) && (_QOS1Acknowledged==false)){  // Resend QOS1 message if not acknowledged
            //debug   Serial.print("*MQQT q1 RESENDING");
               publish_Q1(_SentQOS1Topic, _SentQOS1buffer, _SENTQOS1Length, false,true);   // send last message again
               _QOS1_SENT_TIME = millis();                                                   //Reset timer
         }
 
-        //-----------------------For QOS2 only-----------------
+        //------------------------------For QOS2 only---------------------
         t = millis();
-        if(((t - _qos2Packet._qos2SentTime[qos2ARPacketID]) > MQTT_QOS2_WAIT_TIME) && _qos2Packet._qos2Acknowledged[qos2ARPacketID] == false){
+        if(((t - _qos2Packet._qos2SentTime[qos2ARPacketID]) > MQTT_QOS2_WAIT_TIME) && (_qos2Packet._qos2Acknowledged[qos2ARPacketID] == false))
+        {
         	
         	if(_qos2Packet._qos2Flag[qos2ARPacketID] == MQTTPUBLISH)
         	{
@@ -430,9 +433,8 @@ boolean PubSubClient::loop() {
         		_qos2Packet._qos2Flag[qos2ARPacketID] = MQTTPUBREL;   
         		_qos2Packet._qos2SentTime[qos2ARPacketID] = millis();   
         	}
-
 		}
-
+		
 		qos2ARPacketID++;
     	if(qos2ARPacketID >= MQTT_QOS2_MAX_BUFFER)
     	{
@@ -480,7 +482,8 @@ boolean PubSubClient::loop() {
                 } else if (type == MQTTPINGRESP) {
                     pingOutstanding = false;
                 } else if (type == MQTTPUBACK) { 
-          //debug      Serial.print("*MQQT PUBACK mid:"); Serial.println(((buffer[2]<<8)+ buffer[3])); Serial.print(" looking for:"); Serial.println(_QOS1MSGID);      
+          //debug      
+                	Serial.print("*MQQT PUBACK mid:"); Serial.println(((buffer[2]<<8)+ buffer[3])); Serial.print(" looking for:"); Serial.println(_QOS1MSGID);      
                     if (((buffer[2]<<8)+ buffer[3])==_QOS1MSGID){ 
           //debug          Serial.println(" --- PUBACK SEEN:----");
                     _QOS1Acknowledged=true; 
@@ -617,8 +620,8 @@ boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsi
       			_qos2Packet._qos2CurrentIndex = 0;
       			}
       			qos2IndexRetry++;
-      			if(qos2IndexRetry > MQTT_QOS2_MAX_BUFFER){
-      				Serial.println("Buffer is full due to unseccessfull transmission.");
+      			if(qos2IndexRetry >= MQTT_QOS2_MAX_BUFFER){
+      				Serial.println("[PubSubClient]Buffer is full....processing queue.");
       				return false;
       			}
       		}
@@ -669,13 +672,39 @@ boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsi
     return false;
 }
 
-boolean PubSubClient::qos2Emptry(void){
-	if(qos2IndexRetry <= MQTT_QOS2_MAX_BUFFER){
+boolean PubSubClient::qos2Full(void)
+{
+	if(qos2IndexRetry >= MQTT_QOS2_MAX_BUFFER){
 		return true;
 	}else{
 		return false;
 	}
 }
+
+uint16_t PubSubClient::qos2Empty(void){
+	uint16_t i = 0; 
+	buffPending = 0;
+	while(i <MQTT_QOS2_MAX_BUFFER)
+	{
+		if(_qos2Packet._qos2Acknowledged[i] == false){
+			buffPending++;
+		}
+		i++;
+	}
+
+	return buffPending;
+}
+
+void PubSubClient::qos2ResetBuff(void){
+	uint16_t i = 0; 
+	// buffPending = 0;
+	while(i <MQTT_QOS2_MAX_BUFFER)
+	{
+		_qos2Packet._qos2Acknowledged[i] = true;
+		i++;
+	}
+}
+
 
 uint8_t* PubSubClient::qos2BufferAddr(void)
 {
@@ -816,10 +845,16 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
         bytesRemaining -= rc;
         writeBuf += rc;
     }
+    Serial.println("[PubSubClient] write output:"+result);
     return result;
 #else
     rc = _client->write(buf+(MQTT_MAX_HEADER_SIZE-hlen),length+hlen);
     lastOutActivity = millis();
+    Serial.print("[PubSubClient] write output rc: ");
+    Serial.print(rc);
+    Serial.print(" len: "); 
+    uint16_t tlen = hlen+length;
+    Serial.println(tlen);
     return (rc == hlen+length);
 #endif
 }
