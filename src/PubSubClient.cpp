@@ -8,6 +8,14 @@
 #include "PubSubClient.h"
 #include "Arduino.h"
 
+#if defined(BS_V2)
+    #define debugmq(...)        Serial1.print(__VA_ARGS__)
+    #define debugmqln(...)      Serial1.println(__VA_ARGS__)
+#else
+    #define debugmq(...)        Serial.print(__VA_ARGS__)
+    #define debugmqln(...)      Serial.println(__VA_ARGS__)
+#endif
+
 qos2_state _qos2Packet;
 uint16_t buffPending;
 
@@ -408,7 +416,7 @@ boolean PubSubClient::loop() {
         
         t = millis();
         if ((t - _QOS1_SENT_TIME >= MQTT_QOS1_WAIT_TIME) && (_QOS1Acknowledged==false)){  // Resend QOS1 message if not acknowledged
-           //debug   Serial.print("*MQQT q1 RESENDING");
+           //debug   debugmq("*MQQT q1 RESENDING");
               publish_Q1(_SentQOS1Topic, _SentQOS1buffer, _SENTQOS1Length, false,true);   // send last message again
               _QOS1_SENT_TIME = millis();                                                   //Reset timer
         }
@@ -420,7 +428,7 @@ boolean PubSubClient::loop() {
         	
         	if(_qos2Packet._qos2Flag[qos2ARPacketID] == MQTTPUBLISH)
         	{
-        		Serial.println("[PubSubClient]-- retrying QOS2 MQTTPUBLISH--");
+        		debugmqln("[PubSubClient]-- retrying QOS2 MQTTPUBLISH--");
         		uint16_t tempPacketID = _qos2Packet._qos2CurrentIndex;
         		_qos2Packet._qos2CurrentIndex = qos2ARPacketID;
         		_qos2Packet._qos2Acknowledged[qos2ARPacketID] = true;
@@ -428,7 +436,7 @@ boolean PubSubClient::loop() {
         		_qos2Packet._qos2CurrentIndex = tempPacketID;
         		
         	}else if(_qos2Packet._qos2Flag[qos2ARPacketID] == MQTTPUBREL){
-        		Serial.println("[PubSubClient]-- retrying QOS2 MQTTPUBREL--");
+        		debugmqln("[PubSubClient]-- retrying QOS2 MQTTPUBREL--");
         		qos2Response(MQTTPUBREL | MQTTQOS1 , qos2ARPacketID+1);
         		_qos2Packet._qos2Flag[qos2ARPacketID] = MQTTPUBREL;   
         		_qos2Packet._qos2SentTime[qos2ARPacketID] = millis();   
@@ -458,7 +466,7 @@ boolean PubSubClient::loop() {
                         this->buffer[llen+2+tl] = 0; /* end the topic as a 'C' string with \x00 */
                         char *topic = (char*) this->buffer+llen+2;
                         // msgId only present for QOS>0
-                        if ((this->buffer[0]&0x06) == MQTTQOS1) {
+                        if ((this->buffer[0] & 0x06) == MQTTQOS1) {
                             msgId = (this->buffer[llen+3+tl]<<8)+this->buffer[llen+3+tl+1];
                             payload = this->buffer+llen+3+tl+2;
                             callback(topic,payload,len-llen-3-tl-2);
@@ -467,7 +475,7 @@ boolean PubSubClient::loop() {
                             this->buffer[1] = 2;
                             this->buffer[2] = (msgId >> 8);
                             this->buffer[3] = (msgId & 0xFF);
-                            _client->write(this->buffer,4);
+                            _client->write(this->buffer,4);3
                             lastOutActivity = t;
 
                         } else {
@@ -483,31 +491,31 @@ boolean PubSubClient::loop() {
                     pingOutstanding = false;
                 } else if (type == MQTTPUBACK) { 
           //debug      
-                	Serial.print("*MQQT PUBACK mid:"); Serial.println(((buffer[2]<<8)+ buffer[3])); Serial.print(" looking for:"); Serial.println(_QOS1MSGID);      
+                	debugmq("*MQQT PUBACK mid:"); debugmqln(((buffer[2]<<8)+ buffer[3])); debugmq(" looking for:"); debugmqln(_QOS1MSGID);      
                     if (((buffer[2]<<8)+ buffer[3])==_QOS1MSGID){ 
-          //debug          Serial.println(" --- PUBACK SEEN:----");
+          //debug          debugmqln(" --- PUBACK SEEN:----");
                     _QOS1Acknowledged=true; 
-                    Serial.println("[PubSubClient]--- Qos1 Acknowledged ---");
+                    debugmqln("[PubSubClient]--- Qos1 Acknowledged ---");
                 	}
                 } else if(type == MQTTPUBREC){
-                	qos2MgsId = (buffer[2]<<8)+ buffer[3];
+                	qos2MgsId = (buffer[2] << 8) + buffer[3];
                 	if (qos2MgsId == _qos2Packet._qos2MgsID[qos2MgsId-1]){ 
           //debug          
-                		Serial.print("[PubSubClient]--- PUBREC SEEN: ----for mid: ");
-                		Serial.println(qos2MgsId);
+                		debugmq("[PubSubClient]--- PUBREC SEEN: ----for mid: ");
+                		debugmqln(qos2MgsId);
                     	if(_qos2Packet._qos2Flag[qos2MgsId-1] == MQTTPUBLISH)
                     	{
                             qos2Response(MQTTPUBREL | MQTTQOS1 , qos2MgsId);
                     		_qos2Packet._qos2Flag[qos2MgsId-1] = MQTTPUBREL;   
                     		_qos2Packet._qos2SentTime[qos2MgsId-1] = millis();          
                     	}
-                    // Serial.println("[PubSubClient]Qos1 Acknowledged");
+                    // debugmqln("[PubSubClient]Qos1 Acknowledged");
                 	}
                 } else if(type == MQTTPUBCOMP){
-                	qos2MgsId = (buffer[2]<<8)+ buffer[3];
+                	qos2MgsId = (buffer[2] << 8)+ buffer[3];
                 	if (qos2MgsId == _qos2Packet._qos2MgsID[qos2MgsId-1]){
-                		Serial.print("[PubSubClient]--- Qos2 Acknowledged:--- for mid: ");
-                		Serial.println(qos2MgsId);
+                		debugmq("[PubSubClient]--- Qos2 Acknowledged:--- for mid: ");
+                		debugmqln(qos2MgsId);
                 		_qos2Packet._qos2Acknowledged[qos2MgsId-1] = true;
                 		_qos2Packet._qos2bufferID[qos2MgsId-1] = NULL;
                 		_qos2Packet._qos2SentTime[qos2MgsId-1] = NULL;
@@ -587,7 +595,7 @@ boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsi
         length = writeString(topic,this->buffer,length);
         uint16_t i;
         strncpy(_SentQOS1Topic,topic,20);                                   
-        // for (i=0;i<plength;i++) { _SentQOS1buffer[i]=payload[i];/*Serial.print("Data ")*/}         
+        // for (i=0;i<plength;i++) { _SentQOS1buffer[i]=payload[i];/*debugmq("Data ")*/}         
         // _SentQOS1buffer[sizeof(payload)-1]='\0';
         _SentQOS1buffer = payload;
         _SENTQOS1Length = plength;
@@ -604,7 +612,7 @@ boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsi
               _QOS1_SENT_TIME=millis();                                    // set time for PUBACK check
               _QOS1Acknowledged=false;                                     // set Acknowledged flag false    
       		//debug      
-              Serial.print("[PubSubClient]*MQQT qos1 publish mid:"); Serial.println(_QOS1MSGID); 
+              debugmq("[PubSubClient]*MQQT qos1 publish mid:"); debugmqln(_QOS1MSGID); 
       	}else if(_QOS_TYPE==2){
       		if(_qos2Packet._qos2CurrentIndex>=MQTT_QOS2_MAX_BUFFER)
       		{
@@ -621,7 +629,7 @@ boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsi
       			}
       			qos2IndexRetry++;
       			if(qos2IndexRetry >= MQTT_QOS2_MAX_BUFFER){
-      				Serial.println("[PubSubClient]Buffer is full....processing queue.");
+      				debugmqln("[PubSubClient]Buffer is full....processing queue.");
       				return false;
       			}
       		}
@@ -636,7 +644,7 @@ boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsi
             _qos2Packet._qos2SentTime[_qos2Packet._qos2CurrentIndex]=millis();
             
             //debug
-            Serial.print("[PubSubClient]*MQQT qos2 publish MGS id:"); Serial.println(_qos2Packet._qos2MgsID[_qos2Packet._qos2CurrentIndex]);
+            debugmq("[PubSubClient]*MQQT qos2 publish MGS id:"); debugmqln(_qos2Packet._qos2MgsID[_qos2Packet._qos2CurrentIndex]);
 
             _qos2Packet._qos2CurrentIndex++;      			
       	}
@@ -646,14 +654,14 @@ boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsi
             this->buffer[length++] = payload[i];
         }
         //debug
-        // Serial.print("Full Data With payload: ");
+        // debugmq("Full Data With payload: ");
         // for (i=0;i<=length;i++) {
-        // 	Serial.print(this->buffer[i]);
-        // 	Serial.print(" ");
+        // 	debugmq(this->buffer[i]);
+        // 	debugmq(" ");
         //     // this->buffer[length++] = payload[i];
         // }
 
-        // Serial.println("");
+        // debugmqln("");
         uint8_t header;
 
         if(_QOS_TYPE == 1)
@@ -666,7 +674,7 @@ boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsi
                                // Main change so it sends qos 1     
         if (retained) { header |= 1; }    
                                                 // set for follow up
-     //debug  if((_QOS1MSGID>=10)&&(QOS1_MSG_Repeat==false)) {Serial.print("testing retry");return true;}    // test - deliberately do not send - so that retry will be activated
+     //debug  if((_QOS1MSGID>=10)&&(QOS1_MSG_Repeat==false)) {debugmq("testing retry");return true;}    // test - deliberately do not send - so that retry will be activated
         return write(header,this->buffer,length-5);
     }
     return false;
@@ -831,7 +839,7 @@ size_t PubSubClient::buildHeader(uint8_t header, uint8_t* buf, uint16_t length) 
 boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
     uint16_t rc;
     uint8_t hlen = buildHeader(header, buf, length);
-    // Serial.println((char*)buf);
+    // debugmqln((char*)buf);
 #ifdef MQTT_MAX_TRANSFER_SIZE
     uint8_t* writeBuf = buf+(MQTT_MAX_HEADER_SIZE-hlen);
 
@@ -845,16 +853,16 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
         bytesRemaining -= rc;
         writeBuf += rc;
     }
-    Serial.println("[PubSubClient] write output:"+result);
+    debugmqln("[PubSubClient] write output:"+result);
     return result;
 #else
     rc = _client->write(buf+(MQTT_MAX_HEADER_SIZE-hlen),length+hlen);
     lastOutActivity = millis();
-    Serial.print("[PubSubClient] write output rc: ");
-    Serial.print(rc);
-    Serial.print(" len: "); 
+    debugmq("[PubSubClient] write output rc: ");
+    debugmq(rc);
+    debugmq(" len: "); 
     uint16_t tlen = hlen+length;
-    Serial.println(tlen);
+    debugmqln(tlen);
     return (rc == hlen+length);
 #endif
 }
