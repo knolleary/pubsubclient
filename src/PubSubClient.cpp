@@ -475,7 +475,7 @@ boolean PubSubClient::loop() {
                             this->buffer[1] = 2;
                             this->buffer[2] = (msgId >> 8);
                             this->buffer[3] = (msgId & 0xFF);
-                            _client->write(this->buffer,4);3
+                            _client->write(this->buffer,4);
                             lastOutActivity = t;
 
                         } else {
