@@ -194,12 +194,14 @@ public:
    boolean publish(const char* topic, const char* payload, boolean retained);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
-   boolean publish_Q1(const char* topic, const uint8_t * payload, unsigned int plength);
-   boolean publish_Q1(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained, boolean QOS1_MSG_Repeat);
+   boolean publish_Q1(const char* topic, const uint8_t * payload, unsigned int plength,uint8_t msgId);
+   boolean publish_Q1(const char* topic, const uint8_t* payload, unsigned int plength);
+   boolean publish_Q1(const char* topic, const uint8_t * payload, unsigned int plength,uint8_t mid, boolean retained, boolean QOS1_MSG_Repeat);
    boolean publish_P(const char* topic, const char* payload, boolean retained);
    boolean publish_P(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
 // Added for QOS2
    boolean qos2Response(uint8_t header, uint16_t qMgsID);
+   boolean isqos2ack(uint8_t mid);
    uint16_t qos2Empty(void);
    boolean qos2Full(void);
    void qos2ResetBuff(void);

@@ -18,6 +18,7 @@
 
 qos2_state _qos2Packet;
 uint16_t buffPending;
+uint8_t pipeMgsID;
 
 PubSubClient::PubSubClient() {
     this->_state = MQTT_DISCONNECTED;
@@ -417,7 +418,7 @@ boolean PubSubClient::loop() {
         t = millis();
         if ((t - _QOS1_SENT_TIME >= MQTT_QOS1_WAIT_TIME) && (_QOS1Acknowledged==false)){  // Resend QOS1 message if not acknowledged
            //debug   debugmq("*MQQT q1 RESENDING");
-              publish_Q1(_SentQOS1Topic, _SentQOS1buffer, _SENTQOS1Length, false,true);   // send last message again
+              publish_Q1(_SentQOS1Topic, _SentQOS1buffer, _SENTQOS1Length, NULL, false,true);   // send last message again
               _QOS1_SENT_TIME = millis();                                                   //Reset timer
         }
 
@@ -542,6 +543,11 @@ boolean PubSubClient::qos2Response(uint8_t header, uint16_t qMgsID)
     return _client->write(this->buffer,4);
 }
 
+boolean PubSubClient::isqos2ack(uint8_t mid)
+{
+    return _qos2Packet._qos2Acknowledged[mid-1];
+}
+
 boolean PubSubClient::publish(const char* topic, const char* payload) {
     return publish(topic,(const uint8_t*)payload, payload ? strnlen(payload, this->bufferSize) : 0,false);
 }
@@ -581,10 +587,13 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
 }
 
 boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsigned int plength) {
-    return publish_Q1(topic, payload, plength, false,false);
+    return publish_Q1(topic, payload, plength, NULL, false,false);
+}
+boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsigned int plength, uint8_t msgId) {
+    return publish_Q1(topic, payload, plength, msgId, false,false);
 }
 
-boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained, boolean QOS1_MSG_Repeat) {
+boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsigned int plength, uint8_t mid, boolean retained, boolean QOS1_MSG_Repeat) {
     if (connected()) {
         if (MQTT_MAX_PACKET_SIZE < 5 + 2+strlen(topic) + plength) {
             // Too long
@@ -620,25 +629,41 @@ boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsi
       		}
 
       		qos2IndexRetry = 0;
-      		while(_qos2Packet._qos2Acknowledged[_qos2Packet._qos2CurrentIndex] == false)
-      		{
-      			_qos2Packet._qos2CurrentIndex++;
-      			if(_qos2Packet._qos2CurrentIndex>=MQTT_QOS2_MAX_BUFFER)
-      			{
-      			_qos2Packet._qos2CurrentIndex = 0;
-      			}
-      			qos2IndexRetry++;
-      			if(qos2IndexRetry >= MQTT_QOS2_MAX_BUFFER){
-      				debugmqln("[PubSubClient]Buffer is full....processing queue.");
-      				return false;
-      			}
-      		}
+            if(mid)
+            {
+                if(_qos2Packet._qos2Acknowledged[mid-1] == false)
+                {
+                    debugmqln("[PubSubClient]Buffer is full....processing queue.");
+                    return false;
+                }
+                else
+                {
+                    _qos2Packet._qos2CurrentIndex = (mid-1);
+                }
+            }
+            else
+            {
+                while(_qos2Packet._qos2Acknowledged[_qos2Packet._qos2CurrentIndex] == false)
+                {
+                    _qos2Packet._qos2CurrentIndex++;
+                    if(_qos2Packet._qos2CurrentIndex>=MQTT_QOS2_MAX_BUFFER)
+                    {
+                        _qos2Packet._qos2CurrentIndex = 0;
+                    }
+                    qos2IndexRetry++;
+                    if(qos2IndexRetry >= MQTT_QOS2_MAX_BUFFER){
+                        debugmqln("[PubSubClient]Buffer is full....processing queue.");
+                        return false;
+                    }
+                }
+            }
+      		
 
       		_qos2Packet._qos2Acknowledged[_qos2Packet._qos2CurrentIndex] = false;
       		_qos2Packet._qos2bufferID[_qos2Packet._qos2CurrentIndex] = (uint8_t*)payload;
       		_qos2Packet._qos2Plength[_qos2Packet._qos2CurrentIndex] = plength;
-      		this->buffer[length]=(_qos2Packet._qos2MgsID[_qos2Packet._qos2CurrentIndex] >> 8);                            //add msg id for qos1
-            this->buffer[length+1]= (_qos2Packet._qos2MgsID[_qos2Packet._qos2CurrentIndex] & 0xFF);                       // 
+      		this->buffer[length] = (_qos2Packet._qos2MgsID[_qos2Packet._qos2CurrentIndex] >> 8);                            //add msg id for qos1
+            this->buffer[length+1] = (_qos2Packet._qos2MgsID[_qos2Packet._qos2CurrentIndex] & 0xFF);                       // 
             length=length+2;
             _qos2Packet._qos2Flag[_qos2Packet._qos2CurrentIndex] = MQTTPUBLISH;
             _qos2Packet._qos2SentTime[_qos2Packet._qos2CurrentIndex]=millis();
