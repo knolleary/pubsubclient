@@ -332,7 +332,8 @@ boolean PubSubClient::readByte(uint8_t * result) {
 boolean PubSubClient::readByte(uint8_t * result, uint16_t * index){
   uint16_t current_index = *index;
   uint8_t * write_address = &(result[current_index]);
-  if(readByte(write_address)){
+  if(readByte(write_address))
+  {
     *index = current_index + 1;
     return true;
   }
@@ -342,7 +343,7 @@ boolean PubSubClient::readByte(uint8_t * result, uint16_t * index){
 uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
     uint16_t len = 0;
     if(!readByte(this->buffer, &len)) return 0;
-    bool isPublish = (this->buffer[0]&0xF0) == MQTTPUBLISH;
+    bool isPublish = (this->buffer[0] & 0xF0) == MQTTPUBLISH;
     uint32_t multiplier = 1;
     uint32_t length = 0;
     uint8_t digit = 0;
@@ -436,7 +437,9 @@ boolean PubSubClient::loop() {
         		publish_Q1(_SentQOS1Topic, _qos2Packet._qos2bufferID[qos2ARPacketID], _qos2Packet._qos2Plength[qos2ARPacketID]);
         		_qos2Packet._qos2CurrentIndex = tempPacketID;
         		
-        	}else if(_qos2Packet._qos2Flag[qos2ARPacketID] == MQTTPUBREL){
+        	}
+            else if(_qos2Packet._qos2Flag[qos2ARPacketID] == MQTTPUBREL)
+            {
         		debugmqln("[PubSubClient]-- retrying QOS2 MQTTPUBREL--");
         		qos2Response(MQTTPUBREL | MQTTQOS1 , qos2ARPacketID+1);
         		_qos2Packet._qos2Flag[qos2ARPacketID] = MQTTPUBREL;   
