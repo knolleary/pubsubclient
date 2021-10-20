@@ -261,6 +261,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
                     _client->stop();
                     return false;
                 }
+                delay(1); // not in the lib add by me @clecle253
             }
             uint8_t llen;
             uint32_t len = readPacket(&llen);
