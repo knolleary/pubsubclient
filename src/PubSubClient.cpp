@@ -179,6 +179,10 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 }
 
 boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, boolean cleanSession) {
+    return connect(id,user,pass,willTopic,willQos,willRetain,willMessage,0,cleanSession);
+}
+
+boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, unsigned int willMessageLength, boolean cleanSession) {
     if (!connected()) {
         int result = 0;
 
@@ -237,8 +241,22 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             if (willTopic) {
                 CHECK_STRING_LENGTH(length,willTopic)
                 length = writeString(willTopic,this->buffer,length);
-                CHECK_STRING_LENGTH(length,willMessage)
-                length = writeString(willMessage,this->buffer,length);
+                if(willMessageLength == 0) {
+                    CHECK_STRING_LENGTH(length,willMessage)
+                    length = writeString(willMessage,this->buffer,length);
+                }else{
+                    if (length+2+willMessageLength > this->bufferSize) {
+                        _client->stop();
+                        return false;
+                    }
+                    uint16_t i;
+                    length += 2;
+                    for (i=0;i<willMessageLength;i++) {
+                        this->buffer[length++] = willMessage[i];
+                    }
+                    this->buffer[length-i-2] = (i >> 8);
+                    this->buffer[length-i-1] = (i & 0xFF);
+                }
             }
 
             if(user != NULL) {
