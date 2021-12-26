@@ -8,6 +8,18 @@
 #include "PubSubClient.h"
 #include "Arduino.h"
 
+#if defined(BS_V2)
+    #define debugmq(...)        Serial1.print(__VA_ARGS__)
+    #define debugmqln(...)      Serial1.println(__VA_ARGS__)
+#else
+    #define debugmq(...)        Serial.print(__VA_ARGS__)
+    #define debugmqln(...)      Serial.println(__VA_ARGS__)
+#endif
+
+qos2_state _qos2Packet;
+uint16_t buffPending;
+uint8_t pipeMgsID;
+
 PubSubClient::PubSubClient() {
     this->_state = MQTT_DISCONNECTED;
     this->_client = NULL;
@@ -179,9 +191,27 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 }
 
 boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, boolean cleanSession) {
+    _QOS_TYPE = willQos;
+    // for QOS2 only
+    if(_QOS_TYPE == 2)
+    {
+    	_qos2Packet._qos2CurrentIndex = 0;
+    	for(uint16_t i=0;i<MQTT_QOS2_MAX_BUFFER;i++)
+    	{
+    		_qos2Packet._qos2Acknowledged[i] = true;
+    		_qos2Packet._qos2bufferID[i] = NULL;
+    		_qos2Packet._qos2MgsID[i] = i+1;
+    		_qos2Packet._qos2Flag[i]= NULL;
+    		_qos2Packet._qos2Plength[i] = NULL;
+    		_qos2Packet._qos2SentTime[i] = NULL;
+    	}
+    }
+    qos2ARPacketID = 0;
+    //qos2 end
+    
     if (!connected()) {
         int result = 0;
-
+        _QOS1Acknowledged = true;		// added for qos1
 
         if(_client->connected()) {
             result = 1;
@@ -302,7 +332,8 @@ boolean PubSubClient::readByte(uint8_t * result) {
 boolean PubSubClient::readByte(uint8_t * result, uint16_t * index){
   uint16_t current_index = *index;
   uint8_t * write_address = &(result[current_index]);
-  if(readByte(write_address)){
+  if(readByte(write_address))
+  {
     *index = current_index + 1;
     return true;
   }
@@ -312,7 +343,7 @@ boolean PubSubClient::readByte(uint8_t * result, uint16_t * index){
 uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
     uint16_t len = 0;
     if(!readByte(this->buffer, &len)) return 0;
-    bool isPublish = (this->buffer[0]&0xF0) == MQTTPUBLISH;
+    bool isPublish = (this->buffer[0] & 0xF0) == MQTTPUBLISH;
     uint32_t multiplier = 1;
     uint32_t length = 0;
     uint8_t digit = 0;
@@ -384,6 +415,46 @@ boolean PubSubClient::loop() {
                 pingOutstanding = true;
             }
         }
+        
+        t = millis();
+        if ((t - _QOS1_SENT_TIME >= MQTT_QOS1_WAIT_TIME) && (_QOS1Acknowledged==false)){  // Resend QOS1 message if not acknowledged
+           //debug   debugmq("*MQQT q1 RESENDING");
+              publish_Q1(_SentQOS1Topic, _SentQOS1buffer, _SENTQOS1Length, NULL, false,true);   // send last message again
+              _QOS1_SENT_TIME = millis();                                                   //Reset timer
+        }
+
+        //------------------------------For QOS2 only---------------------
+        t = millis();
+        if(((t - _qos2Packet._qos2SentTime[qos2ARPacketID]) > MQTT_QOS2_WAIT_TIME) && (_qos2Packet._qos2Acknowledged[qos2ARPacketID] == false))
+        {
+        	
+        	if(_qos2Packet._qos2Flag[qos2ARPacketID] == MQTTPUBLISH)
+        	{
+        		debugmqln("[PubSubClient]-- retrying QOS2 MQTTPUBLISH--");
+        		uint16_t tempPacketID = _qos2Packet._qos2CurrentIndex;
+        		_qos2Packet._qos2CurrentIndex = qos2ARPacketID;
+        		_qos2Packet._qos2Acknowledged[qos2ARPacketID] = true;
+        		publish_Q1(_SentQOS1Topic, _qos2Packet._qos2bufferID[qos2ARPacketID], _qos2Packet._qos2Plength[qos2ARPacketID]);
+        		_qos2Packet._qos2CurrentIndex = tempPacketID;
+        		
+        	}
+            else if(_qos2Packet._qos2Flag[qos2ARPacketID] == MQTTPUBREL)
+            {
+        		debugmqln("[PubSubClient]-- retrying QOS2 MQTTPUBREL--");
+        		qos2Response(MQTTPUBREL | MQTTQOS1 , qos2ARPacketID+1);
+        		_qos2Packet._qos2Flag[qos2ARPacketID] = MQTTPUBREL;   
+        		_qos2Packet._qos2SentTime[qos2ARPacketID] = millis();   
+        	}
+		}
+		
+		qos2ARPacketID++;
+    	if(qos2ARPacketID >= MQTT_QOS2_MAX_BUFFER)
+    	{
+    		qos2ARPacketID = 0;
+    	}
+        
+        //-------------------------------
+
         if (_client->available()) {
             uint8_t llen;
             uint16_t len = readPacket(&llen);
@@ -399,7 +470,7 @@ boolean PubSubClient::loop() {
                         this->buffer[llen+2+tl] = 0; /* end the topic as a 'C' string with \x00 */
                         char *topic = (char*) this->buffer+llen+2;
                         // msgId only present for QOS>0
-                        if ((this->buffer[0]&0x06) == MQTTQOS1) {
+                        if ((this->buffer[0] & 0x06) == MQTTQOS1) {
                             msgId = (this->buffer[llen+3+tl]<<8)+this->buffer[llen+3+tl+1];
                             payload = this->buffer+llen+3+tl+2;
                             callback(topic,payload,len-llen-3-tl-2);
@@ -422,7 +493,40 @@ boolean PubSubClient::loop() {
                     _client->write(this->buffer,2);
                 } else if (type == MQTTPINGRESP) {
                     pingOutstanding = false;
+                } else if (type == MQTTPUBACK) { 
+          //debug      
+                	debugmq("*MQQT PUBACK mid:"); debugmqln(((buffer[2]<<8)+ buffer[3])); debugmq(" looking for:"); debugmqln(_QOS1MSGID);      
+                    if (((buffer[2]<<8)+ buffer[3])==_QOS1MSGID){ 
+          //debug          debugmqln(" --- PUBACK SEEN:----");
+                    _QOS1Acknowledged=true; 
+                    debugmqln("[PubSubClient]--- Qos1 Acknowledged ---");
+                	}
+                } else if(type == MQTTPUBREC){
+                	qos2MgsId = (buffer[2] << 8) + buffer[3];
+                	if (qos2MgsId == _qos2Packet._qos2MgsID[qos2MgsId-1]){ 
+          //debug          
+                		debugmq("[PubSubClient]--- PUBREC SEEN: ----for mid: ");
+                		debugmqln(qos2MgsId);
+                    	if(_qos2Packet._qos2Flag[qos2MgsId-1] == MQTTPUBLISH)
+                    	{
+                            qos2Response(MQTTPUBREL | MQTTQOS1 , qos2MgsId);
+                    		_qos2Packet._qos2Flag[qos2MgsId-1] = MQTTPUBREL;   
+                    		_qos2Packet._qos2SentTime[qos2MgsId-1] = millis();          
+                    	}
+                    // debugmqln("[PubSubClient]Qos1 Acknowledged");
+                	}
+                } else if(type == MQTTPUBCOMP){
+                	qos2MgsId = (buffer[2] << 8)+ buffer[3];
+                	if (qos2MgsId == _qos2Packet._qos2MgsID[qos2MgsId-1]){
+                		debugmq("[PubSubClient]--- Qos2 Acknowledged:--- for mid: ");
+                		debugmqln(qos2MgsId);
+                		_qos2Packet._qos2Acknowledged[qos2MgsId-1] = true;
+                		_qos2Packet._qos2bufferID[qos2MgsId-1] = NULL;
+                		_qos2Packet._qos2SentTime[qos2MgsId-1] = NULL;
+                		_qos2Packet._qos2Flag[qos2MgsId-1] = MQTTPUBCOMP;
+                	}
                 }
+
             } else if (!connected()) {
                 // readPacket has closed the connection
                 return false;
@@ -431,6 +535,20 @@ boolean PubSubClient::loop() {
         return true;
     }
     return false;
+}
+
+boolean PubSubClient::qos2Response(uint8_t header, uint16_t qMgsID)
+{
+	this->buffer[0] = header;
+    this->buffer[1] = 2;
+    this->buffer[2] = (qMgsID >> 8);
+    this->buffer[3] = (qMgsID & 0xFF);
+    return _client->write(this->buffer,4);
+}
+
+boolean PubSubClient::isqos2ack(uint8_t mid)
+{
+    return _qos2Packet._qos2Acknowledged[mid-1];
 }
 
 boolean PubSubClient::publish(const char* topic, const char* payload) {
@@ -469,6 +587,174 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
         return write(header,this->buffer,length-MQTT_MAX_HEADER_SIZE);
     }
     return false;
+}
+
+boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsigned int plength) {
+    return publish_Q1(topic, payload, plength, NULL, false,false);
+}
+boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsigned int plength, uint8_t msgId) {
+    return publish_Q1(topic, payload, plength, msgId, false,false);
+}
+
+boolean PubSubClient::publish_Q1(const char* topic, const uint8_t* payload, unsigned int plength, uint8_t mid, boolean retained, boolean QOS1_MSG_Repeat) {
+    if (connected()) {
+        if (MQTT_MAX_PACKET_SIZE < 5 + 2+strlen(topic) + plength) {
+            // Too long
+            return false;
+        }
+        // Leave room in the buffer for header and variable length field
+        uint16_t length = 5;
+        length = writeString(topic,this->buffer,length);
+        uint16_t i;
+        strncpy(_SentQOS1Topic,topic,20);                                   
+        // for (i=0;i<plength;i++) { _SentQOS1buffer[i]=payload[i];/*debugmq("Data ")*/}         
+        // _SentQOS1buffer[sizeof(payload)-1]='\0';
+        _SentQOS1buffer = payload;
+        _SENTQOS1Length = plength;
+
+        if(_QOS_TYPE==1){
+
+   			  // memset(_SentQOS1buffer,'\0',MQTT_MAX_PACKET_SIZE);      
+                                                   
+              if(QOS1_MSG_Repeat==false) {_QOS1MSGID= _QOS1MSGID +1 ;}     // If last msg was acknowledged then increment id , else we are retransmitting, so use last msgid   
+              if (_QOS1MSGID==0){_QOS1MSGID=1;}                            // msgid 0 is a disconnect
+              this->buffer[length]=(_QOS1MSGID >> 8);                            //add msg id for qos1
+              this->buffer[length+1]= (_QOS1MSGID & 0xFF);                       // 
+              length=length+2;                                             //
+              _QOS1_SENT_TIME=millis();                                    // set time for PUBACK check
+              _QOS1Acknowledged=false;                                     // set Acknowledged flag false    
+      		//debug      
+              debugmq("[PubSubClient]*MQQT qos1 publish mid:"); debugmqln(_QOS1MSGID); 
+      	}else if(_QOS_TYPE==2){
+      		if(_qos2Packet._qos2CurrentIndex>=MQTT_QOS2_MAX_BUFFER)
+      		{
+      			_qos2Packet._qos2CurrentIndex = 0;
+      		}
+
+      		qos2IndexRetry = 0;
+            if(mid)
+            {
+                if(_qos2Packet._qos2Acknowledged[mid-1] == false)
+                {
+                    debugmqln("[PubSubClient]Buffer is full....processing queue.");
+                    return false;
+                }
+                else
+                {
+                    _qos2Packet._qos2CurrentIndex = (mid-1);
+                }
+            }
+            else
+            {
+                while(_qos2Packet._qos2Acknowledged[_qos2Packet._qos2CurrentIndex] == false)
+                {
+                    _qos2Packet._qos2CurrentIndex++;
+                    if(_qos2Packet._qos2CurrentIndex>=MQTT_QOS2_MAX_BUFFER)
+                    {
+                        _qos2Packet._qos2CurrentIndex = 0;
+                    }
+                    qos2IndexRetry++;
+                    if(qos2IndexRetry >= MQTT_QOS2_MAX_BUFFER){
+                        debugmqln("[PubSubClient]Buffer is full....processing queue.");
+                        return false;
+                    }
+                }
+            }
+      		
+
+      		_qos2Packet._qos2Acknowledged[_qos2Packet._qos2CurrentIndex] = false;
+      		_qos2Packet._qos2bufferID[_qos2Packet._qos2CurrentIndex] = (uint8_t*)payload;
+      		_qos2Packet._qos2Plength[_qos2Packet._qos2CurrentIndex] = plength;
+      		this->buffer[length] = (_qos2Packet._qos2MgsID[_qos2Packet._qos2CurrentIndex] >> 8);                            //add msg id for qos1
+            this->buffer[length+1] = (_qos2Packet._qos2MgsID[_qos2Packet._qos2CurrentIndex] & 0xFF);                       // 
+            length=length+2;
+            _qos2Packet._qos2Flag[_qos2Packet._qos2CurrentIndex] = MQTTPUBLISH;
+            _qos2Packet._qos2SentTime[_qos2Packet._qos2CurrentIndex]=millis();
+            
+            //debug
+            debugmq("[PubSubClient]*MQQT qos2 publish MGS id:"); debugmqln(_qos2Packet._qos2MgsID[_qos2Packet._qos2CurrentIndex]);
+
+            _qos2Packet._qos2CurrentIndex++;      			
+      	}
+
+                            
+        for (i=0;i<plength;i++) {
+            this->buffer[length++] = payload[i];
+        }
+        //debug
+        // debugmq("Full Data With payload: ");
+        // for (i=0;i<=length;i++) {
+        // 	debugmq(this->buffer[i]);
+        // 	debugmq(" ");
+        //     // this->buffer[length++] = payload[i];
+        // }
+
+        // debugmqln("");
+        uint8_t header;
+
+        if(_QOS_TYPE == 1)
+        {
+        	header = MQTTPUBLISH|MQTTQOS1;      
+        }else if(_QOS_TYPE == 2)
+        {
+        	header = MQTTPUBLISH|MQTTQOS2;
+        }
+                               // Main change so it sends qos 1     
+        if (retained) { header |= 1; }    
+                                                // set for follow up
+     //debug  if((_QOS1MSGID>=10)&&(QOS1_MSG_Repeat==false)) {debugmq("testing retry");return true;}    // test - deliberately do not send - so that retry will be activated
+        return write(header,this->buffer,length-5);
+    }
+    return false;
+}
+
+boolean PubSubClient::qos2Full(void)
+{
+	if(qos2IndexRetry >= MQTT_QOS2_MAX_BUFFER){
+		return true;
+	}else{
+		return false;
+	}
+}
+
+uint16_t PubSubClient::qos2Empty(void){
+	uint16_t i = 0; 
+	buffPending = 0;
+	while(i <MQTT_QOS2_MAX_BUFFER)
+	{
+		if(_qos2Packet._qos2Acknowledged[i] == false){
+			buffPending++;
+		}
+		i++;
+	}
+
+	return buffPending;
+}
+
+void PubSubClient::qos2ResetBuff(void){
+	uint16_t i = 0; 
+	// buffPending = 0;
+	while(i <MQTT_QOS2_MAX_BUFFER)
+	{
+		_qos2Packet._qos2Acknowledged[i] = true;
+		i++;
+	}
+}
+
+
+uint8_t* PubSubClient::qos2BufferAddr(void)
+{
+   	uint16_t tempBufID = 0;
+   	while (tempBufID < MQTT_QOS2_MAX_BUFFER)
+   	{
+   		if(_qos2Packet._qos2Acknowledged[tempBufID] == false)
+   		{
+   			return _qos2Packet._qos2bufferID[tempBufID];
+
+   		}
+   		tempBufID++;
+   	}
+   	return NULL;   	
 }
 
 boolean PubSubClient::publish_P(const char* topic, const char* payload, boolean retained) {
@@ -581,9 +867,10 @@ size_t PubSubClient::buildHeader(uint8_t header, uint8_t* buf, uint16_t length) 
 boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
     uint16_t rc;
     uint8_t hlen = buildHeader(header, buf, length);
-
+    // debugmqln((char*)buf);
 #ifdef MQTT_MAX_TRANSFER_SIZE
     uint8_t* writeBuf = buf+(MQTT_MAX_HEADER_SIZE-hlen);
+
     uint16_t bytesRemaining = length+hlen;  //Match the length type
     uint8_t bytesToWrite;
     boolean result = true;
@@ -594,10 +881,16 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
         bytesRemaining -= rc;
         writeBuf += rc;
     }
+    debugmqln("[PubSubClient] write output:"+result);
     return result;
 #else
     rc = _client->write(buf+(MQTT_MAX_HEADER_SIZE-hlen),length+hlen);
     lastOutActivity = millis();
+    debugmq("[PubSubClient] write output rc: ");
+    debugmq(rc);
+    debugmq(" len: "); 
+    uint16_t tlen = hlen+length;
+    debugmqln(tlen);
     return (rc == hlen+length);
 #endif
 }
