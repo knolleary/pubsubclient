@@ -445,6 +445,18 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
     return publish(topic, payload, plength, false);
 }
 
+boolean PubSubClient::deleteTopic(const char* topic) {
+uint8_t buf[64];
+if (!connected()) return false;
+uint8_t len = strlen(topic);
+buf[0]=0x31; //PUBLISH, QoS=0, Retained
+buf[1]=len+2; //Packet len = topic + his Length
+buf[2]=0; 
+buf[3]=len; //topic StrLen
+strncpy((char*)buf+4,topic,sizeof(buf)-5);
+return   write( buf,len+4);
+}
+
 boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained) {
     if (connected()) {
         if (this->bufferSize < MQTT_MAX_HEADER_SIZE + 2+strnlen(topic, this->bufferSize) + plength) {
