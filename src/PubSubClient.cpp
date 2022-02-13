@@ -446,15 +446,15 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
 }
 
 boolean PubSubClient::deleteTopic(const char* topic) {
-uint8_t buf[32];
-uint8_t len = strlen(topic);
+uint8_t buf[64];
 if (!connected()) return false;
+uint8_t len = strlen(topic);
 buf[0]=0x31; //PUBLISH, QoS=0, Retained
 buf[1]=len+2; //Packet len = topic + his Length
 buf[2]=0; 
 buf[3]=len; //topic StrLen
 strncpy((char*)buf+4,topic,sizeof(buf)-5);
-return   write( buf,strlen(topic)+4);
+return   write( buf,len+4);
 }
 
 boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigned int plength, boolean retained) {
