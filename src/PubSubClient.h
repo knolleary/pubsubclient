@@ -154,6 +154,7 @@ public:
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
    boolean publish_P(const char* topic, const char* payload, boolean retained);
    boolean publish_P(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
+   boolean isRetained() {return this->buffer[0]&0x1;}
    // Start to publish a message.
    // This API:
    //   beginPublish(...)
