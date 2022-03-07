@@ -127,6 +127,7 @@ public:
    PubSubClient(const char*, uint16_t, Client& client, Stream&);
    PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
    PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
+   PubSubClient(const PubSubClient& other);
 
    ~PubSubClient();
 

@@ -158,6 +158,24 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
 }
 
+PubSubClient::PubSubClient(const PubSubClient& other) :
+        _client(other._client),
+        bufferSize(0),
+        keepAlive(other.keepAlive),
+        socketTimeout(other.socketTimeout),
+        nextMsgId(other.nextMsgId),
+        lastOutActivity(other.lastOutActivity),
+        lastInActivity(other.lastInActivity),
+        pingOutstanding(other.pingOutstanding),
+        ip(other.ip),
+        domain(other.domain),
+        port(other.port),
+        stream(other.stream),
+        _state(other._state) {
+    setBufferSize(other.bufferSize);
+    strncpy((char*) buffer, (const char*) other.buffer, other.bufferSize);
+}
+
 PubSubClient::~PubSubClient() {
   free(this->buffer);
 }
