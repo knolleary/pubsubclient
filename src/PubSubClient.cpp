@@ -654,9 +654,8 @@ size_t PubSubClient::write(const uint8_t *data, size_t size) {
             if (bufferOffset + size >= MQTT_MAX_PACKET_SIZE) {
                 return 0;
             }
-            for (uint16_t i=0; i<size; i++) {
-                buffer[bufferOffset++] = data[i];
-            }
+            memcpy(buffer + bufferOffset, data, size);
+            bufferOffset += size;
             return size;
 
         default:
