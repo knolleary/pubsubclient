@@ -76,6 +76,10 @@
 // Maximum size of fixed header and variable length size header
 #define MQTT_MAX_HEADER_SIZE 5
 
+#define MQTT_BEGINEND_NONE 		0 // beginPublish not called
+#define MQTT_BEGINEND_MULTIPACKET 	1 // beginPublish called with pre-calculated payload length
+#define MQTT_BEGINEND_SINGLEPACKET 	2 // beginPublish called with no payload length
+
 #if defined(ESP8266) || defined(ESP32)
 #include <functional>
 #define MQTT_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, unsigned int)> callback
@@ -83,7 +87,7 @@
 #define MQTT_CALLBACK_SIGNATURE void (*callback)(char*, uint8_t*, unsigned int)
 #endif
 
-#define CHECK_STRING_LENGTH(l,s) if (l+2+strnlen(s, this->bufferSize) > this->bufferSize) {_client->stop();return false;}
+#define CHECK_STRING_LENGTH(l,s,sl) if (l+2+(sl = strnlen(s, this->bufferSize)) > this->bufferSize) {_client->stop();return false;}
 
 class PubSubClient : public Print {
 private:
@@ -101,7 +105,8 @@ private:
    boolean readByte(uint8_t * result);
    boolean readByte(uint8_t * result, uint16_t * index);
    boolean write(uint8_t header, uint8_t* buf, uint16_t length);
-   uint16_t writeString(const char* string, uint8_t* buf, uint16_t pos);
+   uint16_t writeString(const char* string, size_t stringLen, uint8_t* buf, uint16_t pos);
+   uint16_t writeString_P(const char* string, size_t stringLen, uint8_t* buf, uint16_t pos);
    // Build up the header ready to send
    // Returns the size of the header
    // Note: the header is built at the end of the first MQTT_MAX_HEADER_SIZE bytes, so will start
@@ -112,6 +117,8 @@ private:
    uint16_t port;
    Stream* stream;
    int _state;
+   uint8_t beginEndType;
+   uint16_t bufferOffset; // Index of next free buffer pos
 public:
    PubSubClient();
    PubSubClient(Client& client);
@@ -152,6 +159,10 @@ public:
    boolean publish(const char* topic, const char* payload, boolean retained);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
+   boolean publish(const __FlashStringHelper* topic, const char* payload);
+   boolean publish(const __FlashStringHelper* topic, const char* payload, boolean retained);
+   boolean publish(const __FlashStringHelper* topic, const uint8_t * payload, unsigned int plength);
+   boolean publish(const __FlashStringHelper* topic, const uint8_t * payload, unsigned int plength, boolean retained);
    boolean publish_P(const char* topic, const char* payload, boolean retained);
    boolean publish_P(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
    // Start to publish a message.
@@ -163,6 +174,9 @@ public:
    // a new buffer and held in memory at one time
    // Returns 1 if the message was started successfully, 0 if there was an error
    boolean beginPublish(const char* topic, unsigned int plength, boolean retained);
+   // As above however headers/payload are all buffered and entire message is sent as a single packet
+   // from endPublish once the lengths have been calculated and set
+   boolean beginPublish(const char* topic, boolean retained);
    // Finish off this publish message (started with beginPublish)
    // Returns 1 if the packet was sent successfully, 0 if there was an error
    int endPublish();
