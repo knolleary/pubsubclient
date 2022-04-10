@@ -113,6 +113,11 @@ private:
    Stream* stream;
    int _state;
 public:
+   unsigned      MarcelTcpFix_MaxPacketLength;
+   bool          MarcelTcpFix_PrintSerial;
+   char          MarcelTcpFix_DisconnectCause[150];
+   unsigned long MarcelTcpFix_DisconnectTimestamp;
+public:
    PubSubClient();
    PubSubClient(Client& client);
    PubSubClient(IPAddress, uint16_t, Client& client);
