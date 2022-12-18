@@ -107,6 +107,8 @@ private:
    // Note: the header is built at the end of the first MQTT_MAX_HEADER_SIZE bytes, so will start
    //       (MQTT_MAX_HEADER_SIZE - <returned size>) bytes into the buffer
    size_t buildHeader(uint8_t header, uint8_t* buf, uint16_t length);
+   // Returns the length in chars needed for a given value with the given argument string to be displayed completly.
+   const uint8_t detect_size(const char* msg, ...) const;
    IPAddress ip;
    const char* domain;
    uint16_t port;

@@ -8,6 +8,8 @@
 #include "PubSubClient.h"
 #include "Arduino.h"
 
+constexpr char DISCARDED_MESSAGE_TOPIC[] PROGMEM = "Discarded packet because it was %u bytes, instead of the max allowed size of %u bytes. Increase the buffer by atleast %u bytes or decrease packet size accordingly";
+
 PubSubClient::PubSubClient() {
     this->_state = MQTT_DISCONNECTED;
     this->_client = NULL;
@@ -362,6 +364,9 @@ uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
     }
 
     if (!this->stream && idx > this->bufferSize) {
+        char topic[detect_size(DISCARDED_MESSAGE_TOPIC, idx, this->bufferSize, idx - this->bufferSize)];
+        snprintf_P(topic, sizeof(topic), DISCARDED_MESSAGE_TOPIC, idx, this->bufferSize, idx - this->bufferSize);
+        callback(topic, NULL, 0U);
         len = 0; // This will cause the packet to be ignored.
     }
     return len;
@@ -576,6 +581,18 @@ size_t PubSubClient::buildHeader(uint8_t header, uint8_t* buf, uint16_t length) 
         buf[MQTT_MAX_HEADER_SIZE-llen+i] = lenBuf[i];
     }
     return llen+1; // Full header size is variable length bit plus the 1-byte fixed header
+}
+
+const uint8_t PubSubClient::detect_size(const char* msg, ...) const {
+  va_list args;
+  va_start(args, msg);
+  // Result is what would have been written if the passed buffer would have been large enough not counting null character,
+  // or if an error occured while creating the string a negative number is returned instead. TO ensure this will not crash the system
+  // when creating an array with negative size we assert beforehand with a clear error message.
+  const int32_t result = (vsnprintf_P(nullptr, 0U, msg, args) + 1U);
+  assert(result >= 0);
+  va_end(args);
+  return result;
 }
 
 boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
