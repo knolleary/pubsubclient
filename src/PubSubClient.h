@@ -39,6 +39,8 @@ private:
    unsigned long lastInActivity;
    bool pingOutstanding;
    bool isSubAckFound;
+   typedef uint32_t(*TimeGetter)();
+   TimeGetter _getCurrentTime;
 
    //! Receive a message from the client
    /*!
@@ -201,6 +203,14 @@ public:
    bool subscribe(MQTT::Subscribe &sub);
    //! Unsubscribe with a pre-constructed MQTT message object
    bool unsubscribe(MQTT::Unsubscribe &unsub);
+
+    /**
+    * @brief Sets external function as a source of current time.
+    * @param getter External function thet returns current timestamp in ms, e.g. from RTC clock.
+    * If external time source is not set, the library uses millis() that can be affected when
+    * deep sleep state is used, this in turn affects "keep alive" and connection timeout functionality
+    */
+   void setTimeGetter(TimeGetter getter);
 };
 
 
