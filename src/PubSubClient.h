@@ -112,6 +112,8 @@ private:
    uint16_t port;
    Stream* stream;
    int _state;
+   typedef uint32_t(*TimeGetter)();
+   TimeGetter _getCurrentTime;
 public:
    PubSubClient();
    PubSubClient(Client& client);
@@ -177,6 +179,14 @@ public:
    boolean loop();
    boolean connected();
    int state();
+   
+   /**
+    * @brief Sets external function as a source of current time.
+    * @param getter External function thet returns current timestamp in ms, e.g. from RTC clock.
+    * If external time source is not set, the library uses millis() that can be affected when
+    * deep sleep state is used, this in turn affects "keep alive" and connection timeout functionality
+    */
+   void setTimeGetter(TimeGetter getter);
 
 };
 

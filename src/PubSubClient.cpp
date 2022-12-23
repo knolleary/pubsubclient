@@ -17,6 +17,7 @@ PubSubClient::PubSubClient() {
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    _getCurrentTime = millis;
 }
 
 PubSubClient::PubSubClient(Client& client) {
@@ -27,6 +28,7 @@ PubSubClient::PubSubClient(Client& client) {
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    _getCurrentTime = millis;
 }
 
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client) {
@@ -38,6 +40,7 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client) {
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    _getCurrentTime = millis;
 }
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
@@ -48,6 +51,7 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client, Stream
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    _getCurrentTime = millis;
 }
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
     this->_state = MQTT_DISCONNECTED;
@@ -59,6 +63,7 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATUR
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    _getCurrentTime = millis;
 }
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
@@ -70,6 +75,7 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATUR
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    _getCurrentTime = millis;
 }
 
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client) {
@@ -81,6 +87,7 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client) {
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    _getCurrentTime = millis;
 }
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
@@ -91,6 +98,7 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client, Stream& s
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    _getCurrentTime = millis;
 }
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
     this->_state = MQTT_DISCONNECTED;
@@ -102,6 +110,7 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, 
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    _getCurrentTime = millis;
 }
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
@@ -113,6 +122,7 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, 
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    _getCurrentTime = millis;
 }
 
 PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client) {
@@ -124,6 +134,7 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client) {
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    _getCurrentTime = millis;
 }
 PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
@@ -134,6 +145,7 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client, St
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    _getCurrentTime = millis;
 }
 PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
     this->_state = MQTT_DISCONNECTED;
@@ -145,6 +157,7 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    _getCurrentTime = millis;
 }
 PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
@@ -156,6 +169,7 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    _getCurrentTime = millis;
 }
 
 PubSubClient::~PubSubClient() {
@@ -252,10 +266,10 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 
             write(MQTTCONNECT,this->buffer,length-MQTT_MAX_HEADER_SIZE);
 
-            lastInActivity = lastOutActivity = millis();
+            lastInActivity = lastOutActivity = _getCurrentTime();
 
             while (!_client->available()) {
-                unsigned long t = millis();
+                unsigned long t = _getCurrentTime();
                 if (t-lastInActivity >= ((int32_t) this->socketTimeout*1000UL)) {
                     _state = MQTT_CONNECTION_TIMEOUT;
                     _client->stop();
@@ -267,7 +281,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 
             if (len == 4) {
                 if (buffer[3] == 0) {
-                    lastInActivity = millis();
+                    lastInActivity = _getCurrentTime();
                     pingOutstanding = false;
                     _state = MQTT_CONNECTED;
                     return true;
@@ -369,7 +383,7 @@ uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
 
 boolean PubSubClient::loop() {
     if (connected()) {
-        unsigned long t = millis();
+        unsigned long t = _getCurrentTime();
         if ((t - lastInActivity > this->keepAlive*1000UL) || (t - lastOutActivity > this->keepAlive*1000UL)) {
             if (pingOutstanding) {
                 this->_state = MQTT_CONNECTION_TIMEOUT;
@@ -516,7 +530,7 @@ boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsig
         rc += _client->write((char)pgm_read_byte_near(payload + i));
     }
 
-    lastOutActivity = millis();
+    lastOutActivity = _getCurrentTime();
 
     expectedLength = 1 + llen + 2 + tlen + plength;
 
@@ -534,7 +548,7 @@ boolean PubSubClient::beginPublish(const char* topic, unsigned int plength, bool
         }
         size_t hlen = buildHeader(header, this->buffer, plength+length-MQTT_MAX_HEADER_SIZE);
         uint16_t rc = _client->write(this->buffer+(MQTT_MAX_HEADER_SIZE-hlen),length-(MQTT_MAX_HEADER_SIZE-hlen));
-        lastOutActivity = millis();
+        lastOutActivity = _getCurrentTime();
         return (rc == (length-(MQTT_MAX_HEADER_SIZE-hlen)));
     }
     return false;
@@ -545,12 +559,12 @@ int PubSubClient::endPublish() {
 }
 
 size_t PubSubClient::write(uint8_t data) {
-    lastOutActivity = millis();
+    lastOutActivity = _getCurrentTime();
     return _client->write(data);
 }
 
 size_t PubSubClient::write(const uint8_t *buffer, size_t size) {
-    lastOutActivity = millis();
+    lastOutActivity = _getCurrentTime();
     return _client->write(buffer,size);
 }
 
@@ -597,7 +611,7 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
     return result;
 #else
     rc = _client->write(buf+(MQTT_MAX_HEADER_SIZE-hlen),length+hlen);
-    lastOutActivity = millis();
+    lastOutActivity = _getCurrentTime();
     return (rc == hlen+length);
 #endif
 }
@@ -664,7 +678,7 @@ void PubSubClient::disconnect() {
     _state = MQTT_DISCONNECTED;
     _client->flush();
     _client->stop();
-    lastInActivity = lastOutActivity = millis();
+    lastInActivity = lastOutActivity = _getCurrentTime();
 }
 
 uint16_t PubSubClient::writeString(const char* string, uint8_t* buf, uint16_t pos) {
@@ -735,6 +749,11 @@ PubSubClient& PubSubClient::setStream(Stream& stream){
 
 int PubSubClient::state() {
     return this->_state;
+}
+
+void PubSubClient::setTimeGetter(TimeGetter getter)
+{
+    _getCurrentTime = getter;
 }
 
 boolean PubSubClient::setBufferSize(uint16_t size) {
