@@ -267,6 +267,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             write(MQTTCONNECT,this->buffer,length-MQTT_MAX_HEADER_SIZE);
 
             lastInActivity = lastOutActivity = _getCurrentTime();
+            pingOutstanding = false;
 
             while (!_client->available()) {
                 unsigned long t = _getCurrentTime();
