@@ -39,7 +39,7 @@ private:
    unsigned long lastInActivity;
    bool pingOutstanding;
    bool isSubAckFound;
-   typedef uint32_t(*TimeGetter)();
+   typedef decltype(millis())(*TimeGetter)();
    TimeGetter _getCurrentTime;
 
    //! Receive a message from the client
