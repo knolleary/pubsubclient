@@ -598,6 +598,8 @@ namespace MQTT {
       return PUBACK;
     case 2:
       return PUBREC;
+    default:
+      return None;
     }
   }
 
