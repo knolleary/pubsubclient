@@ -141,6 +141,9 @@ public:
 
    boolean setBufferSize(uint16_t size);
    uint16_t getBufferSize();
+   __attribute__((unused)) IPAddress getServerIP() const;
+   __attribute__((unused)) const char * getServerDomain() const;
+   __attribute__((unused)) uint16_t getServerPort() const;
 
    boolean connect(const char* id);
    boolean connect(const char* id, const char* user, const char* pass);
