@@ -456,7 +456,7 @@ boolean PubSubClient::publish(const char* topic, const uint8_t* payload, unsigne
         length = writeString(topic,this->buffer,length);
 
         // Add payload
-        uint16_t i;
+        uint32_t i;
         for (i=0;i<plength;i++) {
             this->buffer[length++] = payload[i];
         }
