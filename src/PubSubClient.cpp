@@ -759,6 +759,19 @@ boolean PubSubClient::setBufferSize(uint16_t size) {
 uint16_t PubSubClient::getBufferSize() {
     return this->bufferSize;
 }
+
+__attribute__((unused)) IPAddress PubSubClient::getServerIP() const {
+    return this->ip;
+}
+
+__attribute__((unused)) const char *PubSubClient::getServerDomain() const {
+    return this->domain;
+}
+
+__attribute__((unused)) uint16_t PubSubClient::getServerPort() const {
+    return this->port;
+}
+
 PubSubClient& PubSubClient::setKeepAlive(uint16_t keepAlive) {
     this->keepAlive = keepAlive;
     return *this;
