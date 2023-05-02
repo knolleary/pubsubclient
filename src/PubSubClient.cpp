@@ -12,7 +12,8 @@ PubSubClient::PubSubClient(Client& c) :
   _client(c),
   _parser(c),
   _max_retries(10),
-  isSubAckFound(false)
+  isSubAckFound(false),
+  _getCurrentTime(millis)
 {}
 
 PubSubClient::PubSubClient(Client& c, IPAddress &ip, uint16_t port) :
@@ -22,7 +23,8 @@ PubSubClient::PubSubClient(Client& c, IPAddress &ip, uint16_t port) :
   _max_retries(10),
   isSubAckFound(false),
   server_ip(ip),
-  server_port(port)
+  server_port(port),
+  _getCurrentTime(millis)
 {}
 
 PubSubClient::PubSubClient(Client& c, String hostname, uint16_t port) :
@@ -32,7 +34,8 @@ PubSubClient::PubSubClient(Client& c, String hostname, uint16_t port) :
   _max_retries(10),
   isSubAckFound(false),
   server_port(port),
-  server_hostname(hostname)
+  server_hostname(hostname),
+  _getCurrentTime(millis)
 {}
 
 PubSubClient& PubSubClient::set_server(IPAddress &ip, uint16_t port) {
@@ -51,7 +54,7 @@ PubSubClient& PubSubClient::set_server(String hostname, uint16_t port) {
 MQTT::Message* PubSubClient::_recv_message(void) {
   MQTT::Message *msg = _parser.parse();
   if (msg != nullptr)
-    lastInActivity = millis();
+    lastInActivity = _getCurrentTime();
   return msg;
 }
 
@@ -68,7 +71,7 @@ bool PubSubClient::_send_message(MQTT::Message& msg) {
     }
     return false;
   }
-  lastOutActivity = millis();
+  lastOutActivity = _getCurrentTime();
 
   return true;
 }
@@ -86,7 +89,7 @@ MQTT::Message* PubSubClient::_send_message_with_response(MQTT::Message& msg) {
     }
     return nullptr;
   }
-  lastOutActivity = millis();
+  lastOutActivity = _getCurrentTime();
 
   MQTT::Message *response = _wait_for(msg.response_type(), msg.packet_id());
   if (response == nullptr) {
@@ -145,12 +148,12 @@ void PubSubClient::_process_message(MQTT::Message* msg) {
 
 MQTT::Message* PubSubClient::_wait_for(MQTT::message_type wait_type, uint16_t wait_pid) {
   while (!_client.available()) {
-    if (millis() - lastInActivity > keepalive * 1000UL)
+    if (_getCurrentTime() - lastInActivity > keepalive * 1000UL)
       return nullptr;
     yield();
   }
 
-  while (millis() < lastInActivity + (keepalive * 1000)) {
+  while (_getCurrentTime() < lastInActivity + (keepalive * 1000)) {
     // Read the packet and check it
     MQTT::Message *msg = _recv_message();
     if (msg != nullptr) {
@@ -213,7 +216,7 @@ bool PubSubClient::connect(MQTT::Connect &conn) {
 
   pingOutstanding = false;
   nextMsgId = 1;		// Init the next packet id
-  lastInActivity = millis();	// Init this so that _wait_for() doesn't think we've already timed-out
+  lastInActivity = _getCurrentTime();	// Init this so that _wait_for() doesn't think we've already timed-out
   keepalive = conn.keepalive();	// Store the keepalive period from this connection
 
   MQTT::Message *response = _send_message_with_response(conn);
@@ -239,7 +242,7 @@ bool PubSubClient::loop() {
   if (!connected())
     return false;
 
-  unsigned long t = millis();
+  unsigned long t = _getCurrentTime();
   if ((t - lastInActivity > keepalive * 1000UL) || (t - lastOutActivity > keepalive * 1000UL)) {
     if (pingOutstanding) {
       _client.stop();
@@ -395,4 +398,9 @@ bool PubSubClient::connected() {
      _client.stop();
 
    return rc;
+}
+
+void PubSubClient::setTimeGetter(TimeGetter getter)
+{
+    _getCurrentTime = getter;
 }
