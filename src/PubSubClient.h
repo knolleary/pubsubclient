@@ -86,7 +86,7 @@
 #define CHECK_STRING_LENGTH(l,s) if (l+2+strnlen(s, this->bufferSize) > this->bufferSize) {_client->stop();return false;}
 
 class PubSubClient : public Print {
-private:
+protected:
    Client* _client;
    uint8_t* buffer;
    uint16_t bufferSize;
