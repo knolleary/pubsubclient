@@ -34,7 +34,7 @@ This library is released under the [MIT License](http://www.opensource.org/licen
 
  - Add `setBufferSize()` to override `MQTT_MAX_PACKET_SIZE`
  - Add `setKeepAlive()` to override `MQTT_KEEPALIVE`
- - Add `setSocketTimeout()` to overide `MQTT_SOCKET_TIMEOUT`
+ - Add `setSocketTimeout()` to override `MQTT_SOCKET_TIMEOUT`
  - Added check to prevent subscribe/unsubscribe to empty topics
  - Declare wifi mode prior to connect in ESP example
  - Use `strnlen` to avoid overruns
