@@ -1,5 +1,4 @@
 /*
-
   PubSubClient.cpp - A simple client for MQTT.
   Nick O'Leary
   http://knolleary.net
@@ -39,6 +38,7 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client) {
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
 }
+
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
     setServer(addr,port);
@@ -49,6 +49,7 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client, Stream
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
 }
+
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
     this->_state = MQTT_DISCONNECTED;
     setServer(addr, port);
@@ -60,6 +61,7 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATUR
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
 }
+
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
     setServer(addr,port);
@@ -82,6 +84,7 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client) {
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
 }
+
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
     setServer(ip,port);
@@ -92,6 +95,7 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client, Stream& s
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
 }
+
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
     this->_state = MQTT_DISCONNECTED;
     setServer(ip, port);
@@ -103,6 +107,7 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, 
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
 }
+
 PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
     setServer(ip,port);
@@ -125,6 +130,7 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client) {
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
 }
+
 PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
     setServer(domain,port);
@@ -135,6 +141,7 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client, St
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
 }
+
 PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
     this->_state = MQTT_DISCONNECTED;
     setServer(domain,port);
@@ -146,6 +153,7 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
 }
+
 PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
     this->_state = MQTT_DISCONNECTED;
     setServer(domain,port);
@@ -346,11 +354,21 @@ uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
     }
     uint32_t idx = len;
 
+    if(this->stream && (length > this->bufferSize)){ // If stream is set and message length exceeds buffer size
+      downloadingLargeMessage = true;
+      if(spCallback){
+        spCallback(0,length); // Notify StreamProgress Callback that download has begun
+      }
+    }
+
     for (uint32_t i = start;i<length;i++) {
         if(!readByte(&digit)) return 0;
         if (this->stream) {
             if (isPublish && idx-*lengthLength-2>skip) {
-                this->stream->write(digit);
+                this->stream->write(digit); // Write byte to stream
+                if( spCallback && (i % spProgress == 0)){ // Notify StreamProgress Callback if set
+                  spCallback(i, length);
+                }
             }
         }
 
@@ -364,6 +382,11 @@ uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
     if (!this->stream && idx > this->bufferSize) {
         len = 0; // This will cause the packet to be ignored.
     }
+
+    if(downloadingLargeMessage){
+      downloadingLargeMessage = false;
+    }
+
     return len;
 }
 
@@ -720,6 +743,12 @@ PubSubClient& PubSubClient::setServer(const char * domain, uint16_t port) {
 
 PubSubClient& PubSubClient::setCallback(MQTT_CALLBACK_SIGNATURE) {
     this->callback = callback;
+    return *this;
+}
+
+PubSubClient& PubSubClient::setSPCallback(MQTT_SP_CALLBACK_SIGNATURE, uint32_t n) {
+    this->spProgress = n;
+    this->spCallback = spCallback;
     return *this;
 }
 
