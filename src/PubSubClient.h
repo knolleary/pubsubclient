@@ -77,10 +77,12 @@
 #define MQTT_MAX_HEADER_SIZE 5
 
 #if defined(ESP8266) || defined(ESP32)
-#include <functional>
-#define MQTT_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, unsigned int)> callback
+  #include <functional>
+  #define MQTT_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, unsigned int)> callback
+  #define MQTT_SP_CALLBACK_SIGNATURE std::function<void(uint32_t, uint32_t)> spCallback
 #else
-#define MQTT_CALLBACK_SIGNATURE void (*callback)(char*, uint8_t*, unsigned int)
+  #define MQTT_CALLBACK_SIGNATURE void (*callback)(char*, uint8_t*, unsigned int)
+  #define MQTT_SP_CALLBACK_SIGNATURE void (*spCallback)(uint32_t, uint32_t)
 #endif
 
 #define CHECK_STRING_LENGTH(l,s) if (l+2+strnlen(s, this->bufferSize) > this->bufferSize) {_client->stop();return false;}
@@ -97,6 +99,7 @@ private:
    unsigned long lastInActivity;
    bool pingOutstanding;
    MQTT_CALLBACK_SIGNATURE;
+   MQTT_SP_CALLBACK_SIGNATURE;
    uint32_t readPacket(uint8_t*);
    boolean readByte(uint8_t * result);
    boolean readByte(uint8_t * result, uint16_t * index);
@@ -112,6 +115,9 @@ private:
    uint16_t port;
    Stream* stream;
    int _state;
+   uint32_t spProgress; // how often to notify stream progress callback
+   bool downloadingLargeMessage = false;
+
 public:
    PubSubClient();
    PubSubClient(Client& client);
@@ -134,6 +140,7 @@ public:
    PubSubClient& setServer(uint8_t * ip, uint16_t port);
    PubSubClient& setServer(const char * domain, uint16_t port);
    PubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE);
+   PubSubClient& setSPCallback(MQTT_SP_CALLBACK_SIGNATURE, uint32_t n);
    PubSubClient& setClient(Client& client);
    PubSubClient& setStream(Stream& stream);
    PubSubClient& setKeepAlive(uint16_t keepAlive);
