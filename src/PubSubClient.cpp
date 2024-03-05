@@ -520,7 +520,7 @@ boolean PubSubClient::publish_P(const char* topic, const uint8_t* payload, unsig
 
     expectedLength = 1 + llen + 2 + tlen + plength;
 
-    return (rc == expectedLength);
+    return (rc == (unsigned int)expectedLength);
 }
 
 boolean PubSubClient::beginPublish(const char* topic, unsigned int plength, boolean retained) {
