@@ -142,6 +142,7 @@ public:
    PubSubClient& setServer(const char * domain, uint16_t port);
    PubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE);
    PubSubClient& setClient(Client& client);
+   void clearClient();
    PubSubClient& setStream(Stream& stream);
    PubSubClient& setKeepAlive(uint16_t keepAlive);
    PubSubClient& setSocketTimeout(uint16_t timeout);

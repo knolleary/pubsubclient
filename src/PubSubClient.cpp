@@ -194,6 +194,11 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 }
 
 boolean PubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, boolean cleanSession) {
+
+    if (!_client) {
+        return false;
+    }
+
     if (!connected()) {
         int result = 0;
 
@@ -711,6 +716,10 @@ boolean PubSubClient::unsubscribe(const char* topic) {
 }
 
 void PubSubClient::disconnect() {
+    if (!_client) {
+        return;
+    }
+
     this->send_buffer[0] = MQTTDISCONNECT;
     this->send_buffer[1] = 0;
     _client->write(this->send_buffer,2);
@@ -775,6 +784,13 @@ PubSubClient& PubSubClient::setServer(const char * domain, uint16_t port) {
 PubSubClient& PubSubClient::setCallback(MQTT_CALLBACK_SIGNATURE) {
     this->callback = callback;
     return *this;
+}
+
+void PubSubClient::clearClient(){
+    if (connected()) {
+        disconnect();
+    }
+    this->_client = nullptr;
 }
 
 PubSubClient& PubSubClient::setClient(Client& client){
