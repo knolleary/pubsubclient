@@ -85,6 +85,12 @@
 
 #define CHECK_STRING_LENGTH(l,s) if (l+2+strnlen(s, this->bufferSize) > this->bufferSize) {_client->stop();return false;}
 
+#ifdef DEBUG_PUBSUBCLIENT
+#define DEBUG_PSC_PRINTF(fmt, ...)  Serial.printf(("PUBSUBCLIENT:" fmt), ## __VA_ARGS__)
+#else
+#define DEBUG_PSC_PRINTF(...)
+#endif
+
 class PubSubClient : public Print {
 private:
    Client* _client;
