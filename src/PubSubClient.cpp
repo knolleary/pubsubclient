@@ -255,6 +255,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             lastInActivity = lastOutActivity = millis();
 
             while (!_client->available()) {
+                delay(10);
                 unsigned long t = millis();
                 if (t-lastInActivity >= ((int32_t) this->socketTimeout*1000UL)) {
                     _state = MQTT_CONNECTION_TIMEOUT;
@@ -288,7 +289,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 boolean PubSubClient::readByte(uint8_t * result) {
    uint32_t previousMillis = millis();
    while(!_client->available()) {
-     yield();
+     delay(10);
      uint32_t currentMillis = millis();
      if(currentMillis - previousMillis >= ((int32_t) this->socketTimeout * 1000)){
        return false;
@@ -561,7 +562,6 @@ size_t PubSubClient::buildHeader(uint8_t header, uint8_t* buf, uint16_t length) 
     uint8_t pos = 0;
     uint16_t len = length;
     do {
-
         digit = len  & 127; //digit = len %128
         len >>= 7; //len = len / 128
         if (len > 0) {
