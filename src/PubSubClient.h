@@ -174,6 +174,7 @@ public:
    boolean subscribe(const char* topic);
    boolean subscribe(const char* topic, uint8_t qos);
    boolean unsubscribe(const char* topic);
+   boolean loop_read();
    boolean loop();
    boolean connected();
    int state();
