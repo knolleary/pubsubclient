@@ -8,7 +8,10 @@
 #include "PubSubClient.h"
 #include "Arduino.h"
 
-PubSubClient::PubSubClient() {
+PubSubClient::PubSubClient()
+    : MarcelTcpFix_MaxPacketLength(MQTT_MAX_PACKET_SIZE),
+      MarcelTcpFix_PrintSerial(false),
+      MarcelTcpFix_DisconnectTimestamp(0) {
     this->_state = MQTT_DISCONNECTED;
     this->_client = NULL;
     this->stream = NULL;
@@ -17,9 +20,13 @@ PubSubClient::PubSubClient() {
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause), "none");
 }
 
-PubSubClient::PubSubClient(Client& client) {
+PubSubClient::PubSubClient(Client& client)
+    : MarcelTcpFix_MaxPacketLength(MQTT_MAX_PACKET_SIZE), 
+      MarcelTcpFix_PrintSerial(false),
+      MarcelTcpFix_DisconnectTimestamp(0) {
     this->_state = MQTT_DISCONNECTED;
     setClient(client);
     this->stream = NULL;
@@ -27,9 +34,13 @@ PubSubClient::PubSubClient(Client& client) {
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause), "none");
 }
 
-PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client) {
+PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client)
+    : MarcelTcpFix_MaxPacketLength(MQTT_MAX_PACKET_SIZE), 
+      MarcelTcpFix_PrintSerial(false),
+      MarcelTcpFix_DisconnectTimestamp(0) {
     this->_state = MQTT_DISCONNECTED;
     setServer(addr, port);
     setClient(client);
@@ -38,8 +49,12 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client) {
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause), "none");
 }
-PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client, Stream& stream) {
+PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client, Stream& stream)
+    : MarcelTcpFix_MaxPacketLength(MQTT_MAX_PACKET_SIZE), 
+      MarcelTcpFix_PrintSerial(false),
+      MarcelTcpFix_DisconnectTimestamp(0) {
     this->_state = MQTT_DISCONNECTED;
     setServer(addr,port);
     setClient(client);
@@ -48,8 +63,12 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client, Stream
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause), "none");
 }
-PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
+PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client)
+    : MarcelTcpFix_MaxPacketLength(MQTT_MAX_PACKET_SIZE), 
+      MarcelTcpFix_PrintSerial(false),
+      MarcelTcpFix_DisconnectTimestamp(0) {
     this->_state = MQTT_DISCONNECTED;
     setServer(addr, port);
     setCallback(callback);
@@ -59,8 +78,12 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATUR
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause), "none");
 }
-PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
+PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream)
+    : MarcelTcpFix_MaxPacketLength(MQTT_MAX_PACKET_SIZE), 
+      MarcelTcpFix_PrintSerial(false),
+      MarcelTcpFix_DisconnectTimestamp(0) {
     this->_state = MQTT_DISCONNECTED;
     setServer(addr,port);
     setCallback(callback);
@@ -70,9 +93,13 @@ PubSubClient::PubSubClient(IPAddress addr, uint16_t port, MQTT_CALLBACK_SIGNATUR
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause), "none");
 }
 
-PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client) {
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client)
+    : MarcelTcpFix_MaxPacketLength(MQTT_MAX_PACKET_SIZE), 
+      MarcelTcpFix_PrintSerial(false),
+      MarcelTcpFix_DisconnectTimestamp(0) {
     this->_state = MQTT_DISCONNECTED;
     setServer(ip, port);
     setClient(client);
@@ -81,8 +108,12 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client) {
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause), "none");
 }
-PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client, Stream& stream) {
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client, Stream& stream)
+    : MarcelTcpFix_MaxPacketLength(MQTT_MAX_PACKET_SIZE), 
+      MarcelTcpFix_PrintSerial(false),
+      MarcelTcpFix_DisconnectTimestamp(0) {
     this->_state = MQTT_DISCONNECTED;
     setServer(ip,port);
     setClient(client);
@@ -91,8 +122,12 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, Client& client, Stream& s
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause), "none");
 }
-PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client)
+    : MarcelTcpFix_MaxPacketLength(MQTT_MAX_PACKET_SIZE), 
+      MarcelTcpFix_PrintSerial(false),
+      MarcelTcpFix_DisconnectTimestamp(0) {
     this->_state = MQTT_DISCONNECTED;
     setServer(ip, port);
     setCallback(callback);
@@ -102,8 +137,12 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, 
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause), "none");
 }
-PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
+PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream)
+    : MarcelTcpFix_MaxPacketLength(MQTT_MAX_PACKET_SIZE), 
+      MarcelTcpFix_PrintSerial(false),
+      MarcelTcpFix_DisconnectTimestamp(0) {
     this->_state = MQTT_DISCONNECTED;
     setServer(ip,port);
     setCallback(callback);
@@ -113,9 +152,13 @@ PubSubClient::PubSubClient(uint8_t *ip, uint16_t port, MQTT_CALLBACK_SIGNATURE, 
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause), "none");
 }
 
-PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client) {
+PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client)
+    : MarcelTcpFix_MaxPacketLength(MQTT_MAX_PACKET_SIZE), 
+      MarcelTcpFix_PrintSerial(false),
+      MarcelTcpFix_DisconnectTimestamp(0) {
     this->_state = MQTT_DISCONNECTED;
     setServer(domain,port);
     setClient(client);
@@ -124,8 +167,12 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client) {
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause), "none");
 }
-PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client, Stream& stream) {
+PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client, Stream& stream)
+    : MarcelTcpFix_MaxPacketLength(MQTT_MAX_PACKET_SIZE), 
+      MarcelTcpFix_PrintSerial(false),
+      MarcelTcpFix_DisconnectTimestamp(0) {
     this->_state = MQTT_DISCONNECTED;
     setServer(domain,port);
     setClient(client);
@@ -134,8 +181,12 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, Client& client, St
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause), "none");
 }
-PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client) {
+PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client)
+    : MarcelTcpFix_MaxPacketLength(MQTT_MAX_PACKET_SIZE), 
+      MarcelTcpFix_PrintSerial(false),
+      MarcelTcpFix_DisconnectTimestamp(0) {
     this->_state = MQTT_DISCONNECTED;
     setServer(domain,port);
     setCallback(callback);
@@ -145,8 +196,12 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause), "none");
 }
-PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream) {
+PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGNATURE, Client& client, Stream& stream)
+    : MarcelTcpFix_MaxPacketLength(MQTT_MAX_PACKET_SIZE), 
+      MarcelTcpFix_PrintSerial(false),
+      MarcelTcpFix_DisconnectTimestamp(0) {
     this->_state = MQTT_DISCONNECTED;
     setServer(domain,port);
     setCallback(callback);
@@ -156,6 +211,7 @@ PubSubClient::PubSubClient(const char* domain, uint16_t port, MQTT_CALLBACK_SIGN
     setBufferSize(MQTT_MAX_PACKET_SIZE);
     setKeepAlive(MQTT_KEEPALIVE);
     setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause), "none");
 }
 
 PubSubClient::~PubSubClient() {
@@ -322,6 +378,13 @@ uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
     do {
         if (len == 5) {
             // Invalid remaining length encoding - kill the connection
+            snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause),
+                "PubSubClient::readPacket() invalid remaining length encoding");
+            MarcelTcpFix_DisconnectTimestamp = millis();
+            if (MarcelTcpFix_PrintSerial) {
+                Serial.print("MarcelTcpFix: disconnecting, cause: ");
+                Serial.println(MarcelTcpFix_DisconnectCause);
+                }
             _state = MQTT_DISCONNECTED;
             _client->stop();
             return 0;
@@ -332,6 +395,19 @@ uint32_t PubSubClient::readPacket(uint8_t* lengthLength) {
         multiplier <<=7; //multiplier *= 128
     } while ((digit & 128) != 0);
     *lengthLength = len-1;
+
+    if (length>MarcelTcpFix_MaxPacketLength) {
+        snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause), 
+            "PubSubClient::readPacket() exceeded package length, length=%u", length);
+        MarcelTcpFix_DisconnectTimestamp = millis();
+        if (MarcelTcpFix_PrintSerial) {
+            Serial.print("MarcelTcpFix: disconnecting, cause: ");
+            Serial.println(MarcelTcpFix_DisconnectCause);
+            }
+        _state = MQTT_DISCONNECTED;
+        _client->stop();
+        return 0;
+        }
 
     if (isPublish) {
         // Read in topic length to calculate bytes to skip over for Stream writing
@@ -387,6 +463,18 @@ boolean PubSubClient::loop() {
         if (_client->available()) {
             uint8_t llen;
             uint16_t len = readPacket(&llen);
+            if (len>MarcelTcpFix_MaxPacketLength) {
+                snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause),
+                    "PubSubClient::loop() exceeded package length, llen=%u, len=%u", llen, len);
+                MarcelTcpFix_DisconnectTimestamp = millis();
+                if (MarcelTcpFix_PrintSerial) {
+                    Serial.print("MarcelTcpFix: disconnecting, cause: ");
+                    Serial.println(MarcelTcpFix_DisconnectCause);
+                    }
+                _state = MQTT_DISCONNECTED;
+                _client->stop();
+                return false;
+                }
             uint16_t msgId = 0;
             uint8_t *payload;
             if (len > 0) {
@@ -395,6 +483,18 @@ boolean PubSubClient::loop() {
                 if (type == MQTTPUBLISH) {
                     if (callback) {
                         uint16_t tl = (this->buffer[llen+1]<<8)+this->buffer[llen+2]; /* topic length in bytes */
+                        if (llen+3+tl>getBufferSize()) {
+                            snprintf(MarcelTcpFix_DisconnectCause, sizeof(MarcelTcpFix_DisconnectCause),
+                                "PubSubClient::loop() memmove out of range, llen=%u, tl=%u", llen, tl);
+                            MarcelTcpFix_DisconnectTimestamp = millis();
+                            if (MarcelTcpFix_PrintSerial) {
+                                Serial.print("MarcelTcpFix: disconnecting, cause: ");
+                                Serial.println(MarcelTcpFix_DisconnectCause);
+                                }
+                            _state = MQTT_DISCONNECTED;
+                            _client->stop();
+                            return false;
+                            }
                         memmove(this->buffer+llen+2,this->buffer+llen+3,tl); /* move topic inside buffer 1 byte to front */
                         this->buffer[llen+2+tl] = 0; /* end the topic as a 'C' string with \x00 */
                         char *topic = (char*) this->buffer+llen+2;
