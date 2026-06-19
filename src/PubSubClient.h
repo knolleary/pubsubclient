@@ -97,6 +97,7 @@ private:
    unsigned long lastInActivity;
    bool pingOutstanding;
    MQTT_CALLBACK_SIGNATURE;
+   void _callback(char* topic, byte* payload, unsigned int len);
    uint32_t readPacket(uint8_t*);
    boolean readByte(uint8_t * result);
    boolean readByte(uint8_t * result, uint16_t * index);
@@ -112,6 +113,10 @@ private:
    uint16_t port;
    Stream* stream;
    int _state;
+
+protected:
+  virtual void onCallback(char* topic, byte* payload, unsigned int len);
+
 public:
    PubSubClient();
    PubSubClient(Client& client);
