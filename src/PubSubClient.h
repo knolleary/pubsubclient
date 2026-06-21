@@ -78,9 +78,9 @@
 
 #if defined(ESP8266) || defined(ESP32)
 #include <functional>
-#define MQTT_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, unsigned int)> callback
+#define MQTT_CALLBACK_SIGNATURE std::function<void(void*, char*, uint8_t*, unsigned int)> callback
 #else
-#define MQTT_CALLBACK_SIGNATURE void (*callback)(char*, uint8_t*, unsigned int)
+#define MQTT_CALLBACK_SIGNATURE void (*callback)(void*, char*, uint8_t*, unsigned int)
 #endif
 
 #define CHECK_STRING_LENGTH(l,s) if (l+2+strnlen(s, this->bufferSize) > this->bufferSize) {_client->stop();return false;}
@@ -93,6 +93,7 @@ private:
    uint16_t keepAlive;
    uint16_t socketTimeout;
    uint16_t nextMsgId;
+   void* userData;
    unsigned long lastOutActivity;
    unsigned long lastInActivity;
    bool pingOutstanding;
@@ -134,6 +135,7 @@ public:
    PubSubClient& setServer(uint8_t * ip, uint16_t port);
    PubSubClient& setServer(const char * domain, uint16_t port);
    PubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE);
+   PubSubClient& setUserData(void* userData);
    PubSubClient& setClient(Client& client);
    PubSubClient& setStream(Stream& stream);
    PubSubClient& setKeepAlive(uint16_t keepAlive);
