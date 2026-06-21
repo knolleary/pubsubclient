@@ -8,6 +8,10 @@
 #include "PubSubClient.h"
 #include "Arduino.h"
 
+#ifdef ARDUINO_UNOR4_WIFI
+size_t strnlen(const char* b, size_t s) { size_t i; for(i=0; b[i]!=0 && i<s; i++); return i; }
+#endif
+
 PubSubClient::PubSubClient() {
     this->_state = MQTT_DISCONNECTED;
     this->_client = NULL;
