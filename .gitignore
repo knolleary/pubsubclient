@@ -3,3 +3,4 @@ tests/bin
 .piolibdeps
 .clang_complete
 .gcc-flags.json
+*.o

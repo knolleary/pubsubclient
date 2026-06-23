@@ -6,7 +6,7 @@ VPATH=${SRC_PATH}
 SHIM_FILES=${SRC_PATH}/lib/*.cpp
 PSC_FILE=../src/PubSubClient.cpp
 CC=g++
-CFLAGS=-I${SRC_PATH}/lib -I../src
+CFLAGS=-I${SRC_PATH}/lib -I../src -std=c++11
 
 all: $(TEST_BIN)
 
