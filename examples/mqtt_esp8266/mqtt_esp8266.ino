@@ -50,7 +50,7 @@ void setup_wifi() {
     Serial.print(".");
   }
 
-  randomSeed(micros());
+  randomSeed(RANDOM_REG32);
 
   Serial.println("");
   Serial.println("WiFi connected");
