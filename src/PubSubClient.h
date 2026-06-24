@@ -95,6 +95,8 @@ private:
    uint16_t nextMsgId;
    unsigned long lastOutActivity;
    unsigned long lastInActivity;
+   uint32_t txCount;
+   uint32_t rxCount;
    bool pingOutstanding;
    MQTT_CALLBACK_SIGNATURE;
    uint32_t readPacket(uint8_t*);
@@ -141,6 +143,10 @@ public:
 
    boolean setBufferSize(uint16_t size);
    uint16_t getBufferSize();
+   uint32_t getTxCount();
+   uint32_t getRxCount();
+   boolean resetTxCount();
+   boolean resetRxCount();
 
    boolean connect(const char* id);
    boolean connect(const char* id, const char* user, const char* pass);
