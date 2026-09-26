@@ -11,5 +11,5 @@ returns:
 
 Gets the current size of the internal buffer.
 
-By default, it is set to `256` bytes - as defined by the `MQTT_MAX_MESSAGE_SIZE`
+By default, it is set to `256` bytes - as defined by the `MQTT_MAX_PACKET_SIZE`
 constant in `PubSubClient.h`.
