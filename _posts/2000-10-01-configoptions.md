@@ -12,7 +12,7 @@ They are contained in `PubSubClient.h`.
     <dd>Sets the largest packet size, in bytes, the client will handle. Any
         packet received that exceeds this size will be ignored.
         <p>This value can be overridden by calling <a href="#setBufferSize"><code>setBufferSize(size)</code></a>.</p>
-        <p>Default: 128 bytes</p>
+        <p>Default: 256 bytes</p>
     </dd>
     <dt><code>MQTT_KEEPALIVE</code></dt>
     <dd>Sets the keepalive interval, in seconds, the client will use. This

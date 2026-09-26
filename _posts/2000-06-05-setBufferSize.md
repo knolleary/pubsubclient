@@ -20,7 +20,7 @@ enough to contain the full MQTT packet. When sending or receiving messages,
 the packet will contain the full topic string, the payload data and a small number
 of header bytes.
 
-By default, it is set to `256` bytes - as defined by the `MQTT_MAX_MESSAGE_SIZE`
+By default, it is set to `256` bytes - as defined by the `MQTT_MAX_PACKET_SIZE`
 constant in `PubSubClient.h`.
 
 *Note* : `setBufferSize` returns a boolean flag to indicate whether it was able
