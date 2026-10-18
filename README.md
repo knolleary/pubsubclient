@@ -3,11 +3,11 @@
 This library provides a client for doing simple publish/subscribe messaging with
 a server that supports MQTT.
 
-## Notes of this fork
+## Notes about this fork
 
-This is a fork of the repository [knolleary/pubsubclient v2.8](https://github.com/knolleary/pubsubclient/releases/tag/v2.8), which was last updated in May 20, 2020. There was an update approach in [#1045](https://github.com/knolleary/pubsubclient/issues/1045), but it's also stale.
+This fork of [knolleary/pubsubclient](https://github.com/knolleary/pubsubclient) is based on the last release [v2.8](https://github.com/knolleary/pubsubclient/releases/tag/v2.8) on May 20, 2020. There was a maintenance approach in [#1045](https://github.com/knolleary/pubsubclient/issues/1045), but [Nick](https://github.com/knolleary) meanwhile stated that [PubSubClient is no longer maintained](https://github.com/knolleary/pubsubclient/blob/master/README.md).
 
-I tried lot's of different other MQTT libs, but they need more resources than PubSubClient or lacking maintenance as well:
+I evaluated several other MQTT libraries, but none met my requirements for both resource usage and maintenance:
 
  - https://github.com/256dpi/arduino-mqtt
  - https://github.com/hideakitai/MQTTPubSubClient
@@ -15,13 +15,13 @@ I tried lot's of different other MQTT libs, but they need more resources than Pu
  - https://github.com/arduino-libraries/ArduinoMqttClient
  - https://github.com/thingsboard/pubsubclient
 
-Since there was no progress I decided to merge the most important PRs manually and publish a new major version. I also renamed to PubSubClient3 to have a similar but different name of the library.
+With no suitable alternative, I decided to manually merge the most important PR changes and release them as a new major version. I renamed the library __PubSubClient3__ to distinguish from the original while keeping a similar name.
 
-I appreciate every contribution to this library.
+Contributions are welcome.
 
 ## Examples
 
-The library comes with a number of example sketches. See File > Examples > PubSubClient
+The library comes with a number of example sketches. See _File > Examples > PubSubClient3_
 within the Arduino application.
 
 Full API documentation is available here: https://hmueller01.github.io/pubsubclient3/api
@@ -78,6 +78,12 @@ boards and shields, including:
 The library cannot currently be used with hardware based on the ENC28J60 chip –
 such as the Nanode or the Nuelectronics Ethernet Shield. For those, there is an
 [alternative library](https://github.com/njh/NanodeMQTT) available.
+
+## Usage
+
+If using the [Arduino IDE](https://docs.arduino.cc/software/ide/) open the library manager and search for __PubSubClient3__.
+
+In case of [PlatformIO](https://platformio.org/) you find detailed [installation information here](https://registry.platformio.org/libraries/hmueller01/PubSubClient3/installation).
 
 ## Changelog
 
